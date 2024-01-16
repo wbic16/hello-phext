@@ -1,0 +1,6 @@
+[package]
+name = "hello-phext"
+version = "0.0.1"
+authors = ["Will Bickford <wbic16@gmail.com>"]
+
+[dependencies]
