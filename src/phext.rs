@@ -70,6 +70,12 @@
 /// useful again.
 /// ----------------------------------------------------------------------------------------------------------
 
+//use std::error::Error;
+//use csv::ByteRecord;
+//use serde::Deserialize;
+
+use std::default;
+
 /// ----------------------------------------------------------------------------------------------------------
 /// phext constants
 /// ----------------------------------------------------------------------------------------------------------
@@ -77,7 +83,7 @@ pub const COORDINATE_MINIMUM: u8 = 1;    // human numbering - we start at 1, not
 pub const COORDINATE_MAXIMUM: u8 = 100;  // 2 KB pages x 100^9 = 2 million petabytes
 pub const LIBRARY_BREAK: u8 = 0x01;      // 11th dimension - replaces start of header
 pub const MORE_COWBELL: u8 = 0x07;       // i've got a fever, and the only prescription...is more cowbell!
-pub const LINE_BREAK = 0x0a;             // same as plain text \o/
+pub const LINE_BREAK:u8 = 0x0a;          // same as plain text \o/
 pub const SCROLL_BREAK: u8 = 0x17;       // 3D Break - replaces End Transmission Block
 pub const SECTION_BREAK: u8 = 0x18;      // 4D Break - replaces Cancel Block
 pub const CHAPTER_BREAK: u8 = 0x19;      // 5D Break - replaces End of Tape
@@ -86,6 +92,9 @@ pub const VOLUME_BREAK: u8 = 0x1c;       // 7D Break - replaces file separator
 pub const COLLECTION_BREAK: u8 = 0x1d;   // 8D Break - replaces group separator
 pub const SERIES_BREAK: u8 = 0x1e;       // 9D Break - replaces record separator
 pub const SHELF_BREAK: u8 = 0x1f;        // 10D Break - replaces unit separator
+
+pub const ADDRESS_MICRO_BREAK: u8 = b'.'; // delimiter for micro-coordinates
+pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
 
 /// ----------------------------------------------------------------------------------------------------------
 /// backwards compatibility
@@ -128,10 +137,11 @@ pub const SHELF_BREAK: u8 = 0x1f;        // 10D Break - replaces unit separator
 ///
 /// The large-scale Z arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
+#[derive(PartialEq)]
 pub struct ZCoordinate {
-  library: u8 = 1,
-  shelf: u8 = 1,
-  series: u8 = 1
+  library: u8,
+  shelf: u8,
+  series: u8
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -139,10 +149,11 @@ pub struct ZCoordinate {
 ///
 /// The large-scale Y arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
+#[derive(PartialEq)]
 pub struct YCoordinate {
-  collection: u8 = 1,
-  volume: u8 = 1,
-  book: u8 = 1
+  collection: u8,
+  volume: u8,
+  book: u8
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -150,10 +161,11 @@ pub struct YCoordinate {
 ///
 /// The large-scale X arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
+#[derive(PartialEq)]
 pub struct XCoordinate {
-  chapter: u8 = 1,
-  section: u8 = 1,
-  scroll: u8 = 1
+  chapter: u8,
+  section: u8,
+  scroll: u8
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -168,10 +180,11 @@ pub struct XCoordinate {
 /// Y - this arm contains the collection (y3), volume (y2), and book (y1) dimensions
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
+#[derive(PartialEq)]
 pub struct Coordinate {
-  ZCoordinate z,
-  YCoordinate y,
-  XCoordinate x
+  z: ZCoordinate,
+  y: YCoordinate,
+  x: XCoordinate,
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -185,105 +198,168 @@ pub struct Coordinate {
 /// @param coord  coordinate to select the scroll from
 /// ----------------------------------------------------------------------------------------------------------
 pub fn fetch_text(phext: &str, target: Coordinate) -> String {
-  Coordinate walker;
-
-  let u64 subspace_index = 0;
-  let u8 stage = 0;
-  let u8 next = 0;
-  let chars = str.chars();
-  let u64 start = 0;
-  let u64 end = 0;
-  let bool done = false;
+  let mut walker: Coordinate = default_coordinate();
+  let mut subspace_index = 0 as usize;
+  let mut stage:u8 = 0;
+  let mut next: u8 = 0;
+  let mut start = 0 as usize;
+  let mut end = 0 as usize;
+  let mut done = false;
+  let bytes = phext.as_bytes();
+  let mut vec:Vec<u8> = Vec::new();
   
-  while (!done)
-  {
-    next = chars[subspace_index];
+  for ptr in bytes {
+    let next = *ptr;
+    vec.push(next);
 
-    if (next == SCROLL_BREAK) {
+    if next == SCROLL_BREAK {
       walker.scroll_break();
-      if (stage == 1) { stage = 2; }
-      ++subspace_index;
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == SECTION_BREAK) {
+    if next == SECTION_BREAK {
       walker.section_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == CHAPTER_BREAK) {
+    if next == CHAPTER_BREAK {
       walker.chapter_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == BOOK_BREAK) {
+    if next == BOOK_BREAK {
       walker.book_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == VOLUME_BREAK) {
+    if next == VOLUME_BREAK {
       walker.volume_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == COLLECTION_BREAK) {
+    if next == COLLECTION_BREAK {
       walker.collection_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == SERIES_BREAK) {
+    if next == SERIES_BREAK {
       walker.series_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == SHELF_BREAK) {
+    if next == SHELF_BREAK {
       walker.shelf_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (next == LIBRARY_BREAK) {
+    if next == LIBRARY_BREAK {
       walker.library_break();      
-      if (stage == 1) { stage = 2; }
+      if stage == 1 { stage = 2; }
+      subspace_index += 1;
       continue;
     }
 
-    if (stage == 0 && target == walker) {
+    if stage == 0 && target == walker {
       start = subspace_index;
       stage = 1;
     }
 
-    ++subspace_index;
+    subspace_index += 1;
   }
 
-  if (stage == 1) {
-    end = bytes.lenght() - 1;
+  if stage == 1 {
+    end = (vec.len() - 1) as usize;
   }
 
-  if (end > start)
-  {
-    return chars.skip(start).take(end - start).collect();
+  if end > start
+  {    
+    let temp = vec.into_iter().skip(start).take(end - start).collect();
+    return String::from_utf8(temp).expect("Invalid UTF-8");
   }
 
-  return "";
+  return "".to_owned();
 }
  
+pub fn default_coordinate() -> Coordinate {
+  let coord = Coordinate {
+    z: ZCoordinate {
+      library: 1,
+      shelf: 1,
+      series: 1
+    },
+    y: YCoordinate {
+      collection: 1,
+      volume: 1,
+      book: 1
+    },
+    x: XCoordinate {
+      chapter: 1,
+      section: 1,
+      scroll: 1
+    }
+  };
+  return coord;
+}
+
 /// ----------------------------------------------------------------------------------------------------------
 /// @fn to_coordinate
 ///
 /// translates a phext string to a strongly-typed address
 ///
-/// @param coord    the coordinate to reset
 /// @param address  text to parse
 /// ----------------------------------------------------------------------------------------------------------
-pub fn to_coordinate(coord: Coordinate) -> Coordinate {
+pub fn to_coordinate(address: &str) -> Coordinate {
+  let mut result: Coordinate = default_coordinate();
 
+  let mut index: u8 = 0;
+  let mut value:u32 = 0;
+  let exp:u32 = 10;
+
+  for next in address.as_bytes() {
+    let byte = *next;
+
+    if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK {
+      value = 0;
+      index += 1;
+
+      match index {
+        1 => {result.z.library = value as u8},
+        2 => {result.z.shelf = value as u8},
+        3 => {result.z.series = value as u8},
+        4 => {result.y.collection = value as u8},
+        5 => {result.y.volume = value as u8},
+        6 => {result.y.book = value as u8},
+        7 => {result.x.chapter = value as u8},
+        8 => {result.x.section = value as u8},
+        _ => {}
+      }
+    }
+
+    if byte >= 0x30 && byte <= 0x39
+    {
+      value = exp * value + ((byte - 0x30) as u32);
+    }
+  }
+  
+  result.x.scroll = value as u8;
+
+  return result;
 }
  
 /// ----------------------------------------------------------------------------------------------------------
@@ -293,24 +369,15 @@ pub fn to_coordinate(coord: Coordinate) -> Coordinate {
 ///
 /// @param coord  the coordinate to translate
 /// ----------------------------------------------------------------------------------------------------------
-pub fn phext_get_address(coord: Coordinate) -> String {
+pub fn to_string(coord: Coordinate) -> String {
+  return format!("{}.{}.{}/{}.{}.{}/{}.{}.{}",
+    coord.z.library, coord.z.shelf, coord.z.series,
+    coord.y.collection, coord.y.volume, coord.y.book,
+    coord.x.chapter, coord.x.section, coord.x.scroll);
 }
 
 fn validate_dimension_index(index: u8) -> bool {
   return index >= COORDINATE_MINIMUM && index <= COORDINATE_MAXIMUM;
-}
-
-/// ----------------------------------------------------------------------------------------------------------
-/// @fn advance_coordinate
-///
-/// ----------------------------------------------------------------------------------------------------------
-fn advance_coordinate(index: u8) -> u8 {
-  u8 next = index + 1;
-  if (next < COORDINATE_MAXIMUM) {
-   return next;
-  }
-
-  return index; // can't advance beyond the maximum
 }
 
 impl Coordinate {
@@ -321,130 +388,130 @@ impl Coordinate {
   ///
   /// @param coord: the coordinate to reset
   /// ----------------------------------------------------------------------------------------------------------
-  pub fn validate_coordinate() {
-    bool ok = validate_dimension_index(z.library) && 
-              validate_dimension_index(z.shelf) && 
-              validate_dimension_index(z.series) && 
-              validate_dimension_index(y.collection) && 
-              validate_dimension_index(y.volume) && 
-              validate_dimension_index(y.book) && 
-              validate_dimension_index(x.chapter) && 
-              validate_dimension_index(x.section) && 
-              validate_dimension_index(x.scroll);
+  pub fn validate_coordinate(&self) -> bool {
+    let ok = validate_dimension_index(self.z.library) && 
+                   validate_dimension_index(self.z.shelf) && 
+                   validate_dimension_index(self.z.series) && 
+                   validate_dimension_index(self.y.collection) && 
+                   validate_dimension_index(self.y.volume) && 
+                   validate_dimension_index(self.y.book) && 
+                   validate_dimension_index(self.x.chapter) && 
+                   validate_dimension_index(self.x.section) && 
+                   validate_dimension_index(self.x.scroll);
     return ok;
   }
- 
+
   /// ----------------------------------------------------------------------------------------------------------
+  /// @fn advance_coordinate
+  ///
+  /// ----------------------------------------------------------------------------------------------------------
+  fn advance_coordinate(index: u8) -> u8 {
+    let next = index + 1;
+    if next < COORDINATE_MAXIMUM {
+      return next;
+    }
+
+    return index; // can't advance beyond the maximum
+  }
+
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn scroll_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn scroll_break() {
-    x.scroll = advance_coordinate(x.scroll);
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn scroll_break(&mut self) {
+    self.x.scroll = Self::advance_coordinate(self.x.scroll);
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn section_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn section_break() {
-    x.section = advance_coordinate(x.section);
-    x.scroll = 1;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn section_break(&mut self) {
+    self.x.section = Self::advance_coordinate(self.x.section);
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn chapter_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn chapter_break() {
-    x.chapter = advance_coordinate(x.chapter);
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn chapter_break(&mut self) {
+    self.x.chapter = Self::advance_coordinate(self.x.chapter);
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn book_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn book_break(coord: Coordinate) -> Coordinate {
-    Coordinate result = coord;
-    y.book = advance_coordinate(y.book);
-    x.chapter = 1;
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn book_break(&mut self) {
+    self.y.book = Self::advance_coordinate(self.y.book);
+    self.x.chapter = 1;
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn volume_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn volume_break(coord: Coordinate) -> Coordinate {
-    Coordinate result = coord;
-    y.volume = advance_coordinate(y.volume);
-    y.book = 1;
-    x.chapter = 1;
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn volume_break(&mut self) {
+    self.y.volume = Self::advance_coordinate(self.y.volume);
+    self.y.book = 1;
+    self.x.chapter = 1;
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn collection_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn collection_break(coord: Coordinate) -> Coordinate {
-    Coordinate result = coord;
-    y.collection = advance_coordinate(y.collection);
-    y.volume = 1;
-    y.book = 1;
-    x.chapter = 1;
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn collection_break(&mut self) {
+    self.y.collection = Self::advance_coordinate(self.y.collection);
+    self.y.volume = 1;
+    self.y.book = 1;
+    self.x.chapter = 1;
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn series_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn series_break(coord: Coordinate) -> Coordinate {
-    Coordinate result = coord;
-    z.series = advance_coordinate(z.series);
-    y.collection = 1;
-    y.volume = 1;
-    y.book = 1;
-    x.chapter = 1;
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn series_break(&mut self) {
+    self.z.series = Self::advance_coordinate(self.z.series);
+    self.y.collection = 1;
+    self.y.volume = 1;
+    self.y.book = 1;
+    self.x.chapter = 1;
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn shelf_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn shelf_break(coord: Coordinate) -> Coordinate {
-    Coordinate result = coord;
-    z.shelf = advance_coordinate(z.shelf);
-    z.series = 1;
-    y.book = 1;
-    y.collection = 1;
-    y.volume = 1;
-    y.book = 1;
-    x.chapter = 1;
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn shelf_break(&mut self) {
+    self.z.shelf = Self::advance_coordinate(self.z.shelf);
+    self.z.series = 1;
+    self.y.book = 1;
+    self.y.collection = 1;
+    self.y.volume = 1;
+    self.y.book = 1;
+    self.x.chapter = 1;
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 
-  /// ----------------------------------------------------------------------------------------------------------
+  /// ------------------------------------------------------------------------------------------------------
   /// @fn library_break
-  /// ----------------------------------------------------------------------------------------------------------
-  pub fn library_break(coord: Coordinate) -> Coordinate {
-    Coordinate result = coord;
-    z.library = advance_coordinate(z.library);
-    z.shelf = 1;
-    z.series = 1;
-    y.book = 1;
-    y.collection = 1;
-    y.volume = 1;
-    y.book = 1;
-    x.chapter = 1;
-    x.section = 1;
-    x.scroll = 1;
-    return result;
+  /// ------------------------------------------------------------------------------------------------------
+  pub fn library_break(&mut self) {
+    self.z.library = Self::advance_coordinate(self.z.library);
+    self.z.shelf = 1;
+    self.z.series = 1;
+    self.y.book = 1;
+    self.y.collection = 1;
+    self.y.volume = 1;
+    self.y.book = 1;
+    self.x.chapter = 1;
+    self.x.section = 1;
+    self.x.scroll = 1;
   }
 }
