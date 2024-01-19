@@ -73,8 +73,7 @@
 //use std::error::Error;
 //use csv::ByteRecord;
 //use serde::Deserialize;
-
-use std::default;
+//use std::default;
 
 /// ----------------------------------------------------------------------------------------------------------
 /// phext constants
@@ -82,12 +81,12 @@ use std::default;
 pub const COORDINATE_MINIMUM: u8 = 1;    // human numbering - we start at 1, not 0
 pub const COORDINATE_MAXIMUM: u8 = 100;  // 2 KB pages x 100^9 = 2 million petabytes
 pub const LIBRARY_BREAK: u8 = 0x01;      // 11th dimension - replaces start of header
-pub const MORE_COWBELL: u8 = 0x07;       // i've got a fever, and the only prescription...is more cowbell!
-pub const LINE_BREAK:u8 = 0x0a;          // same as plain text \o/
+//pub const MORE_COWBELL: u8 = 0x07;     // i've got a fever, and the only prescription...is more cowbell!
+//pub const LINE_BREAK:u8 = 0x0a;        // same as plain text \o/
 pub const SCROLL_BREAK: u8 = 0x17;       // 3D Break - replaces End Transmission Block
 pub const SECTION_BREAK: u8 = 0x18;      // 4D Break - replaces Cancel Block
 pub const CHAPTER_BREAK: u8 = 0x19;      // 5D Break - replaces End of Tape
-pub const BOOK_BREAK: u8 = 0x1a;         // 6D Break - replaces Substitute   
+pub const BOOK_BREAK: u8 = 0x1a;         // 6D Break - replaces Substitute
 pub const VOLUME_BREAK: u8 = 0x1c;       // 7D Break - replaces file separator
 pub const COLLECTION_BREAK: u8 = 0x1d;   // 8D Break - replaces group separator
 pub const SERIES_BREAK: u8 = 0x1e;       // 9D Break - replaces record separator
@@ -130,14 +129,14 @@ pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
 /// * device control 2 = 0x12: assuming printers need these
 /// * device control 3 = 0x13: assuming printers need these
 /// * device control 4 = 0x14: assuming printers need these
-/// ---------------------------------------------------------------------------------------------------------- 
+/// ----------------------------------------------------------------------------------------------------------
 
 /// ----------------------------------------------------------------------------------------------------------
 /// @struct ZCoordinate
 ///
 /// The large-scale Z arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct ZCoordinate {
   library: u8,
   shelf: u8,
@@ -149,7 +148,7 @@ pub struct ZCoordinate {
 ///
 /// The large-scale Y arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct YCoordinate {
   collection: u8,
   volume: u8,
@@ -161,7 +160,7 @@ pub struct YCoordinate {
 ///
 /// The large-scale X arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct XCoordinate {
   chapter: u8,
   section: u8,
@@ -180,7 +179,7 @@ pub struct XCoordinate {
 /// Y - this arm contains the collection (y3), volume (y2), and book (y1) dimensions
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct Coordinate {
   z: ZCoordinate,
   y: YCoordinate,
@@ -201,13 +200,11 @@ pub fn fetch_text(phext: &str, target: Coordinate) -> String {
   let mut walker: Coordinate = default_coordinate();
   let mut subspace_index = 0 as usize;
   let mut stage:u8 = 0;
-  let mut next: u8 = 0;
   let mut start = 0 as usize;
   let mut end = 0 as usize;
-  let mut done = false;
   let bytes = phext.as_bytes();
   let mut vec:Vec<u8> = Vec::new();
-  
+
   for ptr in bytes {
     let next = *ptr;
     vec.push(next);
@@ -220,56 +217,56 @@ pub fn fetch_text(phext: &str, target: Coordinate) -> String {
     }
 
     if next == SECTION_BREAK {
-      walker.section_break();      
+      walker.section_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == CHAPTER_BREAK {
-      walker.chapter_break();      
+      walker.chapter_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == BOOK_BREAK {
-      walker.book_break();      
+      walker.book_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == VOLUME_BREAK {
-      walker.volume_break();      
+      walker.volume_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == COLLECTION_BREAK {
-      walker.collection_break();      
+      walker.collection_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == SERIES_BREAK {
-      walker.series_break();      
+      walker.series_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == SHELF_BREAK {
-      walker.shelf_break();      
+      walker.shelf_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
     }
 
     if next == LIBRARY_BREAK {
-      walker.library_break();      
+      walker.library_break();
       if stage == 1 { stage = 2; }
       subspace_index += 1;
       continue;
@@ -288,14 +285,14 @@ pub fn fetch_text(phext: &str, target: Coordinate) -> String {
   }
 
   if end > start
-  {    
+  {
     let temp = vec.into_iter().skip(start).take(end - start).collect();
     return String::from_utf8(temp).expect("Invalid UTF-8");
   }
 
   return "".to_owned();
 }
- 
+
 pub fn default_coordinate() -> Coordinate {
   let coord = Coordinate {
     z: ZCoordinate {
@@ -356,24 +353,10 @@ pub fn to_coordinate(address: &str) -> Coordinate {
       value = exp * value + ((byte - 0x30) as u32);
     }
   }
-  
+
   result.x.scroll = value as u8;
 
   return result;
-}
- 
-/// ----------------------------------------------------------------------------------------------------------
-/// @fn to_string
-///
-/// produces a quoted string for the given phext address in canonical format (z3.z2.z1/y3.y2.y1/x3.x2.x1)
-///
-/// @param coord  the coordinate to translate
-/// ----------------------------------------------------------------------------------------------------------
-pub fn to_string(coord: Coordinate) -> String {
-  return format!("{}.{}.{}/{}.{}.{}/{}.{}.{}",
-    coord.z.library, coord.z.shelf, coord.z.series,
-    coord.y.collection, coord.y.volume, coord.y.book,
-    coord.x.chapter, coord.x.section, coord.x.scroll);
 }
 
 fn validate_dimension_index(index: u8) -> bool {
@@ -389,16 +372,33 @@ impl Coordinate {
   /// @param coord: the coordinate to reset
   /// ----------------------------------------------------------------------------------------------------------
   pub fn validate_coordinate(&self) -> bool {
-    let ok = validate_dimension_index(self.z.library) && 
-                   validate_dimension_index(self.z.shelf) && 
-                   validate_dimension_index(self.z.series) && 
-                   validate_dimension_index(self.y.collection) && 
-                   validate_dimension_index(self.y.volume) && 
-                   validate_dimension_index(self.y.book) && 
-                   validate_dimension_index(self.x.chapter) && 
-                   validate_dimension_index(self.x.section) && 
+    let ok = validate_dimension_index(self.z.library) &&
+                   validate_dimension_index(self.z.shelf) &&
+                   validate_dimension_index(self.z.series) &&
+                   validate_dimension_index(self.y.collection) &&
+                   validate_dimension_index(self.y.volume) &&
+                   validate_dimension_index(self.y.book) &&
+                   validate_dimension_index(self.x.chapter) &&
+                   validate_dimension_index(self.x.section) &&
                    validate_dimension_index(self.x.scroll);
     return ok;
+  }
+
+  /// ----------------------------------------------------------------------------------------------------------
+  /// @fn to_string
+  ///
+  /// produces a quoted string for the given phext address in canonical format (z3.z2.z1/y3.y2.y1/x3.x2.x1)
+  ///
+  /// @param coord  the coordinate to translate
+  /// ----------------------------------------------------------------------------------------------------------
+  pub fn to_string(&self) -> String {
+    if !self.validate_coordinate() {
+      return "".to_owned();
+    }
+    return format!("{}.{}.{}/{}.{}.{}/{}.{}.{}",
+      self.z.library, self.z.shelf, self.z.series,
+      self.y.collection, self.y.volume, self.y.book,
+      self.x.chapter, self.x.section, self.x.scroll);
   }
 
   /// ----------------------------------------------------------------------------------------------------------
