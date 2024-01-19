@@ -187,6 +187,18 @@ pub struct Coordinate {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn fmt::Display
+/// ----------------------------------------------------------------------------------------------------------
+impl std::fmt::Display for Coordinate {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}.{}.{}/{}.{}.{}/{}.{}.{}",
+      self.z.library, self.z.shelf, self.z.series,
+      self.y.collection, self.y.volume, self.y.book,
+      self.x.chapter, self.x.section, self.x.scroll);
+  }
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn fetch
 ///
 /// retrieves the plain text string located at the given coordinates.
@@ -271,11 +283,13 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
       subspace_index += 1;
       continue;
     }
-
+    
     if stage == 0 && target == walker {
       start = subspace_index;
       stage = 1;
     }
+
+    println!("Appending {next} with {target} vs {walker}");
 
     subspace_index += 1;
   }
@@ -287,7 +301,7 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   if end > start
   {
     let temp = vec.into_iter().skip(start).take(end - start).collect();
-    return String::from_utf8(temp).expect("Invalid UTF-8");
+    return String::from_utf8(temp).expect("invalid utf8");
   }
 
   return "".to_owned();
@@ -333,17 +347,16 @@ pub fn to_coordinate(address: &str) -> Coordinate {
 
     if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK {
       value = 0;
-      index += 1;
 
       match index {
-        1 => {result.z.library = value as u8},
-        2 => {result.z.shelf = value as u8},
-        3 => {result.z.series = value as u8},
-        4 => {result.y.collection = value as u8},
-        5 => {result.y.volume = value as u8},
-        6 => {result.y.book = value as u8},
-        7 => {result.x.chapter = value as u8},
-        8 => {result.x.section = value as u8},
+        1 => {result.z.library = value as u8; index += 1; },
+        2 => {result.z.shelf = value as u8; index += 1; },
+        3 => {result.z.series = value as u8; index += 1; },
+        4 => {result.y.collection = value as u8; index += 1; },
+        5 => {result.y.volume = value as u8; index += 1; },
+        6 => {result.y.book = value as u8; index += 1; },
+        7 => {result.x.chapter = value as u8; index += 1; },
+        8 => {result.x.section = value as u8; index += 1; },
         _ => {}
       }
     }
