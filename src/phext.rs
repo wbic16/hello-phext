@@ -187,7 +187,7 @@ pub struct Coordinate {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn fetch_text
+/// @fn fetch
 ///
 /// retrieves the plain text string located at the given coordinates.
 /// important: this can be optimized with hash tables and memo-ized parsing - for now let's keep it simple
@@ -196,7 +196,7 @@ pub struct Coordinate {
 /// @param phext  the raw phext buffer to search
 /// @param coord  coordinate to select the scroll from
 /// ----------------------------------------------------------------------------------------------------------
-pub fn fetch_text(phext: &str, target: Coordinate) -> String {
+pub fn fetch(phext: &str, target: Coordinate) -> String {
   let mut walker: Coordinate = default_coordinate();
   let mut subspace_index = 0 as usize;
   let mut stage:u8 = 0;
