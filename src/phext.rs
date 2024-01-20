@@ -223,63 +223,63 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
 
     if next == SCROLL_BREAK {
       walker.scroll_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == SECTION_BREAK {
       walker.section_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == CHAPTER_BREAK {
       walker.chapter_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == BOOK_BREAK {
       walker.book_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == VOLUME_BREAK {
       walker.volume_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == COLLECTION_BREAK {
       walker.collection_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == SERIES_BREAK {
       walker.series_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == SHELF_BREAK {
       walker.shelf_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
 
     if next == LIBRARY_BREAK {
       walker.library_break();
-      if stage == 1 { stage = 2; }
+      if stage == 1 { stage = 2; end = subspace_index; }
       subspace_index += 1;
       continue;
     }
@@ -289,19 +289,19 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
       stage = 1;
     }
 
-    println!("Appending {next} with {target} vs {walker}");
-
     subspace_index += 1;
   }
 
-  if stage == 1 {
+  if end == 0 {
     end = (vec.len() - 1) as usize;
   }
 
   if end > start
   {
+    
     let temp = vec.into_iter().skip(start).take(end - start).collect();
-    return String::from_utf8(temp).expect("invalid utf8");
+    let result = String::from_utf8(temp).expect("invalid utf8");
+    return result;
   }
 
   return "".to_owned();
