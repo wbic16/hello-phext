@@ -1,7 +1,7 @@
 mod phext;
 
 fn main() {
-  println!("hello-phext v0.0.1");
+  println!("hello-phext v0.0.2");
   let test: phext::Coordinate = phext::to_coordinate("1.1.1/1.1.1/1.1.2");
   let address = test.to_string();
   println!("phext address: {address}");
