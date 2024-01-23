@@ -138,9 +138,9 @@ pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Copy, Clone)]
 pub struct ZCoordinate {
-  library: u8,
-  shelf: u8,
-  series: u8
+  pub library: u8,
+  pub shelf: u8,
+  pub series: u8
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -150,9 +150,9 @@ pub struct ZCoordinate {
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Copy, Clone)]
 pub struct YCoordinate {
-  collection: u8,
-  volume: u8,
-  book: u8
+  pub collection: u8,
+  pub volume: u8,
+  pub book: u8
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -162,9 +162,9 @@ pub struct YCoordinate {
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Copy, Clone)]
 pub struct XCoordinate {
-  chapter: u8,
-  section: u8,
-  scroll: u8
+  pub chapter: u8,
+  pub section: u8,
+  pub scroll: u8
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -181,9 +181,9 @@ pub struct XCoordinate {
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Copy, Clone)]
 pub struct Coordinate {
-  z: ZCoordinate,
-  y: YCoordinate,
-  x: XCoordinate,
+  pub z: ZCoordinate,
+  pub y: YCoordinate,
+  pub x: XCoordinate,
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -293,13 +293,15 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   }
 
   if end == 0 {
-    end = (vec.len() - 1) as usize;
+    end = vec.len() as usize;
+    println!("Taking end as {end}.");
   }
 
   if end > start
   {
-    
-    let temp = vec.into_iter().skip(start).take(end - start).collect();
+    let glyphs = end - start;
+    println!("Finishing parsing: {start} to {end} => {glyphs}.");
+    let temp = vec.into_iter().skip(start).take(glyphs).collect();
     let result = String::from_utf8(temp).expect("invalid utf8");
     return result;
   }
