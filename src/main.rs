@@ -9,9 +9,8 @@ fn main() {
   let expect1 = "Hello World";
   let expect2 = "Scroll #2 -- this text will be selected";
   let expect3 = "Scroll #3 - this text will be ignored";
+
   let sample = format!("{expect1}{expect2}{expect3}");
-  let text = phext::fetch(&sample, test);
-  println!("text at {test}: {text}.");
 
   let coord1 = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
   let coord2 = phext::to_coordinate("1.1.1/1.1.1/1.1.2");
@@ -23,14 +22,14 @@ fn main() {
   println!("Scrolls: {c1}, {c2}, {c3}.");
 
   let text1 = phext::fetch(&sample, coord1);
-  let text2 = phext::fetch(&sample, coord2);
-  let text3 = phext::fetch(&sample, coord3);
   let m1 = expect1 == text1;
+  println!("Scroll Test 1: {m1} with '{text1}' vs '{expect1}'\n");
+  
+  let text2 = phext::fetch(&sample, coord2);
   let m2 = expect2 == text2;
+  println!("Scroll Test 2: {m2} with '{text2}' vs '{expect2}'\n");
+  
+  let text3 = phext::fetch(&sample, coord3);
   let m3 = expect3 == text3;
-
-  // Verify basic scrolls
-  println!("Scroll Test 1: {m1} with '{text1}' vs '{expect3}'");
-  println!("Scroll Test 2: {m2} with '{text2}' vs '{expect3}'");
-  println!("Scroll Test 3: {m3} with '{text3}' vs '{expect3}'");
+  println!("Scroll Test 3: {m3} with '{text3}' vs '{expect3}'\n"); 
 }

@@ -215,11 +215,9 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   let mut start = 0 as usize;
   let mut end = 0 as usize;
   let bytes = phext.as_bytes();
-  let mut vec:Vec<u8> = Vec::new();
 
   for ptr in bytes {
     let next = *ptr;
-    vec.push(next);
 
     if next == SCROLL_BREAK {
       walker.scroll_break();
@@ -293,7 +291,7 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   }
 
   if end == 0 {
-    end = vec.len() as usize;
+    end = bytes.len() as usize;
     println!("Taking end as {end}.");
   }
 
@@ -301,7 +299,7 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   {
     let glyphs = end - start;
     println!("Finishing parsing: {start} to {end} => {glyphs}.");
-    let temp = vec.into_iter().skip(start).take(glyphs).collect();
+    let temp = bytes.iter().skip(start).take(glyphs).cloned().collect();
     let result = String::from_utf8(temp).expect("invalid utf8");
     return result;
   }
