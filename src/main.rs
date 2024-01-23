@@ -1,10 +1,12 @@
 mod phext;
 
 fn main() {
-  println!("hello-phext v0.0.2");
-  let test: phext::Coordinate = phext::to_coordinate("1.1.1/1.1.1/1.1.2");
+  println!("hello-phext v0.0.3");
+  let example_coordinate = "9.8.7/6.5.4/3.2.1";
+  let test: phext::Coordinate = phext::to_coordinate(example_coordinate);
   let address = test.to_string();
-  println!("phext address: {address}");
+  let address_test = address == example_coordinate;
+  println!("phext address: {address_test} with '{address}' vs '{example_coordinate}'");
 
   let expect1 = "Hello World";
   let expect2 = "Scroll #2 -- this text will be selected";
@@ -19,6 +21,7 @@ fn main() {
   let c1 = coord1.x.scroll;
   let c2 = coord2.x.scroll;
   let c3 = coord3.x.scroll;
+  
   println!("Scrolls: {c1}, {c2}, {c3}.");
 
   let text1 = phext::fetch(&sample, coord1);

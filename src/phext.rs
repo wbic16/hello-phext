@@ -292,13 +292,11 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
 
   if end == 0 {
     end = bytes.len() as usize;
-    println!("Taking end as {end}.");
   }
 
   if end > start
   {
     let glyphs = end - start;
-    println!("Finishing parsing: {start} to {end} => {glyphs}.");
     let temp = bytes.iter().skip(start).take(glyphs).cloned().collect();
     let result = String::from_utf8(temp).expect("invalid utf8");
     return result;
