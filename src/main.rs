@@ -1,38 +1,18 @@
 mod phext;
+mod phext_test;
 
 fn main() {
-  println!("hello-phext v0.0.3");
-  let example_coordinate = "9.8.7/6.5.4/3.2.1";
-  let test: phext::Coordinate = phext::to_coordinate(example_coordinate);
-  let address = test.to_string();
-  let address_test = address == example_coordinate;
-  println!("phext address: {address_test} with '{address}' vs '{example_coordinate}'");
+    println!("hello-phext v0.0.4");
 
-  let expect1 = "Hello World";
-  let expect2 = "Scroll #2 -- this text will be selected";
-  let expect3 = "Scroll #3 - this text will be ignored";
+    let buffer = "Quick Example\x17Second Scroll\x18Second Section\x19Section Chapter";
+    let scroll1 = phext::locate(buffer, "1.1.1/1.1.1/1.1.1");
+    let scroll2 = phext::locate(buffer, "1.1.1/1.1.1/1.1.2");
+    let scroll3 = phext::locate(buffer, "1.1.1/1.1.1/1.2.1");
+    let scroll4 = phext::locate(buffer, "1.1.1/1.1.1/2.1.1");
 
-  let sample = format!("{expect1}{expect2}{expect3}");
-
-  let coord1 = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
-  let coord2 = phext::to_coordinate("1.1.1/1.1.1/1.1.2");
-  let coord3 = phext::to_coordinate("1.1.1/1.1.1/1.1.3");
-
-  let c1 = coord1.x.scroll;
-  let c2 = coord2.x.scroll;
-  let c3 = coord3.x.scroll;
-  
-  println!("Scrolls: {c1}, {c2}, {c3}.");
-
-  let text1 = phext::fetch(&sample, coord1);
-  let m1 = expect1 == text1;
-  println!("Scroll Test 1: {m1} with '{text1}' vs '{expect1}'\n");
-  
-  let text2 = phext::fetch(&sample, coord2);
-  let m2 = expect2 == text2;
-  println!("Scroll Test 2: {m2} with '{text2}' vs '{expect2}'\n");
-  
-  let text3 = phext::fetch(&sample, coord3);
-  let m3 = expect3 == text3;
-  println!("Scroll Test 3: {m3} with '{text3}' vs '{expect3}'\n"); 
+    println!("The Reference Phext has 4 scrolls, listed below:");
+    println!("* {scroll1}");
+    println!("* {scroll2}");
+    println!("* {scroll3}");
+    println!("* {scroll4}");
 }

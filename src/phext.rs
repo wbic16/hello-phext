@@ -142,6 +142,15 @@ pub struct ZCoordinate {
   pub shelf: u8,
   pub series: u8
 }
+impl Default for ZCoordinate {
+  fn default() -> ZCoordinate {
+    ZCoordinate {
+      library: 1,
+      shelf: 1,
+      series: 1
+    }
+  }
+}
 
 /// ----------------------------------------------------------------------------------------------------------
 /// @struct YCoordinate
@@ -154,6 +163,15 @@ pub struct YCoordinate {
   pub volume: u8,
   pub book: u8
 }
+impl Default for YCoordinate {
+  fn default() -> YCoordinate {
+    YCoordinate {
+      collection: 1,
+      volume: 1,
+      book: 1
+    }
+  }
+}
 
 /// ----------------------------------------------------------------------------------------------------------
 /// @struct XCoordinate
@@ -165,6 +183,15 @@ pub struct XCoordinate {
   pub chapter: u8,
   pub section: u8,
   pub scroll: u8
+}
+impl Default for XCoordinate {
+  fn default() -> XCoordinate {
+    XCoordinate {
+      chapter: 1,
+      section: 1,
+      scroll: 1
+    }
+  }
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -179,11 +206,53 @@ pub struct XCoordinate {
 /// Y - this arm contains the collection (y3), volume (y2), and book (y1) dimensions
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Copy, Clone)]
+#[derive(Default, PartialEq, Copy, Clone)]
 pub struct Coordinate {
   pub z: ZCoordinate,
   pub y: YCoordinate,
   pub x: XCoordinate,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct PhextParseError;
+impl std::error::Error for PhextParseError {}
+
+impl std::fmt::Display for PhextParseError {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "Phext addresses are of the form LB.SF.SR/CN.VM.BK/CH.SN.SC");
+  }
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn std::convert::TryFrom
+/// ----------------------------------------------------------------------------------------------------------
+impl std::convert::TryFrom<&str> for Coordinate {
+  type Error = PhextParseError;
+
+  fn try_from(value: &str) -> Result<Self, Self::Error> {
+      let parts: Vec<&str> = value.split('/').collect();
+      let error: PhextParseError = Default::default();
+      if parts.len() != 3 {        
+        return Err(error);
+      }
+      let z: Vec<&str> = parts[0].split('.').collect();
+      let y: Vec<&str> = parts[1].split('.').collect();
+      let x: Vec<&str> = parts[2].split('.').collect();
+      if z.len() != 3 || y.len() != 3 || x.len() != 3 {
+        return Err(error);
+      }
+      let mut result: Coordinate = Default::default();
+      result.z.library = z[0].parse::<u8>().expect("Library missing");
+      result.z.shelf = z[1].parse::<u8>().expect("Shelf missing");
+      result.z.series = z[2].parse::<u8>().expect("Series missing");
+      result.y.collection = y[0].parse::<u8>().expect("Collection missing");
+      result.y.volume = y[1].parse::<u8>().expect("Volume missing");
+      result.y.book = y[2].parse::<u8>().expect("Book missing");
+      result.x.chapter = x[0].parse::<u8>().expect("Chapter missing");
+      result.x.section = x[1].parse::<u8>().expect("Section missing");
+      result.x.scroll = x[2].parse::<u8>().expect("Scroll missing");
+      return Ok(result);
+    }
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -305,6 +374,10 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   return "".to_owned();
 }
 
+pub fn locate(phext: &str, target: &str) -> String {  
+  return fetch(phext, to_coordinate(target));
+}
+
 pub fn default_coordinate() -> Coordinate {
   let coord = Coordinate {
     z: ZCoordinate {
@@ -343,11 +416,12 @@ pub fn to_coordinate(address: &str) -> Coordinate {
   for next in address.as_bytes() {
     let byte = *next;
 
-    if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK {
-      value = 0;
-
+    if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK {            
       match index {
-        1 => {result.z.library = value as u8; index += 1; },
+        1 => {
+          result.z.library = value as u8;
+          index += 1;
+        },
         2 => {result.z.shelf = value as u8; index += 1; },
         3 => {result.z.series = value as u8; index += 1; },
         4 => {result.y.collection = value as u8; index += 1; },
@@ -357,11 +431,13 @@ pub fn to_coordinate(address: &str) -> Coordinate {
         8 => {result.x.section = value as u8; index += 1; },
         _ => {}
       }
+      value = 0;
     }
 
     if byte >= 0x30 && byte <= 0x39
     {
       value = exp * value + ((byte - 0x30) as u32);
+      if index == 0 { index = 1; }
     }
   }
 
