@@ -67,4 +67,15 @@ mod tests {
         let result = test_helper(phext::SECTION_BREAK, data);
         assert_eq!(result, true);
     }
+
+    #[test]
+    fn test_chapters() {
+        let mut data: HashMap<&str, &str> = std::collections::HashMap::new();
+        data.insert("Chapter Alpha", "1.1.1/1.1.1/1.1.1");
+        data.insert("Chapter Beta", "1.1.1/1.1.1/2.1.1");
+        data.insert("Chapter Gamma", "1.1.1/1.1.1/3.1.1");
+
+        let result = test_helper(phext::CHAPTER_BREAK, data);
+        assert_eq!(result, true);
+    }
 }
