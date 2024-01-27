@@ -26,7 +26,8 @@ mod tests {
         }
         if index < 3 { return false; }
 
-        let delim = std::str::from_utf8(delim_in).expect("valid utf8");
+        let buf = vec![delim_in];
+        let delim = std::str::from_utf8(&buf).unwrap();
         let sample = format!("{expect1}{delim}{expect2}{delim}{expect3}");
 
         let coord1 = phext::to_coordinate(address1);
@@ -58,24 +59,12 @@ mod tests {
 
     #[test]
     fn test_sections() {
-        let expect1 = "Section #1";
-        let expect2 = "Section Part Deux";
-        let expect3 = "Section The Third";
-        let delim = phext::SECTION_BREAK;
+        let mut data: HashMap<&str, &str> = std::collections::HashMap::new();
+        data.insert("Section A", "1.1.1/1.1.1/1.1.1");
+        data.insert("Section B", "1.1.1/1.1.1/1.2.1");
+        data.insert("Section C", "1.1.1/1.1.1/1.3.1");
 
-        let sample = format!("{expect1}{delim}{expect2}{delim}{expect3}");
-
-        let coord1 = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
-        let coord2 = phext::to_coordinate("1.1.1/1.1.1/1.2.1");
-        let coord3 = phext::to_coordinate("1.1.1/1.1.1/1.3.1");
-
-        let text1 = phext::fetch(&sample, coord1);
-        assert_eq!(text1, expect1, "Fetching text for coord1 failed");
-
-        let text2 = phext::fetch(&sample, coord2);
-        assert_eq!(text2, expect2, "Fetching text for coord2 failed");
-
-        let text3 = phext::fetch(&sample, coord3);
-        assert_eq!(text3, expect3, "Fetching text for coord3 failed");
+        let result = test_helper(phext::SECTION_BREAK, data);
+        assert_eq!(result, true);
     }
 }
