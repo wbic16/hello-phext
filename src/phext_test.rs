@@ -133,4 +133,15 @@ mod tests {
         let result = test_helper(phext::SHELF_BREAK, data);
         assert_eq!(result, true);
     }
+
+    #[test]
+    fn test_library() {
+        let mut data: HashMap<&str, &str> = std::collections::HashMap::new();
+        data.insert("Library 1-1-1", "1.1.1/1.1.1/1.1.1");
+        data.insert("Library 2-1-1", "2.1.1/1.1.1/1.1.1");
+        data.insert("Library 3-1-1", "3.1.1/1.1.1/1.1.1");
+
+        let result = test_helper(phext::LIBRARY_BREAK, data);
+        assert_eq!(result, true);
+    }
 }
