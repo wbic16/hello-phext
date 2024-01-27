@@ -2,7 +2,7 @@ mod phext;
 mod phext_test;
 
 fn main() {
-    println!("hello-phext v0.0.4");
+    println!("hello-phext v0.0.5");
 
     let buffer = "Quick Example\x17Second Scroll\x18Second Section\x19Section Chapter";
     let scroll1 = phext::locate(buffer, "1.1.1/1.1.1/1.1.1");
