@@ -100,4 +100,15 @@ mod tests {
         let result = test_helper(phext::VOLUME_BREAK, data);
         assert_eq!(result, true);
     }
+
+    #[test]
+    fn test_collections() {
+        let mut data: HashMap<&str, &str> = std::collections::HashMap::new();
+        data.insert("Collection 1-1-1", "1.1.1/1.1.1/1.1.1");
+        data.insert("Collection 2-1-1", "1.1.1/2.1.1/1.1.1");
+        data.insert("Collection 3-1-1", "1.1.1/3.1.1/1.1.1");
+
+        let result = test_helper(phext::COLLECTION_BREAK, data);
+        assert_eq!(result, true);
+    }
 }
