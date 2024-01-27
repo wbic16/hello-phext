@@ -144,4 +144,18 @@ mod tests {
         let result = test_helper(phext::LIBRARY_BREAK, data);
         assert_eq!(result, true);
     }
+
+    #[test]
+    fn test_coordinates() {
+        let c1: phext::Coordinate = phext::to_coordinate("0.0.0/0.0.0/0.0.0"); // invalid
+        let c2 = phext::Coordinate {
+            z: phext::ZCoordinate{library: 0, shelf: 0, series: 0},
+            y: phext::YCoordinate{collection: 0, volume: 0, book: 0},
+            x: phext::XCoordinate{chapter: 0, section: 0, scroll: 0}};
+        assert_eq!(c1, c2);
+        let c1b = c1.validate_coordinate();
+        let c2b = c2.validate_coordinate();
+        assert_eq!(c1b, false);
+        assert_eq!(c2b, false);
+    }
 }

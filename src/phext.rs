@@ -136,7 +136,7 @@ pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
 ///
 /// The large-scale Z arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub struct ZCoordinate {
   pub library: u8,
   pub shelf: u8,
@@ -157,7 +157,7 @@ impl Default for ZCoordinate {
 ///
 /// The large-scale Y arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub struct YCoordinate {
   pub collection: u8,
   pub volume: u8,
@@ -178,7 +178,7 @@ impl Default for YCoordinate {
 ///
 /// The large-scale X arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub struct XCoordinate {
   pub chapter: u8,
   pub section: u8,
@@ -206,7 +206,7 @@ impl Default for XCoordinate {
 /// Y - this arm contains the collection (y3), volume (y2), and book (y1) dimensions
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(Default, PartialEq, Copy, Clone)]
+#[derive(Default, Debug, PartialEq, Copy, Clone)]
 pub struct Coordinate {
   pub z: ZCoordinate,
   pub y: YCoordinate,
