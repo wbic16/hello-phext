@@ -172,4 +172,12 @@ mod tests {
         assert_eq!(c1b, false);
         assert_eq!(c2b, false);
     }
+
+    #[test]
+    fn test_realistic_parse() {
+        let coord: phext::Coordinate = phext::to_coordinate("6.13.4/2.11.4/2.20.3");
+        let subspace = "here's some text at 6.13.4/2.11.4/2.20.3this is the next scroll and won't be picked";
+        let result = phext::fetch(subspace, coord);
+        assert_eq!(result, "here's some text at 6.13.4/2.11.4/2.20.3");
+    }
 }
