@@ -78,19 +78,19 @@
 /// ----------------------------------------------------------------------------------------------------------
 /// phext constants
 /// ----------------------------------------------------------------------------------------------------------
-pub const COORDINATE_MINIMUM: u8 = 1;    // human numbering - we start at 1, not 0
-pub const COORDINATE_MAXIMUM: u8 = 100;  // 2 KB pages x 100^9 = 2 million petabytes
-pub const LIBRARY_BREAK: u8 = 0x01;      // 11th dimension - replaces start of header
-//pub const MORE_COWBELL: u8 = 0x07;     // i've got a fever, and the only prescription...is more cowbell!
-//pub const LINE_BREAK:u8 = 0x0a;        // same as plain text \o/
-pub const SCROLL_BREAK: u8 = 0x17;       // 3D Break - replaces End Transmission Block
-pub const SECTION_BREAK: u8 = 0x18;      // 4D Break - replaces Cancel Block
-pub const CHAPTER_BREAK: u8 = 0x19;      // 5D Break - replaces End of Tape
-pub const BOOK_BREAK: u8 = 0x1a;         // 6D Break - replaces Substitute
-pub const VOLUME_BREAK: u8 = 0x1c;       // 7D Break - replaces file separator
-pub const COLLECTION_BREAK: u8 = 0x1d;   // 8D Break - replaces group separator
-pub const SERIES_BREAK: u8 = 0x1e;       // 9D Break - replaces record separator
-pub const SHELF_BREAK: u8 = 0x1f;        // 10D Break - replaces unit separator
+pub const COORDINATE_MINIMUM: u8 = 1;      // human numbering - we start at 1, not 0
+pub const COORDINATE_MAXIMUM: u8 = 100;    // 2 KB pages x 100^9 = 2 million petabytes
+pub const LIBRARY_BREAK: char = '\x01';    // 11th dimension - replaces start of header
+pub const MORE_COWBELL: char = '\x07';     // i've got a fever, and the only prescription...is more cowbell!
+pub const LINE_BREAK: char = '\x0a';       // same as plain text \o/
+pub const SCROLL_BREAK: char = '\x17';     // 3D Break - replaces End Transmission Block
+pub const SECTION_BREAK: char = '\x18';    // 4D Break - replaces Cancel Block
+pub const CHAPTER_BREAK: char = '\x19';    // 5D Break - replaces End of Tape
+pub const BOOK_BREAK: char = '\x1a';       // 6D Break - replaces Substitute
+pub const VOLUME_BREAK: char = '\x1c';     // 7D Break - replaces file separator
+pub const COLLECTION_BREAK: char = '\x1d'; // 8D Break - replaces group separator
+pub const SERIES_BREAK: char = '\x1e';     // 9D Break - replaces record separator
+pub const SHELF_BREAK: char = '\x1f';      // 10D Break - replaces unit separator
 
 pub const ADDRESS_MICRO_BREAK: u8 = b'.'; // delimiter for micro-coordinates
 pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
@@ -286,7 +286,7 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   let bytes = phext.as_bytes();
 
   for ptr in bytes {
-    let next = *ptr;
+    let next = *ptr as char;
 
     if next == SCROLL_BREAK {
       walker.scroll_break();

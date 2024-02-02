@@ -53,7 +53,7 @@ mod tests {
         data.insert("Scroll #2 -- this text will be selected", "1.1.1/1.1.1/1.1.2");
         data.insert("Scroll #3 - this text will be ignored", "1.1.1/1.1.1/1.1.3");
 
-        let result = test_helper(phext::SCROLL_BREAK, data);
+        let result = test_helper(phext::SCROLL_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -64,7 +64,7 @@ mod tests {
         data.insert("Section B", "1.1.1/1.1.1/1.2.1");
         data.insert("Section C", "1.1.1/1.1.1/1.3.1");
 
-        let result = test_helper(phext::SECTION_BREAK, data);
+        let result = test_helper(phext::SECTION_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -75,7 +75,7 @@ mod tests {
         data.insert("Chapter Beta", "1.1.1/1.1.1/2.1.1");
         data.insert("Chapter Gamma", "1.1.1/1.1.1/3.1.1");
 
-        let result = test_helper(phext::CHAPTER_BREAK, data);
+        let result = test_helper(phext::CHAPTER_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -86,7 +86,7 @@ mod tests {
         data.insert("Book Something Else #2", "1.1.1/1.1.2/1.1.1");
         data.insert("Book Part 3", "1.1.1/1.1.3/1.1.1");
 
-        let result = test_helper(phext::BOOK_BREAK, data);
+        let result = test_helper(phext::BOOK_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -97,7 +97,7 @@ mod tests {
         data.insert("Volume 1-2-1", "1.1.1/1.2.1/1.1.1");
         data.insert("Volume 1-3-1", "1.1.1/1.3.1/1.1.1");
 
-        let result = test_helper(phext::VOLUME_BREAK, data);
+        let result = test_helper(phext::VOLUME_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -108,7 +108,7 @@ mod tests {
         data.insert("Collection 2-1-1", "1.1.1/2.1.1/1.1.1");
         data.insert("Collection 3-1-1", "1.1.1/3.1.1/1.1.1");
 
-        let result = test_helper(phext::COLLECTION_BREAK, data);
+        let result = test_helper(phext::COLLECTION_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -119,7 +119,7 @@ mod tests {
         data.insert("Series 1-1-2", "1.1.2/1.1.1/1.1.1");
         data.insert("Series 1-1-3", "1.1.3/1.1.1/1.1.1");
 
-        let result = test_helper(phext::SERIES_BREAK, data);
+        let result = test_helper(phext::SERIES_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -130,7 +130,7 @@ mod tests {
         data.insert("Shelf 1-2-1", "1.2.1/1.1.1/1.1.1");
         data.insert("Shelf 1-3-1", "1.3.1/1.1.1/1.1.1");
 
-        let result = test_helper(phext::SHELF_BREAK, data);
+        let result = test_helper(phext::SHELF_BREAK as u8, data);
         assert_eq!(result, true);
     }
 
@@ -141,7 +141,7 @@ mod tests {
         data.insert("Library 2-1-1", "2.1.1/1.1.1/1.1.1");
         data.insert("Library 3-1-1", "3.1.1/1.1.1/1.1.1");
 
-        let result = test_helper(phext::LIBRARY_BREAK, data);
+        let result = test_helper(phext::LIBRARY_BREAK as u8, data);
         assert_eq!(result, true);
     }
 

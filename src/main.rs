@@ -1,5 +1,7 @@
 mod phext;
 mod phext_test;
+use std::borrow::Borrow;
+use std::fs;
 use std::env;
 
 fn main() {
@@ -19,23 +21,53 @@ fn main() {
 
     if command == "pack"
     {
-        run_pack();
+        run_pack(file);
+        return;
     }
 
     if command == "unpack"
     {
-        run_unpack();
+        run_unpack(file);
+        return;
     }
     
     run_example();
 }
 
-fn run_pack() {
-
+fn ignore_path(path: String, file: &str) -> bool {
+    return path.ends_with(".git") ||
+           path.ends_with("Cargo.lock") ||
+           path.ends_with(".gitignore") ||
+           path.ends_with(file);
 }
 
-fn run_unpack() {
-    
+fn run_pack(file: &str)
+{
+    println!("Packing local files into {file}...");
+    let mut coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
+
+    let paths = fs::read_dir("./").unwrap();
+    let mut output = String::new();
+
+    for ith in paths
+    {
+        let path = ith.unwrap().path();
+        let value = path.clone().into_os_string().into_string().unwrap();
+        if !ignore_path(value.clone(), file) && path.is_file()
+        {
+            println!("{coord}: {value}");
+            let data = fs::read_to_string(value).expect("unexpected read error");
+            output.push_str(data.as_str());
+            output.push(phext::SCROLL_BREAK);
+            coord.scroll_break();
+        }
+    }
+
+    fs::write(file, output.clone()).expect("Error writing output");
+}
+
+fn run_unpack(file: &str) {
+    println!("Extracting {file} to local directory...");
 }
 
 fn run_example() {
