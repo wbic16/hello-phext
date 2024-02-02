@@ -25,7 +25,33 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-Hello World
+# hello-phext
+
+This repository demonstrates how to work with phext from a rust context.
+
+## Build
+
+1. Clone this repo
+2. Install Rust
+3. Run `cargo build`
+
+## Test
+
+1. Complete the build steps above
+2. Run `cargo test`
+
+## Examples
+
+After completing the build and test commands, you should be able to try out the example, pack, and unpack commands.
+
+### Demonstrate how to inspect a phext
+Run `cargo run help`
+
+### Compile all local text files into a phext
+Run `cargo run pack test.phext`
+
+### Extract all nodes from a phext document into your local directory
+Not yet implementedHello World
 Scroll #2
 Scroll #3
 This is a scroll at 1.1.1/1.1.1/1.2.1.This is a scroll at 1.1.1/1.1.1/1.2.2.We're at 1.1.1/1.1.1/2.2.2 now. 🚀This scroll is at 1.1.1/1.1.2/2.2.2.We've found another scroll at 1.1.1/1.2.2/2.2.2.We're now at 1.1.1/2.2.2/2.2.2.This scroll is at 1.1.2/2.2.2/2.2.2.This text is at 1.2.2/2.2.2/2.2.2.This is the 2.1.1/1.1.1/1.1.1 scroll.This scroll is at 2.2.2/2.2.2/2.2.2.

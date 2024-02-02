@@ -26,6 +26,10 @@ fn main() {
             return;
         }
         let file = &args[2];
+        if fs::metadata(file).is_ok()
+        {
+            fs::remove_file(file).expect("unable to clear output file");
+        }
         run_pack(file);
         return;
     }
