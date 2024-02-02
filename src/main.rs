@@ -1,37 +1,51 @@
 mod phext;
 mod phext_test;
-use std::borrow::Borrow;
 use std::fs;
 use std::env;
 
 fn main() {
-    println!("hello-phext v0.0.5");
+    println!("hello-phext v0.0.6");
 
     let args: Vec<String> = env::args().collect();
-    if args.len() < 3
+    if args.len() < 2
     {
         println!("\navailable commands:");
         println!(" - pack <archive>: packs the given archive as a phext");
         println!(" - unpack <phext>: unpacks the given phext into your local directory");        
+        println!(" - help: print an example phext");
         return;
     }
 
-    let command = &args[1];
-    let file = &args[2];
+    let command = &args[1];    
 
     if command == "pack"
     {
+        if args.len() < 3
+        {
+            println!("Missing file parameter for pack.");
+            return;
+        }
+        let file = &args[2];
         run_pack(file);
         return;
     }
 
     if command == "unpack"
     {
+        if args.len() < 3
+        {
+            println!("Missing file parameter for unpack.");
+            return;
+        }
+        let file = &args[2];
         run_unpack(file);
         return;
     }
     
-    run_example();
+    if command == "help"
+    {
+        run_example();
+    }
 }
 
 fn ignore_path(path: String, file: &str) -> bool {
@@ -67,7 +81,7 @@ fn run_pack(file: &str)
 }
 
 fn run_unpack(file: &str) {
-    println!("Extracting {file} to local directory...");
+    println!("Pretending to extract {file} to local directory...(not yet implemented)");
 }
 
 fn run_example() {
