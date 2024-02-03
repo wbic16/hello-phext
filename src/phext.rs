@@ -151,6 +151,11 @@ impl Default for ZCoordinate {
     }
   }
 }
+impl std::fmt::Display for ZCoordinate {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}.{}.{}", self.library, self.shelf, self.series);
+  }
+}
 
 /// ----------------------------------------------------------------------------------------------------------
 /// @struct YCoordinate
@@ -170,6 +175,11 @@ impl Default for YCoordinate {
       volume: 1,
       book: 1
     }
+  }
+}
+impl std::fmt::Display for YCoordinate {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}.{}.{}", self.collection, self.volume, self.book);
   }
 }
 
@@ -193,6 +203,11 @@ impl Default for XCoordinate {
     }
   }
 }
+impl std::fmt::Display for XCoordinate {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}.{}.{}", self.chapter, self.section, self.scroll);
+  }
+}
 
 /// ----------------------------------------------------------------------------------------------------------
 /// @struct Coordinate
@@ -207,10 +222,16 @@ impl Default for XCoordinate {
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(Default, Debug, PartialEq, Copy, Clone)]
+#[derive(impl_new::New)]
 pub struct Coordinate {
   pub z: ZCoordinate,
   pub y: YCoordinate,
   pub x: XCoordinate,
+}
+impl std::fmt::Display for Coordinate {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}/{}/{}", self.z, self.y, self.x);
+  }
 }
 
 #[derive(Default, Debug, Clone)]
@@ -253,18 +274,6 @@ impl std::convert::TryFrom<&str> for Coordinate {
       result.x.scroll = x[2].parse::<u8>().expect("Scroll missing");
       return Ok(result);
     }
-}
-
-/// ----------------------------------------------------------------------------------------------------------
-/// @fn fmt::Display
-/// ----------------------------------------------------------------------------------------------------------
-impl std::fmt::Display for Coordinate {
-  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    return write!(f, "{}.{}.{}/{}.{}.{}/{}.{}.{}",
-      self.z.library, self.z.shelf, self.z.series,
-      self.y.collection, self.y.volume, self.y.book,
-      self.x.chapter, self.x.section, self.x.scroll);
-  }
 }
 
 /// ----------------------------------------------------------------------------------------------------------

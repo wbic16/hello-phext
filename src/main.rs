@@ -4,7 +4,12 @@ use std::fs;
 use std::env;
 
 fn main() {
-    println!("hello-phext v0.0.6");
+    let mut v: phext::Coordinate = phext::default_coordinate();    
+    v.x.scroll = 6;
+    v.x.section = 0;
+    v.x.chapter = 0;
+    let version = v.x;
+    println!("hello-phext v{version}");
 
     let args: Vec<String> = env::args().collect();
     if args.len() < 2

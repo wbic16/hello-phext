@@ -180,4 +180,14 @@ mod tests {
         let result = phext::fetch(subspace, coord);
         assert_eq!(result, "here's some text at 6.13.4/2.11.4/2.20.3");
     }
+
+    #[test]
+    fn test_line_break() {
+        assert_eq!(phext::LINE_BREAK, '\n');
+    }
+
+    #[test]
+    fn test_more_cowbell() {
+        assert_eq!(phext::MORE_COWBELL, '\x07');
+    }
 }
