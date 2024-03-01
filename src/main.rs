@@ -5,8 +5,9 @@ mod phext;
 mod phext_test;
 
 #[get("/<coordinate>")]
-fn index(coordinate: phext::Coordinate) -> String {
-  format!("phext.io introduction {}", coordinate)
+fn index(coordinate: &str) -> String {
+  let parsed: phext::Coordinate = phext::to_coordinate(coordinate);
+  format!("phext.io introduction {}", parsed)
 }
 
 #[catch(404)]
