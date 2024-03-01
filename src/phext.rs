@@ -369,7 +369,8 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
     subspace_index += 1;
   }
 
-  if end == 0 {
+  if end == 0 && start > 0
+  {
     end = bytes.len() as usize;
   }
 
