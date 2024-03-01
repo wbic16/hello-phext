@@ -94,6 +94,7 @@ pub const SHELF_BREAK: char = '\x1f';      // 10D Break - replaces unit separato
 
 pub const ADDRESS_MICRO_BREAK: u8 = b'.'; // delimiter for micro-coordinates
 pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
+pub const ADDRESS_MACRO_ALT: u8 = b';';   // also allow ';' for url encoding
 
 /// ----------------------------------------------------------------------------------------------------------
 /// backwards compatibility
@@ -425,7 +426,7 @@ pub fn to_coordinate(address: &str) -> Coordinate {
   for next in address.as_bytes() {
     let byte = *next;
 
-    if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK {            
+    if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK || byte == ADDRESS_MACRO_ALT {            
       match index {
         1 => {
           result.z.library = value as u8;
@@ -609,5 +610,24 @@ impl Coordinate {
     self.x.chapter = 1;
     self.x.section = 1;
     self.x.scroll = 1;
+  }
+}
+
+use rocket::request::FromParam;
+
+impl<'r> FromParam<'r> for Coordinate {
+  type Error = &'r str;
+
+  fn from_param(param: &'r str) -> Result<Self, Self::Error> {
+      if !param.chars().all(|c| c.is_ascii_alphabetic()) {
+        return Err(&param);
+      }
+
+      let test: Coordinate = to_coordinate(param);
+      if !test.validate_coordinate() {
+        return Err(&param);
+      }
+
+      return Ok(test);
   }
 }

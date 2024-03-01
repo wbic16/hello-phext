@@ -174,6 +174,20 @@ mod tests {
     }
 
     #[test]
+    fn test_url_encoding() {
+        let c1: phext::Coordinate = phext::to_coordinate("142.143.144;145.146.147;148.149.150"); // valid
+        let c2 = phext::Coordinate {
+            z: phext::ZCoordinate{library: 142, shelf: 143, series: 144},
+            y: phext::YCoordinate{collection: 145, volume: 146, book: 147},
+            x: phext::XCoordinate{chapter: 148, section: 149, scroll: 150}};
+        assert_eq!(c1, c2);
+        let c1b = c1.validate_coordinate();
+        let c2b = c2.validate_coordinate();
+        assert_eq!(c1b, false);
+        assert_eq!(c2b, false);
+    }
+
+    #[test]
     fn test_realistic_parse() {
         let coord: phext::Coordinate = phext::to_coordinate("6.13.4/2.11.4/2.20.3");
         let subspace = "here's some text at 6.13.4/2.11.4/2.20.3this is the next scroll and won't be picked";
