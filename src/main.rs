@@ -5,11 +5,13 @@ mod phext;
 mod phext_test;
 use std::fs;
 
-#[get("/<coordinate>")]
-fn index(coordinate: &str) -> String {
+#[get("/api/<world>/<coordinate>")]
+fn index(world: &str, coordinate: &str) -> String {
+  let filename = world.to_owned() + ".phext";
   let parsed: phext::Coordinate = phext::to_coordinate(coordinate);
 
-  let buffer:String = fs::read_to_string("world.phext").expect("Unable to find world");
+  let message = "Unable to find ".to_owned() + world;
+  let buffer:String = fs::read_to_string(filename).expect(&message);
   let scroll = phext::locate(&buffer, coordinate);
   return format!("{}", scroll);
 }
