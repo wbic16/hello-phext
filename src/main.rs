@@ -8,8 +8,6 @@ use std::fs;
 #[get("/api/<world>/<coordinate>")]
 fn index(world: &str, coordinate: &str) -> String {
   let filename = world.to_owned() + ".phext";
-  let parsed: phext::Coordinate = phext::to_coordinate(coordinate);
-
   let message = "Unable to find ".to_owned() + world;
   let buffer:String = fs::read_to_string(filename).expect(&message);
   let scroll = phext::locate(&buffer, coordinate);
