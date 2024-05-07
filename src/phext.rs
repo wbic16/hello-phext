@@ -376,9 +376,9 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
 
   if end > start
   {
-    let glyphs = end - start;
-    let temp = bytes.iter().skip(start).take(glyphs).cloned().collect();
-    let result = String::from_utf8(temp).expect("invalid utf8");
+    let glyphs: usize = end - start;
+    let temp: Vec<u8> = bytes.iter().skip(start).take(glyphs).cloned().collect();
+    let result: String = String::from_utf8(temp).expect("invalid utf8");
     return result;
   }
 
