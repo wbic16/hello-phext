@@ -31,31 +31,34 @@
 /// of common use.
 ///
 /// We've shortened these dimension names to two-letter acronyms in the table below to ensure it fits.
-/// * CL = Column (1D)
-/// * LN = Line (2D)
-/// * SC = Scroll (3D)
-/// * SN = Section (4D)
-/// * CH = Chapter (5D)
-/// * BK = Book (6D)
-/// * VM = Volume (7D)
-/// * CN = Collection (8D)
-/// * SR = Series (9D)
-/// * SF = Shelf (10D)
-/// * LB = Library (11D)
 ///
-/// delimiter         value     CL   LN   SC   SN   CH   BK   VM   CN   SR   SF   LB
-/// ---------         -----     --   --   --   --   --   --   --   --   --   --   --
-/// character         implicit  +1
-/// line break        0x0A      =1   +1
-/// scroll break      0x17      =1   =1   +1
-/// section break     0x18      =1   =1   =1   +1
-/// chapter break     0x19      =1   =1   =1   =1   +1
-/// book break        0x1a      =1   =1   =1   =1   =1   +1
-/// volume break      0x1c      =1   =1   =1   =1   =1   =1   +1
-/// collection break  0x1d      =1   =1   =1   =1   =1   =1   =1   +1
-/// series break      0x1e      =1   =1   =1   =1   =1   =1   =1   =1   +1
-/// shelf break       0x1f      =1   =1   =1   =1   =1   =1   =1   =1   =1   +1
-/// library break     0x01      =1   =1   =1   =1   =1   =1   =1   =1   =1   =1   +1
+///   Dimension  Designation  Description
+///   ---------  -----------  ----------- 
+///   1          CL           Column
+///   2          LN           Line
+///   3          SC           Scroll
+///   4          SN           Section
+///   5          CH           Chapter
+///   6          BK           Book
+///   7          VM           Volume
+///   8          CN           Collection
+///   9          SR           Series
+///   10         SF           Shelf
+///   11         LB           Library
+///
+///   delimiter         value     CL   LN   SC   SN   CH   BK   VM   CN   SR   SF   LB
+///   ---------         -----     --   --   --   --   --   --   --   --   --   --   --
+///   character         implicit  +1
+///   line break        0x0A      =1   +1
+///   scroll break      0x17      =1   =1   +1
+///   section break     0x18      =1   =1   =1   +1
+///   chapter break     0x19      =1   =1   =1   =1   +1
+///   book break        0x1A      =1   =1   =1   =1   =1   +1
+///   volume break      0x1C      =1   =1   =1   =1   =1   =1   +1
+///   collection break  0x1D      =1   =1   =1   =1   =1   =1   =1   +1
+///   series break      0x1E      =1   =1   =1   =1   =1   =1   =1   =1   +1
+///   shelf break       0x1F      =1   =1   =1   =1   =1   =1   =1   =1   =1   +1
+///   library break     0x01      =1   =1   =1   =1   =1   =1   =1   =1   =1   =1   +1
 ///
 /// History Fork
 /// ------------
@@ -70,11 +73,6 @@
 /// useful again.
 /// ----------------------------------------------------------------------------------------------------------
 
-//use std::error::Error;
-//use csv::ByteRecord;
-//use serde::Deserialize;
-//use std::default;
-
 /// ----------------------------------------------------------------------------------------------------------
 /// phext constants
 /// ----------------------------------------------------------------------------------------------------------
@@ -82,15 +80,15 @@ pub const COORDINATE_MINIMUM: u8 = 1;      // human numbering - we start at 1, n
 pub const COORDINATE_MAXIMUM: u8 = 100;    // 2 KB pages x 100^9 = 2 million petabytes
 pub const LIBRARY_BREAK: char = '\x01';    // 11th dimension - replaces start of header
 pub const MORE_COWBELL: char = '\x07';     // i've got a fever, and the only prescription...is more cowbell!
-pub const LINE_BREAK: char = '\x0a';       // same as plain text \o/
+pub const LINE_BREAK: char = '\x0A';       // same as plain text \o/
 pub const SCROLL_BREAK: char = '\x17';     // 3D Break - replaces End Transmission Block
 pub const SECTION_BREAK: char = '\x18';    // 4D Break - replaces Cancel Block
 pub const CHAPTER_BREAK: char = '\x19';    // 5D Break - replaces End of Tape
-pub const BOOK_BREAK: char = '\x1a';       // 6D Break - replaces Substitute
-pub const VOLUME_BREAK: char = '\x1c';     // 7D Break - replaces file separator
-pub const COLLECTION_BREAK: char = '\x1d'; // 8D Break - replaces group separator
-pub const SERIES_BREAK: char = '\x1e';     // 9D Break - replaces record separator
-pub const SHELF_BREAK: char = '\x1f';      // 10D Break - replaces unit separator
+pub const BOOK_BREAK: char = '\x1A';       // 6D Break - replaces Substitute
+pub const VOLUME_BREAK: char = '\x1C';     // 7D Break - replaces file separator
+pub const COLLECTION_BREAK: char = '\x1D'; // 8D Break - replaces group separator
+pub const SERIES_BREAK: char = '\x1E';     // 9D Break - replaces record separator
+pub const SHELF_BREAK: char = '\x1F';      // 10D Break - replaces unit separator
 
 pub const ADDRESS_MICRO_BREAK: u8 = b'.'; // delimiter for micro-coordinates
 pub const ADDRESS_MACRO_BREAK: u8 = b'/'; // delimiter for macro-coordinates
