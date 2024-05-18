@@ -291,4 +291,9 @@ mod tests {
     fn test_more_cowbell() {
         assert_eq!(phext::MORE_COWBELL, '\x07');
     }
+
+    #[test]
+    fn test_api_write() {
+        // todo: figure out how to invoke rocket from unit tests
+    }
 }

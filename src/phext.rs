@@ -586,7 +586,6 @@ impl Coordinate {
   pub fn shelf_break(&mut self) {
     self.z.shelf = Self::advance_coordinate(self.z.shelf);
     self.z.series = 1;
-    self.y.book = 1;
     self.y.collection = 1;
     self.y.volume = 1;
     self.y.book = 1;
@@ -602,7 +601,6 @@ impl Coordinate {
     self.z.library = Self::advance_coordinate(self.z.library);
     self.z.shelf = 1;
     self.z.series = 1;
-    self.y.book = 1;
     self.y.collection = 1;
     self.y.volume = 1;
     self.y.book = 1;
