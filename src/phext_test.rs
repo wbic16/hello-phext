@@ -293,6 +293,29 @@ mod tests {
     }
 
     #[test]
+    fn test_coordinate_based_insert() {
+        let mut test: String = "".to_string();
+        test += "aaa";               // 1.1.1/1.1.1/1.1.1
+        test.push(LIBRARY_BREAK); // 2.1.1/1.1.1/1.1.1
+        test += "bbb";               // 
+        test.push(SCROLL_BREAK);  // 2.1.1/1.1.1/1.1.2
+        test += "ccc";
+
+        // append 'eee' after 'ccc'
+        let coord1 = phext::to_coordinate("2.2.1/1.1.1/1.1.1");
+        let expected1 = phext::get_subspace_coordinates(test.as_bytes(), coord1);
+        assert_eq!(expected1.0, 7);
+        assert_eq!(expected1.1, 7);
+        let update1 = phext::insert(&test, coord1, "eee");
+        assert_eq!(update1, "aaa\x01bbb\x17ccc\x1feee");
+
+        // append 'ddd' before 'eee'
+        let coord2 = phext::to_coordinate("2.1.1/1.3.1/1.1.1");
+        let update2 = phext::insert(update1.as_str(), coord2, "ddd");
+        assert_eq!(update2, "aaa\x01bbb\x17ccc\x1c\x1cddd\x1feee");
+    }
+
+    #[test]
     fn test_api_write() {
         // todo: figure out how to invoke rocket from unit tests
     }

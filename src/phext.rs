@@ -276,25 +276,28 @@ impl std::convert::TryFrom<&str> for Coordinate {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn fetch
+/// @fn get_subspace_coordinates
 ///
-/// retrieves the plain text string located at the given coordinates.
-/// important: this can be optimized with hash tables and memo-ized parsing - for now let's keep it simple
-/// see my C# implementation in https://github.com/wbic16/terse-editor if you want to do that
-///
-/// @param phext  the raw phext buffer to search
-/// @param coord  coordinate to select the scroll from
+/// finds the start and end offsets for the given coordinate
 /// ----------------------------------------------------------------------------------------------------------
-pub fn fetch(phext: &str, target: Coordinate) -> String {
+pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, usize) {
   let mut walker: Coordinate = default_coordinate();
   let mut subspace_index = 0 as usize;
   let mut stage:u8 = 0;
   let mut start = 0 as usize;
   let mut end = 0 as usize;
-  let bytes = phext.as_bytes();
 
-  for ptr in bytes {
+  let mut nearest: Coordinate = null_coordinate();
+
+  for ptr in subspace {
     let next = *ptr as char;
+
+    if walker.z.library == target.z.library {
+      if nearest.z.library == 0 {
+        // nearest.z.library = subspace_index;
+      }
+    }
+    // todo: keep track of the best insertion point based on a partial coordinate match
 
     if next == SCROLL_BREAK {
       walker.scroll_break();
@@ -369,8 +372,45 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
 
   if end == 0 && start > 0
   {
-    end = bytes.len() as usize;
+    end = subspace.len() as usize;
   }
+
+  return (start, end);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn insert
+///
+/// inserts the content specified in `scroll` at the coordinate within `phext` specified by `location`
+/// ----------------------------------------------------------------------------------------------------------
+pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
+  let bytes = phext.as_bytes();
+  let parts = get_subspace_coordinates(bytes, location);
+  let end: usize = parts.1;
+  let text: Vec<u8> = scroll.as_bytes().to_vec();
+  let left = &bytes[..end];
+  let right = &bytes[end..];
+  let temp:Vec<u8> = left.iter().chain(text.iter()).chain(right.iter()).cloned().collect();
+  let result: String = String::from_utf8(temp).expect("invalid utf8");
+  return result;
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn fetch
+///
+/// retrieves the plain text string located at the given coordinates.
+/// important: this can be optimized with hash tables and memo-ized parsing - for now let's keep it simple
+/// see my C# implementation in https://github.com/wbic16/terse-editor if you want to do that
+///
+/// @param phext  the raw phext buffer to search
+/// @param coord  coordinate to select the scroll from
+/// ----------------------------------------------------------------------------------------------------------
+pub fn fetch(phext: &str, target: Coordinate) -> String {
+  let bytes = phext.as_bytes();
+  let parts = get_subspace_coordinates(bytes, target);
+
+  let start = parts.0 as usize;
+  let end = parts.1 as usize;
 
   if end > start
   {
@@ -383,10 +423,12 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
   return "".to_owned();
 }
 
+/// ----------------------------------------------------------------------------------------------------------
 pub fn locate(phext: &str, target: &str) -> String {  
   return fetch(phext, to_coordinate(target));
 }
 
+/// ----------------------------------------------------------------------------------------------------------
 pub fn default_coordinate() -> Coordinate {
   let coord = Coordinate {
     z: ZCoordinate {
@@ -403,6 +445,28 @@ pub fn default_coordinate() -> Coordinate {
       chapter: 1,
       section: 1,
       scroll: 1
+    }
+  };
+  return coord;
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+fn null_coordinate() -> Coordinate {
+  let coord = Coordinate {
+    z: ZCoordinate {
+      library: 0,
+      shelf: 0,
+      series: 0
+    },
+    y: YCoordinate {
+      collection: 0,
+      volume: 0,
+      book: 0
+    },
+    x: XCoordinate {
+      chapter: 0,
+      section: 0,
+      scroll: 0
     }
   };
   return coord;
@@ -609,6 +673,8 @@ impl Coordinate {
     self.x.scroll = 1;
   }
 }
+
+use std::io::Read;
 
 use rocket::request::FromParam;
 
