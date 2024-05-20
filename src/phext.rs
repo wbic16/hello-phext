@@ -76,8 +76,8 @@
 /// ----------------------------------------------------------------------------------------------------------
 /// phext constants
 /// ----------------------------------------------------------------------------------------------------------
-pub const COORDINATE_MINIMUM: u8 = 1;      // human numbering - we start at 1, not 0
-pub const COORDINATE_MAXIMUM: u8 = 100;    // 2 KB pages x 100^9 = 2 million petabytes
+pub const COORDINATE_MINIMUM: usize = 1;   // human numbering - we start at 1, not 0
+pub const COORDINATE_MAXIMUM: usize = 100; // 2 KB pages x 100^9 = 2 million petabytes
 pub const LIBRARY_BREAK: char = '\x01';    // 11th dimension - replaces start of header
 pub const MORE_COWBELL: char = '\x07';     // i've got a fever, and the only prescription...is more cowbell!
 pub const LINE_BREAK: char = '\x0A';       // same as plain text \o/
@@ -137,9 +137,9 @@ pub const ADDRESS_MACRO_ALT: u8 = b';';   // also allow ';' for url encoding
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub struct ZCoordinate {
-  pub library: u8,
-  pub shelf: u8,
-  pub series: u8
+  pub library: usize,
+  pub shelf: usize,
+  pub series: usize
 }
 impl Default for ZCoordinate {
   fn default() -> ZCoordinate {
@@ -163,9 +163,9 @@ impl std::fmt::Display for ZCoordinate {
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub struct YCoordinate {
-  pub collection: u8,
-  pub volume: u8,
-  pub book: u8
+  pub collection: usize,
+  pub volume: usize,
+  pub book: usize
 }
 impl Default for YCoordinate {
   fn default() -> YCoordinate {
@@ -189,9 +189,9 @@ impl std::fmt::Display for YCoordinate {
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub struct XCoordinate {
-  pub chapter: u8,
-  pub section: u8,
-  pub scroll: u8
+  pub chapter: usize,
+  pub section: usize,
+  pub scroll: usize
 }
 impl Default for XCoordinate {
   fn default() -> XCoordinate {
@@ -262,15 +262,15 @@ impl std::convert::TryFrom<&str> for Coordinate {
         return Err(error);
       }
       let mut result: Coordinate = Default::default();
-      result.z.library = z[0].parse::<u8>().expect("Library missing");
-      result.z.shelf = z[1].parse::<u8>().expect("Shelf missing");
-      result.z.series = z[2].parse::<u8>().expect("Series missing");
-      result.y.collection = y[0].parse::<u8>().expect("Collection missing");
-      result.y.volume = y[1].parse::<u8>().expect("Volume missing");
-      result.y.book = y[2].parse::<u8>().expect("Book missing");
-      result.x.chapter = x[0].parse::<u8>().expect("Chapter missing");
-      result.x.section = x[1].parse::<u8>().expect("Section missing");
-      result.x.scroll = x[2].parse::<u8>().expect("Scroll missing");
+      result.z.library = z[0].parse::<usize>().expect("Library missing");
+      result.z.shelf = z[1].parse::<usize>().expect("Shelf missing");
+      result.z.series = z[2].parse::<usize>().expect("Series missing");
+      result.y.collection = y[0].parse::<usize>().expect("Collection missing");
+      result.y.volume = y[1].parse::<usize>().expect("Volume missing");
+      result.y.book = y[2].parse::<usize>().expect("Book missing");
+      result.x.chapter = x[0].parse::<usize>().expect("Chapter missing");
+      result.x.section = x[1].parse::<usize>().expect("Section missing");
+      result.x.scroll = x[2].parse::<usize>().expect("Scroll missing");
       return Ok(result);
     }
 }
@@ -294,10 +294,57 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
 
     if walker.z.library == target.z.library {
       if nearest.z.library == 0 {
-        // nearest.z.library = subspace_index;
+        nearest.z.library = subspace_index;
+      }
+
+      if walker.z.shelf == target.z.shelf {
+        if nearest.z.shelf == 0 {
+          nearest.z.shelf = subspace_index;
+        }
+
+        if walker.z.series == target.z.series {
+          if nearest.z.series == 0 {
+            nearest.z.series = subspace_index;
+          }
+
+          if walker.y.collection == target.y.collection {
+            if nearest.y.collection == 0 {
+              nearest.y.collection = subspace_index;
+            }
+
+            if walker.y.volume == target.y.volume {
+              if nearest.y.volume == 0 {
+                nearest.y.volume = subspace_index;
+              }
+
+              if walker.y.book == target.y.book {
+                if nearest.y.book == 0 {
+                  nearest.y.book = subspace_index;
+                }
+
+                if walker.x.chapter == target.x.chapter {
+                  if nearest.x.chapter == 0 {
+                    nearest.x.chapter = subspace_index;
+                  }
+
+                  if walker.x.section == target.x.section {
+                    if nearest.x.section == 0 {
+                      nearest.x.section = subspace_index;
+                    }
+
+                    if walker.x.scroll == target.x.scroll {
+                      if nearest.x.scroll == 0 {
+                        nearest.x.scroll = subspace_index;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
-    // todo: keep track of the best insertion point based on a partial coordinate match
 
     if next == SCROLL_BREAK {
       walker.scroll_break();
@@ -368,6 +415,30 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     }
 
     subspace_index += 1;
+  }
+
+  if (stage == 0) {
+    if nearest.x.scroll > 0 {
+      start = nearest.x.scroll;
+    } else if nearest.x.section > 0 {
+      start = nearest.x.section;
+    } else if nearest.x.chapter > 0 {
+      start = nearest.x.chapter;
+    } else if nearest.y.book > 0 {
+      start = nearest.y.book;
+    } else if nearest.y.volume > 0 {
+      start = nearest.y.volume;
+    } else if nearest.y.collection > 0 {
+      start = nearest.y.collection;
+    } else if nearest.z.series > 0 {
+      start = nearest.z.series;
+    } else if nearest.z.shelf > 0 {
+      start = nearest.z.shelf;
+    } else if nearest.z.library > 0 {
+      start = nearest.z.library;
+    }
+
+    end = start;
   }
 
   if end == 0 && start > 0
@@ -492,16 +563,16 @@ pub fn to_coordinate(address: &str) -> Coordinate {
     if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK || byte == ADDRESS_MACRO_ALT {            
       match index {
         1 => {
-          result.z.library = value as u8;
+          result.z.library = value as usize;
           index += 1;
         },
-        2 => {result.z.shelf = value as u8; index += 1; },
-        3 => {result.z.series = value as u8; index += 1; },
-        4 => {result.y.collection = value as u8; index += 1; },
-        5 => {result.y.volume = value as u8; index += 1; },
-        6 => {result.y.book = value as u8; index += 1; },
-        7 => {result.x.chapter = value as u8; index += 1; },
-        8 => {result.x.section = value as u8; index += 1; },
+        2 => {result.z.shelf = value as usize; index += 1; },
+        3 => {result.z.series = value as usize; index += 1; },
+        4 => {result.y.collection = value as usize; index += 1; },
+        5 => {result.y.volume = value as usize; index += 1; },
+        6 => {result.y.book = value as usize; index += 1; },
+        7 => {result.x.chapter = value as usize; index += 1; },
+        8 => {result.x.section = value as usize; index += 1; },
         _ => {}
       }
       value = 0;
@@ -514,12 +585,12 @@ pub fn to_coordinate(address: &str) -> Coordinate {
     }
   }
 
-  result.x.scroll = value as u8;
+  result.x.scroll = value as usize;
 
   return result;
 }
 
-fn validate_dimension_index(index: u8) -> bool {
+fn validate_dimension_index(index: usize) -> bool {
   return index >= COORDINATE_MINIMUM && index <= COORDINATE_MAXIMUM;
 }
 
@@ -565,7 +636,7 @@ impl Coordinate {
   /// @fn advance_coordinate
   ///
   /// ----------------------------------------------------------------------------------------------------------
-  fn advance_coordinate(index: u8) -> u8 {
+  fn advance_coordinate(index: usize) -> usize {
     let next = index + 1;
     if next < COORDINATE_MAXIMUM {
       return next;
@@ -673,8 +744,6 @@ impl Coordinate {
     self.x.scroll = 1;
   }
 }
-
-use std::io::Read;
 
 use rocket::request::FromParam;
 
