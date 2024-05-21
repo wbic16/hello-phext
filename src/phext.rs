@@ -280,7 +280,7 @@ impl std::convert::TryFrom<&str> for Coordinate {
 ///
 /// finds the start and end offsets for the given coordinate
 /// ----------------------------------------------------------------------------------------------------------
-pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, usize) {
+pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, usize, Coordinate) {
   let mut walker: Coordinate = default_coordinate();
   let mut subspace_index = 0 as usize;
   let mut stage:u8 = 0;
@@ -417,7 +417,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     subspace_index += 1;
   }
 
-  if (stage == 0) {
+  if stage == 0 {
     if nearest.x.scroll > 0 {
       start = nearest.x.scroll;
     } else if nearest.x.section > 0 {
@@ -436,6 +436,10 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       start = nearest.z.shelf;
     } else if nearest.z.library > 0 {
       start = nearest.z.library;
+
+      if walker.z.shelf < target.z.shelf {
+        start = subspace_index;
+      }
     }
 
     end = start;
@@ -446,7 +450,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     end = subspace.len() as usize;
   }
 
-  return (start, end);
+  return (start, end, walker);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -458,10 +462,48 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   let bytes = phext.as_bytes();
   let parts = get_subspace_coordinates(bytes, location);
   let end: usize = parts.1;
-  let text: Vec<u8> = scroll.as_bytes().to_vec();
+  let mut fixup: Vec<u8> = vec![];
+  let mut subspace_coordinate: Coordinate = parts.2;
+  while subspace_coordinate.z.library < location.z.library {
+    fixup.push(LIBRARY_BREAK as u8);
+    subspace_coordinate.z.library += 1;
+  }
+  while subspace_coordinate.z.shelf < location.z.shelf {
+    fixup.push(SHELF_BREAK as u8);
+    subspace_coordinate.z.shelf += 1;
+  }
+  while subspace_coordinate.z.series < location.z.series {
+    fixup.push(SERIES_BREAK as u8);
+    subspace_coordinate.z.series += 1;
+  }
+  while subspace_coordinate.y.collection < location.y.collection {
+    fixup.push(COLLECTION_BREAK as u8);
+    subspace_coordinate.y.collection += 1;
+  }
+  while subspace_coordinate.y.volume < location.y.volume {
+    fixup.push(VOLUME_BREAK as u8);
+    subspace_coordinate.y.volume += 1;
+  }
+  while subspace_coordinate.y.book < location.y.book {
+    fixup.push(BOOK_BREAK as u8);
+    subspace_coordinate.y.book += 1;
+  }
+  while subspace_coordinate.x.chapter < location.x.chapter {
+    fixup.push(CHAPTER_BREAK as u8);
+    subspace_coordinate.x.chapter += 1;
+  }
+  while subspace_coordinate.x.section < location.x.section {
+    fixup.push(SECTION_BREAK as u8);
+    subspace_coordinate.x.section += 1;
+  }
+  while subspace_coordinate.x.scroll < location.x.scroll {
+    fixup.push(SCROLL_BREAK as u8);
+    subspace_coordinate.x.scroll += 1;
+  }
+  let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let left = &bytes[..end];
   let right = &bytes[end..];
-  let temp:Vec<u8> = left.iter().chain(text.iter()).chain(right.iter()).cloned().collect();
+  let temp:Vec<u8> = left.iter().chain(fixup.iter()).chain(text).chain(right.iter()).cloned().collect();
   let result: String = String::from_utf8(temp).expect("invalid utf8");
   return result;
 }

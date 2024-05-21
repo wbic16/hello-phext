@@ -208,7 +208,7 @@ mod tests {
         test.push(BOOK_BREAK);
         test += "and now over to 2.1.1/1.1.2/1.1.1";
         test.push(SHELF_BREAK);
-        test += "woot, up to 2.2.1/1.1.1/1.1.1";        
+        test += "woot, up to 2.2.1/1.1.1/1.1.1";
         test.push(LIBRARY_BREAK);
         test += "here we are at 3.1.1/1.1.1.1.1";
         test.push(LIBRARY_BREAK); // 4.1.1/1.1.1/1.1.1
@@ -304,8 +304,8 @@ mod tests {
         // append 'eee' after 'ccc'
         let coord1 = phext::to_coordinate("2.2.1/1.1.1/1.1.1");
         let expected1 = phext::get_subspace_coordinates(test.as_bytes(), coord1);
-        assert_eq!(expected1.0, 7);
-        assert_eq!(expected1.1, 7);
+        assert_eq!(expected1.0, 11);
+        assert_eq!(expected1.1, 11);
         let update1 = phext::insert(&test, coord1, "eee");
         assert_eq!(update1, "aaa\x01bbb\x17ccc\x1feee");
 
