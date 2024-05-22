@@ -282,6 +282,7 @@ impl std::convert::TryFrom<&str> for Coordinate {
 /// ----------------------------------------------------------------------------------------------------------
 pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, usize, Coordinate) {
   let mut walker: Coordinate = default_coordinate();
+  let mut best: Coordinate = default_coordinate();
   let mut subspace_index = 0 as usize;
   let mut stage:u8 = 0;
   let mut start = 0 as usize;
@@ -295,46 +296,55 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     if walker.z.library == target.z.library {
       if nearest.z.library == 0 {
         nearest.z.library = subspace_index;
+        best = walker;
       }
 
       if walker.z.shelf == target.z.shelf {
         if nearest.z.shelf == 0 {
           nearest.z.shelf = subspace_index;
+          best = walker;
         }
 
         if walker.z.series == target.z.series {
           if nearest.z.series == 0 {
             nearest.z.series = subspace_index;
+            best = walker;
           }
 
           if walker.y.collection == target.y.collection {
             if nearest.y.collection == 0 {
               nearest.y.collection = subspace_index;
+              best = walker;
             }
 
             if walker.y.volume == target.y.volume {
               if nearest.y.volume == 0 {
                 nearest.y.volume = subspace_index;
+                best = walker;
               }
 
               if walker.y.book == target.y.book {
                 if nearest.y.book == 0 {
                   nearest.y.book = subspace_index;
+                  best = walker;
                 }
 
                 if walker.x.chapter == target.x.chapter {
                   if nearest.x.chapter == 0 {
                     nearest.x.chapter = subspace_index;
+                    best = walker;
                   }
 
                   if walker.x.section == target.x.section {
                     if nearest.x.section == 0 {
                       nearest.x.section = subspace_index;
+                      best = walker;
                     }
 
                     if walker.x.scroll == target.x.scroll {
                       if nearest.x.scroll == 0 {
                         nearest.x.scroll = subspace_index;
+                        best = walker;
                       }
                     }
                   }
@@ -450,7 +460,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     end = subspace.len() as usize;
   }
 
-  return (start, end, walker);
+  return (start, end, best);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -464,41 +474,48 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   let end: usize = parts.1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
+
+  println!("Inserting at {}.{}.{}/{}.{}.{}/{}.{}.{}", subspace_coordinate.z.library, subspace_coordinate.z.shelf, subspace_coordinate.z.series,
+  subspace_coordinate.y.collection, subspace_coordinate.y.volume, subspace_coordinate.y.book,
+  subspace_coordinate.x.chapter, subspace_coordinate.x.section, subspace_coordinate.x.scroll);
+  println!("Navigating to {}.{}.{}/{}.{}.{}/{}.{}.{}", location.z.library, location.z.shelf, location.z.series,
+location.y.collection, location.y.volume, location.y.book, location.x.chapter, location.x.section, location.x.scroll);
+
   while subspace_coordinate.z.library < location.z.library {
     fixup.push(LIBRARY_BREAK as u8);
-    subspace_coordinate.z.library += 1;
+    subspace_coordinate.library_break();
   }
   while subspace_coordinate.z.shelf < location.z.shelf {
     fixup.push(SHELF_BREAK as u8);
-    subspace_coordinate.z.shelf += 1;
+    subspace_coordinate.shelf_break();
   }
   while subspace_coordinate.z.series < location.z.series {
     fixup.push(SERIES_BREAK as u8);
-    subspace_coordinate.z.series += 1;
+    subspace_coordinate.series_break();
   }
   while subspace_coordinate.y.collection < location.y.collection {
     fixup.push(COLLECTION_BREAK as u8);
-    subspace_coordinate.y.collection += 1;
+    subspace_coordinate.collection_break();
   }
   while subspace_coordinate.y.volume < location.y.volume {
     fixup.push(VOLUME_BREAK as u8);
-    subspace_coordinate.y.volume += 1;
+    subspace_coordinate.volume_break();
   }
   while subspace_coordinate.y.book < location.y.book {
     fixup.push(BOOK_BREAK as u8);
-    subspace_coordinate.y.book += 1;
+    subspace_coordinate.book_break();
   }
   while subspace_coordinate.x.chapter < location.x.chapter {
     fixup.push(CHAPTER_BREAK as u8);
-    subspace_coordinate.x.chapter += 1;
+    subspace_coordinate.chapter_break();
   }
   while subspace_coordinate.x.section < location.x.section {
     fixup.push(SECTION_BREAK as u8);
-    subspace_coordinate.x.section += 1;
+    subspace_coordinate.section_break();
   }
   while subspace_coordinate.x.scroll < location.x.scroll {
     fixup.push(SCROLL_BREAK as u8);
-    subspace_coordinate.x.scroll += 1;
+    subspace_coordinate.scroll_break();
   }
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let left = &bytes[..end];
@@ -604,17 +621,14 @@ pub fn to_coordinate(address: &str) -> Coordinate {
 
     if byte == ADDRESS_MICRO_BREAK || byte == ADDRESS_MACRO_BREAK || byte == ADDRESS_MACRO_ALT {            
       match index {
-        1 => {
-          result.z.library = value as usize;
-          index += 1;
-        },
-        2 => {result.z.shelf = value as usize; index += 1; },
-        3 => {result.z.series = value as usize; index += 1; },
-        4 => {result.y.collection = value as usize; index += 1; },
-        5 => {result.y.volume = value as usize; index += 1; },
-        6 => {result.y.book = value as usize; index += 1; },
-        7 => {result.x.chapter = value as usize; index += 1; },
-        8 => {result.x.section = value as usize; index += 1; },
+        1 => { result.z.library = value as usize; index += 1; },
+        2 => { result.z.shelf = value as usize; index += 1; },
+        3 => { result.z.series = value as usize; index += 1; },
+        4 => { result.y.collection = value as usize; index += 1; },
+        5 => { result.y.volume = value as usize; index += 1; },
+        6 => { result.y.book = value as usize; index += 1; },
+        7 => { result.x.chapter = value as usize; index += 1; },
+        8 => { result.x.section = value as usize; index += 1; },
         _ => {}
       }
       value = 0;
@@ -679,7 +693,7 @@ impl Coordinate {
   ///
   /// ----------------------------------------------------------------------------------------------------------
   fn advance_coordinate(index: usize) -> usize {
-    let next = index + 1;
+    let next: usize = index + 1;
     if next < COORDINATE_MAXIMUM {
       return next;
     }
@@ -788,6 +802,8 @@ impl Coordinate {
 }
 
 use rocket::request::FromParam;
+
+use crate::default;
 
 impl<'r> FromParam<'r> for Coordinate {
   type Error = &'r str;

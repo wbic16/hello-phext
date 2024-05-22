@@ -167,6 +167,7 @@ mod tests {
             y: phext::YCoordinate{collection: 32, volume: 4, book: 8},
             x: phext::XCoordinate{chapter: 4, section: 2, scroll: 1}};
         assert_eq!(c1, c2);
+        assert_eq!(c1.y.volume, 4);
         let c1b: bool = c1.validate_coordinate();
         let c2b: bool = c2.validate_coordinate();
         assert_eq!(c1b, false);
@@ -306,6 +307,12 @@ mod tests {
         let expected1 = phext::get_subspace_coordinates(test.as_bytes(), coord1);
         assert_eq!(expected1.0, 11);
         assert_eq!(expected1.1, 11);
+
+        let mut expected_coord = phext::default_coordinate();
+        expected_coord.z.library = 2;
+        expected_coord.z.shelf = 2;
+        assert_eq!(coord1, expected_coord);
+
         let update1 = phext::insert(&test, coord1, "eee");
         assert_eq!(update1, "aaa\x01bbb\x17ccc\x1feee");
 
