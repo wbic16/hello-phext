@@ -305,6 +305,15 @@ mod tests {
         // append 'ddd' after 'ccc'
         let coord1 = phext::to_coordinate("2.1.1/1.1.1/1.1.3");
         let expected1 = phext::get_subspace_coordinates(test.as_bytes(), coord1);
+        assert_eq!(expected1.2.z.library, 2);
+        assert_eq!(expected1.2.z.shelf, 1);
+        assert_eq!(expected1.2.z.series, 1);
+        assert_eq!(expected1.2.y.collection, 1);
+        assert_eq!(expected1.2.y.volume, 1);
+        assert_eq!(expected1.2.y.book, 1);
+        assert_eq!(expected1.2.x.chapter, 1);
+        assert_eq!(expected1.2.x.section, 1);
+        assert_eq!(expected1.2.x.scroll, 2);
         assert_eq!(expected1.0, 11);
         assert_eq!(expected1.1, 11);
 
