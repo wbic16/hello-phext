@@ -302,24 +302,24 @@ mod tests {
         test.push(SCROLL_BREAK);  // 2.1.1/1.1.1/1.1.2
         test += "ccc";
 
-        // append 'eee' after 'ccc'
-        let coord1 = phext::to_coordinate("2.2.1/1.1.1/1.1.1");
+        // append 'ddd' after 'ccc'
+        let coord1 = phext::to_coordinate("2.1.1/1.1.1/1.1.3");
         let expected1 = phext::get_subspace_coordinates(test.as_bytes(), coord1);
         assert_eq!(expected1.0, 11);
         assert_eq!(expected1.1, 11);
 
         let mut expected_coord = phext::default_coordinate();
         expected_coord.z.library = 2;
-        expected_coord.z.shelf = 2;
+        expected_coord.x.scroll = 3;
         assert_eq!(coord1, expected_coord);
 
-        let update1 = phext::insert(&test, coord1, "eee");
-        assert_eq!(update1, "aaa\x01bbb\x17ccc\x1feee");
+        let update1 = phext::insert(&test, coord1, "ddd");
+        assert_eq!(update1, "aaa\x01bbb\x17ccc\x17ddd");
 
-        // append 'ddd' before 'eee'
-        let coord2 = phext::to_coordinate("2.1.1/1.3.1/1.1.1");
+        // append 'eee' after 'ddd'
+        let coord2 = phext::to_coordinate("2.1.1/1.1.1/1.1.4");
         let update2 = phext::insert(update1.as_str(), coord2, "ddd");
-        assert_eq!(update2, "aaa\x01bbb\x17ccc\x1c\x1cddd\x1feee");
+        assert_eq!(update2, "aaa\x01bbb\x17ccc\x17ddd\x17eee");
     }
 
     #[test]

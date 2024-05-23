@@ -283,78 +283,15 @@ impl std::convert::TryFrom<&str> for Coordinate {
 pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, usize, Coordinate) {
   let mut walker: Coordinate = default_coordinate();
   let mut best: Coordinate = default_coordinate();
-  let mut subspace_index = 0 as usize;
-  let mut stage:u8 = 0;
-  let mut start = 0 as usize;
-  let mut end = 0 as usize;
+  let mut subspace_index: usize = 0;
+  let mut stage: u8 = 0;
+  let mut start: usize = 0;
+  let mut end: usize = 0;
 
   let mut nearest: Coordinate = null_coordinate();
 
   for ptr in subspace {
-    let next = *ptr as char;
-
-    if walker.z.library == target.z.library {
-      if nearest.z.library == 0 {
-        nearest.z.library = subspace_index;
-        best = walker;
-      }
-
-      if walker.z.shelf == target.z.shelf {
-        if nearest.z.shelf == 0 {
-          nearest.z.shelf = subspace_index;
-          best = walker;
-        }
-
-        if walker.z.series == target.z.series {
-          if nearest.z.series == 0 {
-            nearest.z.series = subspace_index;
-            best = walker;
-          }
-
-          if walker.y.collection == target.y.collection {
-            if nearest.y.collection == 0 {
-              nearest.y.collection = subspace_index;
-              best = walker;
-            }
-
-            if walker.y.volume == target.y.volume {
-              if nearest.y.volume == 0 {
-                nearest.y.volume = subspace_index;
-                best = walker;
-              }
-
-              if walker.y.book == target.y.book {
-                if nearest.y.book == 0 {
-                  nearest.y.book = subspace_index;
-                  best = walker;
-                }
-
-                if walker.x.chapter == target.x.chapter {
-                  if nearest.x.chapter == 0 {
-                    nearest.x.chapter = subspace_index;
-                    best = walker;
-                  }
-
-                  if walker.x.section == target.x.section {
-                    if nearest.x.section == 0 {
-                      nearest.x.section = subspace_index;
-                      best = walker;
-                    }
-
-                    if walker.x.scroll == target.x.scroll {
-                      if nearest.x.scroll == 0 {
-                        nearest.x.scroll = subspace_index;
-                        best = walker;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    let next: char = *ptr as char;
 
     if next == SCROLL_BREAK {
       walker.scroll_break();
@@ -418,6 +355,69 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       subspace_index += 1;
       continue;
     }
+
+    if walker.z.library == target.z.library {
+      if nearest.z.library == 0 {
+        nearest.z.library = subspace_index;
+        best = walker;
+      }
+
+      if walker.z.shelf == target.z.shelf {
+        if nearest.z.shelf == 0 {
+          nearest.z.shelf = subspace_index;
+          best = walker;
+        }
+
+        if walker.z.series == target.z.series {
+          if nearest.z.series == 0 {
+            nearest.z.series = subspace_index;
+            best = walker;
+          }
+
+          if walker.y.collection == target.y.collection {
+            if nearest.y.collection == 0 {
+              nearest.y.collection = subspace_index;
+              best = walker;
+            }
+
+            if walker.y.volume == target.y.volume {
+              if nearest.y.volume == 0 {
+                nearest.y.volume = subspace_index;
+                best = walker;
+              }
+
+              if walker.y.book == target.y.book {
+                if nearest.y.book == 0 {
+                  nearest.y.book = subspace_index;
+                  best = walker;
+                }
+
+                if walker.x.chapter == target.x.chapter {
+                  if nearest.x.chapter == 0 {
+                    nearest.x.chapter = subspace_index;
+                    best = walker;
+                  }
+
+                  if walker.x.section == target.x.section {
+                    if nearest.x.section == 0 {
+                      nearest.x.section = subspace_index;
+                      best = walker;
+                    }
+
+                    if walker.x.scroll == target.x.scroll {
+                      if nearest.x.scroll == 0 {
+                        nearest.x.scroll = subspace_index;
+                        best = walker;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     
     if stage == 0 && target == walker {
       start = subspace_index;
@@ -425,6 +425,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     }
 
     subspace_index += 1;
+
   }
 
   if stage == 0 {
