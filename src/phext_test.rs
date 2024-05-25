@@ -327,8 +327,28 @@ mod tests {
 
         // append 'eee' after 'ddd'
         let coord2 = phext::to_coordinate("2.1.1/1.1.1/1.1.4");
-        let update2 = phext::insert(update1.as_str(), coord2, "ddd");
+        let update2 = phext::insert(update1.as_str(), coord2, "eee");
         assert_eq!(update2, "aaa\x01bbb\x17ccc\x17ddd\x17eee");
+
+        // append 'fff' after 'eee'
+        let coord3 = phext::to_coordinate("2.1.1/1.1./1.2.1");
+        let update3 = phext::insert(update2.as_str(), coord3, "fff");
+        assert_eq!(update3, "aaa\x01bbb\x17ccc\x17ddd\x17eee\x18fff");
+
+        // append 'ggg' after 'fff'
+        let coord4 = phext::to_coordinate("2.1.1/1.1.1/1.2.2");
+        let update4 = phext::insert(update3.as_str(), coord4, "ggg");
+        assert_eq!(update4, "aaa\x01bbb\x17ccc\x17ddd\x17eee\x18fff\x17ggg");
+
+        // append 'hhh' after 'ggg'
+        let coord5 = phext::to_coordinate("2.1.1/1.1.1/2.1.1");
+        let update5 = phext::insert(update4.as_str(), coord5, "hhh");
+        assert_eq!(update5, "aaa\x01bbb\x17ccc\x17ddd\x17eee\x18fff\x17ggg\x19hhh");
+
+        // append 'iii' after 'eee'
+        let coord6 = phext::to_coordinate("2.1.1/1.1.1/1.1.5");
+        let update6 = phext::insert(update5.as_str(), coord6, "iii");
+        assert_eq!(update6, "aaa\x01bbb\x17ccc\x17ddd\x17eee\x17iii\x18fff\x17ggg\x19hhh");
     }
 
     #[test]
