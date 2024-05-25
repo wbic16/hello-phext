@@ -293,6 +293,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
   for ptr in subspace {
     let next: char = *ptr as char;
 
+    println!("Checking {}", next);
+
     if next == SCROLL_BREAK {
       walker.scroll_break();
       if stage == 1 { stage = 2; end = subspace_index; }
@@ -449,6 +451,20 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       start = nearest.z.library;
     }
 
+    if target.z.library >= walker.z.library &&
+       target.z.shelf >= walker.z.shelf &&
+       target.z.series >= walker.z.series &&
+       target.y.collection >= walker.y.collection &&
+       target.y.volume >= walker.y.volume &&
+       target.y.book >= walker.y.book &&
+       target.x.chapter >= walker.x.chapter &&
+       target.x.section >= walker.x.section &&
+       target.x.scroll >= walker.x.scroll {
+      best = walker;
+    }
+
+    println!("Selected index={}, target={}, walker={}, best={}", start, target.to_string(), walker.to_string(), best.to_string());
+
     end = start;
   }
 
@@ -468,7 +484,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
 pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   let bytes = phext.as_bytes();
   let parts = get_subspace_coordinates(bytes, location);
-  let end: usize = parts.1;
+  let end: usize = parts.1 + 1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
 

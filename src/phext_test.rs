@@ -314,8 +314,8 @@ mod tests {
         assert_eq!(expected1.2.x.chapter, 1);
         assert_eq!(expected1.2.x.section, 1);
         assert_eq!(expected1.2.x.scroll, 2);
-        assert_eq!(expected1.0, 11);
-        assert_eq!(expected1.1, 11);
+        assert_eq!(expected1.0, 10);
+        assert_eq!(expected1.1, 10);
 
         let mut expected_coord = phext::default_coordinate();
         expected_coord.z.library = 2;
