@@ -287,7 +287,6 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
   let mut stage: u8 = 0;
   let mut start: usize = 0;
   let mut end: usize = 0;
-  let mut found = false;
 
   let mut nearest: Coordinate = null_coordinate();
 
@@ -447,7 +446,6 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                          walker.x.section == target.x.section &&
                          walker.x.scroll == target.x.scroll {
                         best = walker;
-                        found = true;
                       }
                     }
                   }
@@ -516,13 +514,26 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     }
 
     println!("Selected index={}, target={}, walker={}, best={}", start, target.to_string(), walker.to_string(), best.to_string());
-
-    end = start;
   }
 
-  if end == 0 && start > 0
-  {
-    end = subspace.len() as usize;
+  end = start;
+  let tail = subspace[start..].to_vec();
+  for ptr in tail.iter() {
+    let test: char = *ptr as char;
+
+    if test == SCROLL_BREAK ||
+       test == SECTION_BREAK ||
+       test == CHAPTER_BREAK ||
+       test == BOOK_BREAK ||
+       test == VOLUME_BREAK ||
+       test == COLLECTION_BREAK ||
+       test == SERIES_BREAK ||
+       test == SHELF_BREAK ||
+       test == LIBRARY_BREAK {
+      break;
+    }
+
+    end += 1;
   }
 
   return (start, end, best);
@@ -573,17 +584,21 @@ location.y.collection, location.y.volume, location.y.book, location.x.chapter, l
   while subspace_coordinate.x.chapter < location.x.chapter {
     fixup.push(CHAPTER_BREAK as u8);
     subspace_coordinate.chapter_break();
+    println!("Chapter Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.section < location.x.section {
     fixup.push(SECTION_BREAK as u8);
     subspace_coordinate.section_break();
+    println!("Section Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.scroll < location.x.scroll {
     fixup.push(SCROLL_BREAK as u8);
     subspace_coordinate.scroll_break();
+    println!("Scroll Break at {}", subspace_coordinate.to_string());
   }
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
+  println!("Attempting to merge {} at {}", scroll, end);
   if end > max { end = max; }
   let left = &bytes[..end];
   let right = &bytes[end..];
