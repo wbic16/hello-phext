@@ -135,7 +135,7 @@ pub const ADDRESS_MACRO_ALT: u8 = b';';   // also allow ';' for url encoding
 ///
 /// The large-scale Z arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, PartialOrd, Debug, Copy, Clone)]
 pub struct ZCoordinate {
   pub library: usize,
   pub shelf: usize,
@@ -161,7 +161,7 @@ impl std::fmt::Display for ZCoordinate {
 ///
 /// The large-scale Y arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, PartialOrd, Debug, Copy, Clone)]
 pub struct YCoordinate {
   pub collection: usize,
   pub volume: usize,
@@ -187,7 +187,7 @@ impl std::fmt::Display for YCoordinate {
 ///
 /// The large-scale X arm of a phext coordinate (see `Coordinate` below)
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, PartialOrd, Debug, Copy, Clone)]
 pub struct XCoordinate {
   pub chapter: usize,
   pub section: usize,
@@ -220,7 +220,7 @@ impl std::fmt::Display for XCoordinate {
 /// Y - this arm contains the collection (y3), volume (y2), and book (y1) dimensions
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
-#[derive(Default, Debug, PartialEq, Copy, Clone)]
+#[derive(Default, Debug, PartialEq, PartialOrd, Copy, Clone)]
 #[derive(impl_new::New)]
 pub struct Coordinate {
   pub z: ZCoordinate,
@@ -289,72 +289,63 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
   let mut end: usize = 0;
 
   let mut nearest: Coordinate = null_coordinate();
+  let mut adjacent: Coordinate = null_coordinate();
 
   for ptr in subspace {
     let next: char = *ptr as char;
-
-    let mut dimension_break = false;
+    let mut dimension_break: bool = false;
 
     if next == SCROLL_BREAK {
       walker.scroll_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == SECTION_BREAK {
       walker.section_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == CHAPTER_BREAK {
       walker.chapter_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == BOOK_BREAK {
       walker.book_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == VOLUME_BREAK {
       walker.volume_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == COLLECTION_BREAK {
       walker.collection_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == SERIES_BREAK {
       walker.series_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == SHELF_BREAK {
       walker.shelf_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
     if next == LIBRARY_BREAK {
       walker.library_break();
       if stage == 1 { stage = 2; end = subspace_index; }
-      subspace_index += 1;
       dimension_break = true;
     }
 
@@ -447,94 +438,151 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                          walker.x.scroll == target.x.scroll {
                         best = walker;
                       }
+                    } else {
+                      // scroll deeper than our target
+                      if stage == 1 { stage = 2; end = subspace_index; }
+                      if adjacent.x.scroll == 0 {
+                        adjacent.x.scroll = subspace_index;
+                      }
+                    }
+                  } else {
+                    // section deeper than our target
+                    if stage == 1 { stage = 2; end = subspace_index; }
+                    if adjacent.x.section == 0 {
+                      adjacent.x.section = subspace_index;
                     }
                   }
+                } else {
+                  // chapter deeper than our target
+                  if stage == 1 { stage = 2; end = subspace_index; }
+                  if adjacent.x.chapter == 0 {
+                    adjacent.x.chapter = subspace_index;
+                  }
+                }
+              } else {
+                // book deeper than our target
+                if stage == 1 { stage = 2; end = subspace_index; }
+                if adjacent.y.book == 0 {
+                  adjacent.y.book = subspace_index;
                 }
               }
+            } else {
+              // volume deeper than our target
+              if stage == 1 { stage = 2; end = subspace_index; }
+              if adjacent.y.volume == 0 {
+                adjacent.y.volume = subspace_index;
+              }
+            }
+          } else {
+            // collection deeper than our target
+            if stage == 1 { stage = 2; end = subspace_index; }
+            if adjacent.y.collection == 0 {
+              adjacent.y.collection = subspace_index;
             }
           }
+        } else {
+          // series deeper than our target
+          if stage == 1 { stage = 2; end = subspace_index; }
+          if adjacent.z.series == 0 {
+            adjacent.z.series = subspace_index;
+          }
         }
+      } else {
+        // shelf deeper than our target
+        if stage == 1 { stage = 2; end = subspace_index; }
+        if adjacent.z.shelf == 0 {
+          adjacent.z.shelf = subspace_index;
+        }
+      }
+    } else {
+      // library deeper than our target
+      if stage == 1 { stage = 2; end = subspace_index; }
+      if adjacent.z.library == 0 {
+        adjacent.z.library = subspace_index;
       }
     }
 
-    if dimension_break {
-      continue;
-    }
-    
-    if stage == 0 && target == walker {
+    if dimension_break == false && stage == 0 && target == walker {
       start = subspace_index;
       stage = 1;
     }
 
     subspace_index += 1;
+  }
 
+  if stage == 1 {
+    end = subspace_index;
   }
 
   if stage == 0 {
-    println!("Applying partial match...");
-    if nearest.x.scroll > 0 {
-      start = nearest.x.scroll;
-      println!("Picked scroll = {}", start);
-    } else if nearest.x.section > 0 {
-      start = nearest.x.section;
-      println!("Picked section = {}", start);
-    } else if nearest.x.chapter > 0 {
-      start = nearest.x.chapter;
-      println!("Picked chapter = {}", start);
-    } else if nearest.y.book > 0 {
-      start = nearest.y.book;
-      println!("Picked book = {}", start);
-    } else if nearest.y.volume > 0 {
-      start = nearest.y.volume;
-      println!("Picked volume = {}", start);
-    } else if nearest.y.collection > 0 {
-      start = nearest.y.collection;
-      println!("Picked collection = {}", start);
-    } else if nearest.z.series > 0 {
-      start = nearest.z.series;
-      println!("Picked series = {}", start);
-    } else if nearest.z.shelf > 0 {
-      start = nearest.z.shelf;
-      println!("Picked shelf = {}", start);
-    } else if nearest.z.library > 0 {
-      start = nearest.z.library;
-      println!("Picked library = {}", start);
+    // This is a little complicated: if we're appending beyond known subspace, then we want the furthest
+    // subspace coordinate. But if we're injecting into known subspace, then we want the closest coordinate.
+    start = nearest.z.library;
+    if walker >= target {
+      if nearest.z.shelf > start      { start = nearest.z.shelf;      }
+      if nearest.z.series > start     { start = nearest.z.series;     }
+      if nearest.y.collection > start { start = nearest.y.collection; }
+      if nearest.y.volume > start     { start = nearest.y.volume;     }
+      if nearest.y.book > start       { start = nearest.y.book;       }
+      if nearest.x.chapter > start    { start = nearest.x.chapter;    }
+      if nearest.x.section > start    { start = nearest.x.section;    }
+      if nearest.x.scroll > start     { start = nearest.x.scroll;     } 
+    } else {
+      if nearest.z.shelf > 0 && start > nearest.z.shelf           { start = nearest.z.shelf;      }
+      if nearest.z.series > 0 && start > nearest.z.series         { start = nearest.z.series;     }
+      if nearest.y.collection > 0 && start > nearest.y.collection { start = nearest.y.collection; }
+      if nearest.y.volume > 0 && start > nearest.y.volume         { start = nearest.y.volume;     }
+      if nearest.y.book > 0 && start > nearest.y.book             { start = nearest.y.book;       }
+      if nearest.x.chapter > 0 && start > nearest.x.chapter       { start = nearest.x.chapter;    }
+      if nearest.x.section > 0 && start > nearest.x.section       { start = nearest.x.section;    }
+      if nearest.x.scroll > 0 && start > nearest.x.scroll         { start = nearest.x.scroll;     }
     }
 
-    if target.z.library >= walker.z.library &&
-       target.z.shelf >= walker.z.shelf &&
-       target.z.series >= walker.z.series &&
-       target.y.collection >= walker.y.collection &&
-       target.y.volume >= walker.y.volume &&
-       target.y.book >= walker.y.book &&
-       target.x.chapter >= walker.x.chapter &&
-       target.x.section >= walker.x.section &&
-       target.x.scroll >= walker.x.scroll {
-      best = walker;      
-    }
-
-    println!("Selected index={}, target={}, walker={}, best={}", start, target.to_string(), walker.to_string(), best.to_string());
+    // ensure we're actually pointing to text and not delimiters of unusual size
+    while subspace[start] == SCROLL_BREAK as u8 ||
+          subspace[start] == SECTION_BREAK as u8 ||
+          subspace[start] == CHAPTER_BREAK as u8 ||
+          subspace[start] == BOOK_BREAK as u8 ||
+          subspace[start] == VOLUME_BREAK as u8 ||
+          subspace[start] == COLLECTION_BREAK as u8 ||
+          subspace[start] == SERIES_BREAK as u8 ||
+          subspace[start] == SHELF_BREAK as u8 ||
+          subspace[start] == LIBRARY_BREAK as u8 {
+            start -=1;
+            if start == 0 { break; }
+          }
   }
 
-  end = start;
-  let tail = subspace[start..].to_vec();
-  for ptr in tail.iter() {
-    let test: char = *ptr as char;
-
-    if test == SCROLL_BREAK ||
-       test == SECTION_BREAK ||
-       test == CHAPTER_BREAK ||
-       test == BOOK_BREAK ||
-       test == VOLUME_BREAK ||
-       test == COLLECTION_BREAK ||
-       test == SERIES_BREAK ||
-       test == SHELF_BREAK ||
-       test == LIBRARY_BREAK {
-      break;
-    }
-
-    end += 1;
+  if stage == 1 {
+    // same logic as above for starting subspace coordinates
+    end = adjacent.z.library;
+    if adjacent.z.shelf > end      { end = adjacent.z.shelf;      }
+    if adjacent.z.series > end     { end = adjacent.z.series;     }
+    if adjacent.y.collection > end { end = adjacent.y.collection; }
+    if adjacent.y.volume > end     { end = adjacent.y.volume;     }
+    if adjacent.y.book > end       { end = adjacent.y.book;       }
+    if adjacent.x.chapter > end    { end = adjacent.x.chapter;    }
+    if adjacent.x.section > end    { end = adjacent.x.section;    }
+    if adjacent.x.scroll > end     { end = adjacent.x.scroll;     }
   }
+
+  if end == 0 || end < start {    
+    end = start;
+    while subspace[end] != SCROLL_BREAK as u8 &&
+          subspace[end] != SECTION_BREAK as u8 &&
+          subspace[end] != CHAPTER_BREAK as u8 &&
+          subspace[end] != BOOK_BREAK as u8 &&
+          subspace[end] != VOLUME_BREAK as u8 &&
+          subspace[end] != COLLECTION_BREAK as u8 &&
+          subspace[end] != SERIES_BREAK as u8 &&
+          subspace[end] != SHELF_BREAK as u8 &&
+          subspace[end] != LIBRARY_BREAK as u8 {
+            end +=1;
+            if end == subspace.len() { break; }
+          }
+  }
+
+  println!("Selected index={}, end={}, target={}, walker={}, best={}", start, end, target.to_string(), walker.to_string(), best.to_string());
 
   return (start, end, best);
 }
@@ -547,6 +595,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
 pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   let bytes = phext.as_bytes();
   let parts = get_subspace_coordinates(bytes, location);
+  println!("Coords: {}-{} ({})", parts.0, parts.1, parts.2.to_string());
   let mut end: usize = parts.1 + 1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
