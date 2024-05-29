@@ -351,23 +351,21 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
 
     if walker.z.library <= target.z.library {
       nearest.z.library = subspace_index;
-      if walker.z.library == target.z.library {
-        best = walker;
-      }
+      best.z.library = walker.z.library;
 
       if walker.z.shelf <= target.z.shelf {
         nearest.z.shelf = subspace_index;
         if walker.z.library == target.z.library &&
-           walker.z.shelf == target.z.shelf {
-          best = walker;
+           walker.z.shelf <= target.z.shelf {
+          best.z.shelf = walker.z.shelf;
         }
 
         if walker.z.series <= target.z.series {
           nearest.z.series = subspace_index;
           if walker.z.library == target.z.library &&
              walker.z.shelf == target.z.shelf &&
-             walker.z.series == target.z.series {
-            best = walker;
+             walker.z.series <= target.z.series {
+            best.z.series = walker.z.series;
           }
 
           if walker.y.collection <= target.y.collection {
@@ -375,8 +373,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
             if walker.z.library == target.z.library &&
                walker.z.shelf == target.z.shelf &&
                walker.z.series == target.z.series &&
-               walker.y.collection == target.y.collection {
-              best = walker;
+               walker.y.collection <= target.y.collection {
+              best.y.collection = walker.y.collection;
             }
 
             if walker.y.volume <= target.y.volume {
@@ -385,8 +383,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                  walker.z.shelf == target.z.shelf &&
                  walker.z.series == target.z.series &&
                  walker.y.collection == target.y.collection &&
-                 walker.y.volume == target.y.volume {
-                best = walker;
+                 walker.y.volume <= target.y.volume {
+                best.y.volume = walker.y.volume;
               }
 
               if walker.y.book <= target.y.book {
@@ -396,8 +394,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                    walker.z.series == target.z.series &&
                    walker.y.collection == target.y.collection &&
                    walker.y.volume == target.y.volume &&
-                   walker.y.book == target.y.book {
-                  best = walker;
+                   walker.y.book <= target.y.book {
+                  best.y.book = walker.y.book;
                 }
 
                 if walker.x.chapter <= target.x.chapter {
@@ -408,8 +406,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                      walker.y.collection == target.y.collection &&
                      walker.y.volume == target.y.volume &&
                      walker.y.book == target.y.book &&
-                     walker.x.chapter == target.x.chapter {
-                    best = walker;
+                     walker.x.chapter <= target.x.chapter {
+                    best.x.chapter = walker.x.chapter;
                   }
 
                   if walker.x.section <= target.x.section {
@@ -421,8 +419,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                        walker.y.volume == target.y.volume &&
                        walker.y.book == target.y.book &&
                        walker.x.chapter == target.x.chapter &&
-                       walker.x.section == target.x.section {
-                      best = walker;
+                       walker.x.section <= target.x.section {
+                      best.x.section = walker.x.section;
                     }
 
                     if walker.x.scroll <= target.x.scroll {
@@ -435,8 +433,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
                          walker.y.book == target.y.book &&
                          walker.x.chapter == target.x.chapter &&
                          walker.x.section == target.x.section &&
-                         walker.x.scroll == target.x.scroll {
-                        best = walker;
+                         walker.x.scroll <= target.x.scroll {
+                        best.x.scroll = walker.x.scroll;
                       }
                     } else {
                       // scroll deeper than our target
@@ -517,8 +515,9 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
   if stage == 0 {
     // This is a little complicated: if we're appending beyond known subspace, then we want the furthest
     // subspace coordinate. But if we're injecting into known subspace, then we want the closest coordinate.
-    start = nearest.z.library;
-    if walker >= target {
+    start = nearest.z.library;    
+    if walker < target {
+      println!("Appending beyond existing subspace walker={} vs target={}", walker.to_string(), target.to_string());
       if nearest.z.shelf > start      { start = nearest.z.shelf;      }
       if nearest.z.series > start     { start = nearest.z.series;     }
       if nearest.y.collection > start { start = nearest.y.collection; }
@@ -528,6 +527,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       if nearest.x.section > start    { start = nearest.x.section;    }
       if nearest.x.scroll > start     { start = nearest.x.scroll;     } 
     } else {
+      println!("Inserting within subspace {} vs {}", walker.to_string(), target.to_string());
       if nearest.z.shelf > 0 && start > nearest.z.shelf           { start = nearest.z.shelf;      }
       if nearest.z.series > 0 && start > nearest.z.series         { start = nearest.z.series;     }
       if nearest.y.collection > 0 && start > nearest.y.collection { start = nearest.y.collection; }
@@ -596,7 +596,7 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   let bytes = phext.as_bytes();
   let parts = get_subspace_coordinates(bytes, location);
   println!("Coords: {}-{} ({})", parts.0, parts.1, parts.2.to_string());
-  let mut end: usize = parts.1 + 1;
+  let mut end: usize = parts.1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
 
