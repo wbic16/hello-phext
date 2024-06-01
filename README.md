@@ -46,10 +46,11 @@ Not yet implemented
 * line_break: Proves that we're using ASCII line breaks
 * test_more_cowbell: Ensures that you've got more cowbell!
 * coordinate_based_insert: Verifies that random insertion by phext coordinate works
-* PENDING: coordinate_based_replace: Verifies that random replacement by phext coordinate works
-* PENDING: coordinate_based_remove: Verifies that random scroll removal by phext coordinate works
+* coordinate_based_replace: Verifies that random replacement by phext coordinate works
+* coordinate_based_remove: Verifies that random scroll removal by phext coordinate works
 * PENDING: range_based_replace: Verifies that a range of phext coordinates can be used to replace text
 * PENDING: merge: verifies that two phext documents can be zipper-merged
 * PENDING: intersection: verifies that content from shared coordinates can be merged between two docs
 * PENDING: subtract: verifies that we can prune all of the coordinates from a second phext document
+* PENDING: normalize: verifies that empty scrolls are pruned from the given phext document
 * test_api_write
