@@ -533,6 +533,15 @@ mod tests {
     }
 
     #[test]
+    fn test_range_based_replace() {
+        let doc = "Before\x19text to be replaced\x1Calso this\x1Eand this\x17After";
+        let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/2.1.1"),
+                           end: phext::to_coordinate("1.1.1/2.1.1/1.1.1") };
+        let update = phext::range_replace(doc, range, "");
+        assert_eq!(update, "Before\x1E\x17After");
+    }
+
+    #[test]
     fn test_api_write() {
         // todo: figure out how to invoke rocket from unit tests
     }

@@ -233,6 +233,18 @@ impl std::fmt::Display for Coordinate {
   }
 }
 
+#[derive(Default, Debug, PartialEq, PartialOrd, Copy, Clone)]
+#[derive(impl_new::New)]
+pub struct Range {
+  pub start: Coordinate,
+  pub end: Coordinate
+}
+impl std::fmt::Display for Range {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}-{}", self.start, self.end);
+  }
+}
+
 #[derive(Default, Debug, Clone)]
 pub struct PhextParseError;
 impl std::error::Error for PhextParseError {}
@@ -643,6 +655,68 @@ pub fn replace(phext: &str, location: Coordinate, scroll: &str) -> String {
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
   println!("Attempting to merge {} at {}", scroll, end);
+  if end > max { end = max; }
+  let left = &bytes[..start];
+  let right = &bytes[end..];
+  let temp:Vec<u8> = left.iter().chain(fixup.iter()).chain(text).chain(right.iter()).cloned().collect();
+  let result: String = String::from_utf8(temp).expect("invalid utf8");
+  return result;
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
+  let bytes = phext.as_bytes();
+  let parts_start = get_subspace_coordinates(bytes, location.start);
+  let parts_end = get_subspace_coordinates(bytes, location.end);
+  println!("Start: {} vs {}", location.start, parts_start.2.to_string());
+  println!("End: {} vs {}", location.end, parts_end.2.to_string());
+  let start: usize = parts_start.0;
+  let mut end: usize = parts_end.1;
+  let mut fixup: Vec<u8> = vec![];
+  let mut subspace_coordinate: Coordinate = parts_end.2;
+
+  while subspace_coordinate.z.library < location.end.z.library {
+    fixup.push(LIBRARY_BREAK as u8);
+    subspace_coordinate.library_break();
+  }
+  while subspace_coordinate.z.shelf < location.end.z.shelf {
+    fixup.push(SHELF_BREAK as u8);
+    subspace_coordinate.shelf_break();
+  }
+  while subspace_coordinate.z.series < location.end.z.series {
+    fixup.push(SERIES_BREAK as u8);
+    subspace_coordinate.series_break();
+  }
+  while subspace_coordinate.y.collection < location.end.y.collection {
+    fixup.push(COLLECTION_BREAK as u8);
+    subspace_coordinate.collection_break();
+  }
+  while subspace_coordinate.y.volume < location.end.y.volume {
+    fixup.push(VOLUME_BREAK as u8);
+    subspace_coordinate.volume_break();
+  }
+  while subspace_coordinate.y.book < location.end.y.book {
+    fixup.push(BOOK_BREAK as u8);
+    subspace_coordinate.book_break();
+  }
+  while subspace_coordinate.x.chapter < location.end.x.chapter {
+    fixup.push(CHAPTER_BREAK as u8);
+    subspace_coordinate.chapter_break();
+    println!("Chapter Break at {}", subspace_coordinate.to_string());
+  }
+  while subspace_coordinate.x.section < location.end.x.section {
+    fixup.push(SECTION_BREAK as u8);
+    subspace_coordinate.section_break();
+    println!("Section Break at {}", subspace_coordinate.to_string());
+  }
+  while subspace_coordinate.x.scroll < location.end.x.scroll {
+    fixup.push(SCROLL_BREAK as u8);
+    subspace_coordinate.scroll_break();
+    println!("Scroll Break at {}", subspace_coordinate.to_string());
+  }
+  let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
+  let max = bytes.len();
+  println!("Attempting to merge '{}' at {} - {}", scroll, start, end);
   if end > max { end = max; }
   let left = &bytes[..start];
   let right = &bytes[end..];
