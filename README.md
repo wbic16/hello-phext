@@ -1,6 +1,6 @@
 # hello-phext
 
-This repository demonstrates how to work with phext from a rust context.
+This repository demonstrates how to work with phext from a rust context. Phext is 11 dimensional plain hypertext.
 
 ## Build
 
@@ -53,4 +53,7 @@ Not yet implemented
 * PENDING: intersection: verifies that content from shared coordinates can be merged between two docs
 * PENDING: subtract: verifies that we can prune all of the coordinates from a second phext document
 * PENDING: normalize: verifies that empty scrolls are pruned from the given phext document
+* PENDING: expand: verifies that delimiters can be grown larger by 1 dimension
+* PENDING: contract: verifies that delimiters can be shrunk by 1 dimension
+* PENDING: swap: verifies that the content at the given coordinates can be swapped between two phext archives
 * test_api_write
