@@ -534,11 +534,18 @@ mod tests {
 
     #[test]
     fn test_range_based_replace() {
-        let doc = "Before\x19text to be replaced\x1Calso this\x1Eand this\x17After";
-        let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/2.1.1"),
-                           end: phext::to_coordinate("1.1.1/2.1.1/1.1.1") };
-        let update = phext::range_replace(doc, range, "");
-        assert_eq!(update, "Before\x1E\x17After");
+        let doc1 = "Before\x19text to be replaced\x1Calso this\x1Dand this\x17After";
+        let range1 = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/2.1.1"),
+                            end: phext::to_coordinate("1.1.1/2.1.1/1.1.1") };
+        let update1 = phext::range_replace(doc1, range1, "");
+        assert_eq!(update1, "Before\x19\x17After");
+
+        let doc2 = "Before\x01Library two\x01Library three\x01Library four";
+        let range2 = phext::Range { start: phext::to_coordinate("2.1.1/1.1.1/1.1.1"),
+                            end: phext::to_coordinate("3.1.1/1.1.1/1.1.1") };
+
+        let update2 = phext::range_replace(doc2, range2, "");
+        assert_eq!(update2, "Before\x01\x01Library four");
     }
 
     #[test]

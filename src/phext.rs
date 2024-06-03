@@ -529,7 +529,6 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     // subspace coordinate. But if we're injecting into known subspace, then we want the closest coordinate.
     start = nearest.z.library;    
     if walker < target {
-      println!("Appending beyond existing subspace walker={} vs target={}", walker.to_string(), target.to_string());
       if nearest.z.shelf > start      { start = nearest.z.shelf;      }
       if nearest.z.series > start     { start = nearest.z.series;     }
       if nearest.y.collection > start { start = nearest.y.collection; }
@@ -539,7 +538,6 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       if nearest.x.section > start    { start = nearest.x.section;    }
       if nearest.x.scroll > start     { start = nearest.x.scroll;     } 
     } else {
-      println!("Inserting within subspace {} vs {}", walker.to_string(), target.to_string());
       if nearest.z.shelf > 0 && start > nearest.z.shelf           { start = nearest.z.shelf;      }
       if nearest.z.series > 0 && start > nearest.z.series         { start = nearest.z.series;     }
       if nearest.y.collection > 0 && start > nearest.y.collection { start = nearest.y.collection; }
@@ -594,7 +592,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
           }
   }
 
-  println!("Selected index={}, end={}, target={}, walker={}, best={}", start, end, target.to_string(), walker.to_string(), best.to_string());
+  //println!("Selected index={}, end={}, target={}, walker={}, best={}", start, end, target.to_string(), walker.to_string(), best.to_string());
 
   return (start, end, best);
 }
@@ -640,21 +638,17 @@ pub fn replace(phext: &str, location: Coordinate, scroll: &str) -> String {
   while subspace_coordinate.x.chapter < location.x.chapter {
     fixup.push(CHAPTER_BREAK as u8);
     subspace_coordinate.chapter_break();
-    println!("Chapter Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.section < location.x.section {
     fixup.push(SECTION_BREAK as u8);
     subspace_coordinate.section_break();
-    println!("Section Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.scroll < location.x.scroll {
     fixup.push(SCROLL_BREAK as u8);
     subspace_coordinate.scroll_break();
-    println!("Scroll Break at {}", subspace_coordinate.to_string());
   }
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
-  println!("Attempting to merge {} at {}", scroll, end);
   if end > max { end = max; }
   let left = &bytes[..start];
   let right = &bytes[end..];
@@ -672,6 +666,7 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
   println!("End: {} vs {}", location.end, parts_end.2.to_string());
   let start: usize = parts_start.0;
   let mut end: usize = parts_end.1;
+  println!("Subspace start: {}, end: {}", start, end);
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts_end.2;
 
@@ -702,21 +697,17 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
   while subspace_coordinate.x.chapter < location.end.x.chapter {
     fixup.push(CHAPTER_BREAK as u8);
     subspace_coordinate.chapter_break();
-    println!("Chapter Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.section < location.end.x.section {
     fixup.push(SECTION_BREAK as u8);
     subspace_coordinate.section_break();
-    println!("Section Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.scroll < location.end.x.scroll {
     fixup.push(SCROLL_BREAK as u8);
     subspace_coordinate.scroll_break();
-    println!("Scroll Break at {}", subspace_coordinate.to_string());
   }
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
-  println!("Attempting to merge '{}' at {} - {}", scroll, start, end);
   if end > max { end = max; }
   let left = &bytes[..start];
   let right = &bytes[end..];
@@ -733,16 +724,9 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
 pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   let bytes = phext.as_bytes();
   let parts = get_subspace_coordinates(bytes, location);
-  println!("Coords: {}-{} ({})", parts.0, parts.1, parts.2.to_string());
   let mut end: usize = parts.1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
-
-  println!("Inserting at {}.{}.{}/{}.{}.{}/{}.{}.{}", subspace_coordinate.z.library, subspace_coordinate.z.shelf, subspace_coordinate.z.series,
-  subspace_coordinate.y.collection, subspace_coordinate.y.volume, subspace_coordinate.y.book,
-  subspace_coordinate.x.chapter, subspace_coordinate.x.section, subspace_coordinate.x.scroll);
-  println!("Navigating to {}.{}.{}/{}.{}.{}/{}.{}.{}", location.z.library, location.z.shelf, location.z.series,
-location.y.collection, location.y.volume, location.y.book, location.x.chapter, location.x.section, location.x.scroll);
 
   while subspace_coordinate.z.library < location.z.library {
     fixup.push(LIBRARY_BREAK as u8);
@@ -771,21 +755,17 @@ location.y.collection, location.y.volume, location.y.book, location.x.chapter, l
   while subspace_coordinate.x.chapter < location.x.chapter {
     fixup.push(CHAPTER_BREAK as u8);
     subspace_coordinate.chapter_break();
-    println!("Chapter Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.section < location.x.section {
     fixup.push(SECTION_BREAK as u8);
     subspace_coordinate.section_break();
-    println!("Section Break at {}", subspace_coordinate.to_string());
   }
   while subspace_coordinate.x.scroll < location.x.scroll {
     fixup.push(SCROLL_BREAK as u8);
     subspace_coordinate.scroll_break();
-    println!("Scroll Break at {}", subspace_coordinate.to_string());
   }
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
-  println!("Attempting to merge {} at {}", scroll, end);
   if end > max { end = max; }
   let left = &bytes[..end];
   let right = &bytes[end..];
