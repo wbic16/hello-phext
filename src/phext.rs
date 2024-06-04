@@ -668,44 +668,7 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
   let mut end: usize = parts_end.1;
   println!("Subspace start: {}, end: {}", start, end);
   let mut fixup: Vec<u8> = vec![];
-  let mut subspace_coordinate: Coordinate = parts_end.2;
 
-  while subspace_coordinate.z.library < location.end.z.library {
-    fixup.push(LIBRARY_BREAK as u8);
-    subspace_coordinate.library_break();
-  }
-  while subspace_coordinate.z.shelf < location.end.z.shelf {
-    fixup.push(SHELF_BREAK as u8);
-    subspace_coordinate.shelf_break();
-  }
-  while subspace_coordinate.z.series < location.end.z.series {
-    fixup.push(SERIES_BREAK as u8);
-    subspace_coordinate.series_break();
-  }
-  while subspace_coordinate.y.collection < location.end.y.collection {
-    fixup.push(COLLECTION_BREAK as u8);
-    subspace_coordinate.collection_break();
-  }
-  while subspace_coordinate.y.volume < location.end.y.volume {
-    fixup.push(VOLUME_BREAK as u8);
-    subspace_coordinate.volume_break();
-  }
-  while subspace_coordinate.y.book < location.end.y.book {
-    fixup.push(BOOK_BREAK as u8);
-    subspace_coordinate.book_break();
-  }
-  while subspace_coordinate.x.chapter < location.end.x.chapter {
-    fixup.push(CHAPTER_BREAK as u8);
-    subspace_coordinate.chapter_break();
-  }
-  while subspace_coordinate.x.section < location.end.x.section {
-    fixup.push(SECTION_BREAK as u8);
-    subspace_coordinate.section_break();
-  }
-  while subspace_coordinate.x.scroll < location.end.x.scroll {
-    fixup.push(SCROLL_BREAK as u8);
-    subspace_coordinate.scroll_break();
-  }
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
   if end > max { end = max; }
