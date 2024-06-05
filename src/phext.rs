@@ -738,6 +738,66 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn merge
+///
+/// combines `left` and `right` into a new phext document, with content merged on a per-scroll basis
+/// ----------------------------------------------------------------------------------------------------------
+pub fn merge(left: &str, right: &str) -> String {
+  let mut ll = to_coordinate("1.1.1/1.1.1/1.1.1");
+  let mut rr = to_coordinate("1.1.1/1.1.1/1.1.1");
+
+  let mut result = "";
+
+  let lp = left.as_bytes();
+  let rp = right.as_bytes();
+  let mut rpi = 0;
+  let rpi_limit = rp.len();
+
+  let mut output_left: Vec<u8> = vec![];
+  let mut output_right: Vec<u8> = vec![];
+  
+  for next in lp {
+    let byte = *next;
+    let mut compare: u8 = 0;
+    if rpi < rpi_limit {
+      compare = rp[rpi];
+
+      if compare == SCROLL_BREAK as u8     { rr.scroll_break();     continue; }
+      if compare == SECTION_BREAK as u8    { rr.section_break();    continue; }
+      if compare == CHAPTER_BREAK as u8    { rr.chapter_break();    continue; }
+      if compare == BOOK_BREAK as u8       { rr.book_break();       continue; }
+      if compare == VOLUME_BREAK as u8     { rr.volume_break();     continue; }
+      if compare == COLLECTION_BREAK as u8 { rr.collection_break(); continue; }
+      if compare == SERIES_BREAK as u8     { rr.series_break();     continue; }
+      if compare == SHELF_BREAK as u8      { rr.shelf_break();      continue; }
+      if compare == LIBRARY_BREAK as u8    { rr.library_break();    continue; }
+    }
+
+    if byte == SCROLL_BREAK as u8     { ll.scroll_break();     continue; }
+    if byte == SECTION_BREAK as u8    { ll.section_break();    continue; }
+    if byte == CHAPTER_BREAK as u8    { ll.chapter_break();    continue; }
+    if byte == BOOK_BREAK as u8       { ll.book_break();       continue; }
+    if byte == VOLUME_BREAK as u8     { ll.volume_break();     continue; }
+    if byte == COLLECTION_BREAK as u8 { ll.collection_break(); continue; }
+    if byte == SERIES_BREAK as u8     { ll.series_break();     continue; }
+    if byte == SHELF_BREAK as u8      { ll.shelf_break();      continue; }
+    if byte == LIBRARY_BREAK as u8    { ll.library_break();    continue; }
+
+    if ll < rr {
+      output_left.push(byte);
+      output_left.push(compare);
+      rpi += 1;
+    } else {
+      output_left.push(compare);
+      rpi += 1;
+      output_right.push(byte);      
+    }
+  }
+
+  return String::from_utf8(output_left.concat(output_right)).expect("invalid utf8");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn fetch
 ///
 /// retrieves the plain text string located at the given coordinates.
