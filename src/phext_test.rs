@@ -549,6 +549,14 @@ mod tests {
     }
 
     #[test]
+    fn test_merge() {
+        let doc1 = "Hello \x17I've come to talk";
+        let doc2 = "Darkness, my old friend.\x17 with you again.";
+        let update = phext::merge(doc1, doc2);
+        assert_eq!(update, "Hello Darkness, my old friend.\x17I've come to talk with you again.");
+    }
+
+    #[test]
     fn test_api_write() {
         // todo: figure out how to invoke rocket from unit tests
     }

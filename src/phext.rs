@@ -746,8 +746,6 @@ pub fn merge(left: &str, right: &str) -> String {
   let mut ll = to_coordinate("1.1.1/1.1.1/1.1.1");
   let mut rr = to_coordinate("1.1.1/1.1.1/1.1.1");
 
-  let mut result = "";
-
   let lp = left.as_bytes();
   let rp = right.as_bytes();
   let mut rpi = 0;
@@ -755,6 +753,7 @@ pub fn merge(left: &str, right: &str) -> String {
 
   let mut output_left: Vec<u8> = vec![];
   let mut output_right: Vec<u8> = vec![];
+  let mut output_dous: Vec<u8> = vec![];
   
   for next in lp {
     let byte = *next;
@@ -773,6 +772,13 @@ pub fn merge(left: &str, right: &str) -> String {
       if compare == LIBRARY_BREAK as u8    { rr.library_break();    continue; }
     }
 
+    let test = byte as char;
+    if test == SCROLL_BREAK || test == SECTION_BREAK || test == CHAPTER_BREAK ||
+       test == BOOK_BREAK   || test == VOLUME_BREAK || test == COLLECTION_BREAK ||
+       test == SERIES_BREAK || test == SHELF_BREAK || test == LIBRARY_BREAK {
+      output_dous.push(byte);
+    }
+
     if byte == SCROLL_BREAK as u8     { ll.scroll_break();     continue; }
     if byte == SECTION_BREAK as u8    { ll.section_break();    continue; }
     if byte == CHAPTER_BREAK as u8    { ll.chapter_break();    continue; }
@@ -784,17 +790,35 @@ pub fn merge(left: &str, right: &str) -> String {
     if byte == LIBRARY_BREAK as u8    { ll.library_break();    continue; }
 
     if ll < rr {
+      for delim in &output_dous {
+        output_left.push(*delim);
+      }
+      output_dous.clear();
       output_left.push(byte);
-      output_left.push(compare);
-      rpi += 1;
+      if rpi < rpi_limit {
+        output_left.push(compare);
+        rpi += 1;
+      }
     } else {
-      output_left.push(compare);
-      rpi += 1;
-      output_right.push(byte);      
+      if rpi < rpi_limit {
+        output_left.push(compare);
+        rpi += 1;
+      }
+      for delim in &output_dous {
+        output_right.push(*delim);
+      }
+      output_dous.clear();
+      output_right.push(byte);
     }
   }
 
-  return String::from_utf8(output_left.concat(output_right)).expect("invalid utf8");
+  while rpi < rpi_limit {
+    let byte = rp[rpi];
+    output_right.push(byte);
+    rpi += 1;
+  }
+
+  return String::from_utf8([&output_left[..], &output_right[..]].concat()).expect("invalid utf8");
 }
 
 /// ----------------------------------------------------------------------------------------------------------
