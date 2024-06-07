@@ -550,10 +550,15 @@ mod tests {
 
     #[test]
     fn test_merge() {
-        let doc1 = "Hello \x17I've come to talk";
-        let doc2 = "Darkness, my old friend.\x17 with you again.";
-        let update = phext::merge(doc1, doc2);
-        assert_eq!(update, "Hello Darkness, my old friend.\x17I've come to talk with you again.");
+        let doc_1a = "A\x17B";
+        let doc_2a = "C\x17D";
+        let update_a = phext::merge(doc_1a, doc_2a);
+        assert_eq!(update_a, "AC\x17BD");
+
+        let doc_2a = "Hello \x17I've come to talk";
+        let doc_2b = "Darkness, my old friend.\x17 with you again.";
+        let update_b = phext::merge(doc_2a, doc_2b);
+        assert_eq!(update_b, "Hello Darkness, my old friend.\x17I've come to talk with you again.");
     }
 
     #[test]

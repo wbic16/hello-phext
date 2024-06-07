@@ -789,7 +789,7 @@ pub fn merge(left: &str, right: &str) -> String {
     if byte == SHELF_BREAK as u8      { ll.shelf_break();      continue; }
     if byte == LIBRARY_BREAK as u8    { ll.library_break();    continue; }
 
-    if ll < rr {
+    if ll <= rr {
       for delim in &output_dous {
         output_left.push(*delim);
       }
