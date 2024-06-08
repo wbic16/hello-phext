@@ -737,6 +737,28 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   return result;
 }
 
+fn next_scroll(phext: &str, start: Coordinate) -> (Coordinate, String) {
+  let mut location = start;
+  let p = phext.as_bytes();
+  let mut output: Vec<u8> = vec![];
+  let mut pi: usize = 0;
+  while pi < p.len()
+  {
+    let test = p[pi] as char;
+    if test == SCROLL_BREAK || test == SECTION_BREAK || test == CHAPTER_BREAK ||
+       test == BOOK_BREAK || test == VOLUME_BREAK || test == COLLECTION_BREAK ||
+       test == SERIES_BREAK || test == SHELF_BREAK || test == LIBRARY_BREAK
+    {
+      break;
+    } else {
+      output.push(p[pi]);
+    }
+    pi += 1;
+  }
+
+  return (location, String::from_utf8(output).expect("valid UTF-8"));
+}
+
 /// ----------------------------------------------------------------------------------------------------------
 /// @fn merge
 ///
@@ -758,6 +780,7 @@ pub fn merge(left: &str, right: &str) -> String {
   for next in lp {
     let byte = *next;
     let mut compare: u8 = 0;
+
     if rpi < rpi_limit {
       compare = rp[rpi];
 
