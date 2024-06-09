@@ -549,6 +549,15 @@ mod tests {
     }
 
     #[test]
+    fn test_next_scroll() {
+        let doc1 = "3A\x17B2";
+        let (update1coord, update1, remaining) = phext::next_scroll(doc1, phext::to_coordinate("1.1.1/1.1.1/1.1.1"));
+        assert_eq!(update1coord.to_string(), "1.1.1/1.1.1/1.1.2");
+        assert_eq!(update1, "3A");
+        assert_eq!(remaining, "B2");
+    }
+
+    #[test]
     fn test_merge() {
         let doc_1a = "3A\x17B2";
         let doc_2a = "4C\x17D1";

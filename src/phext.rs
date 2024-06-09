@@ -737,26 +737,50 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
   return result;
 }
 
-fn next_scroll(phext: &str, start: Coordinate) -> (Coordinate, String) {
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn next_scroll
+///
+/// retrieves the next scroll from the given string, assuming an arbitrary starting point
+/// ----------------------------------------------------------------------------------------------------------
+pub fn next_scroll(phext: &str, start: Coordinate) -> (Coordinate, String, String) {
   let mut location = start;
   let p = phext.as_bytes();
   let mut output: Vec<u8> = vec![];
+  let mut remaining: Vec<u8> = vec![];
   let mut pi: usize = 0;
   while pi < p.len()
   {
     let test = p[pi] as char;
-    if test == SCROLL_BREAK || test == SECTION_BREAK || test == CHAPTER_BREAK ||
-       test == BOOK_BREAK || test == VOLUME_BREAK || test == COLLECTION_BREAK ||
-       test == SERIES_BREAK || test == SHELF_BREAK || test == LIBRARY_BREAK
-    {
-      break;
+    let mut dimension_break: bool = false;
+    if test == SCROLL_BREAK     { location.scroll_break();     dimension_break = true; }
+    if test == SECTION_BREAK    { location.section_break();    dimension_break = true; }
+    if test == CHAPTER_BREAK    { location.chapter_break();    dimension_break = true; }
+    if test == BOOK_BREAK       { location.book_break();       dimension_break = true; }
+    if test == VOLUME_BREAK     { location.volume_break();     dimension_break = true; }
+    if test == COLLECTION_BREAK { location.collection_break(); dimension_break = true; }
+    if test == SERIES_BREAK     { location.series_break();     dimension_break = true; }
+    if test == SHELF_BREAK      { location.shelf_break();      dimension_break = true; }
+    if test == LIBRARY_BREAK    { location.library_break();    dimension_break = true; }
+
+    if dimension_break {
+      if output.len() > 0 {
+        pi += 1;
+        break;
+      }
     } else {
       output.push(p[pi]);
     }
     pi += 1;
   }
 
-  return (location, String::from_utf8(output).expect("valid UTF-8"));
+  while pi < p.len()
+  {
+    remaining.push(p[pi]);
+    pi += 1;
+  }
+
+  return (location, String::from_utf8(output).expect("valid UTF-8"), String::from_utf8(remaining).expect("valid UTF-8"));
 }
 
 /// ----------------------------------------------------------------------------------------------------------
