@@ -791,81 +791,56 @@ pub fn next_scroll(phext: &str, start: Coordinate) -> (Coordinate, String, Strin
 pub fn merge(left: &str, right: &str) -> String {
   let mut ll = to_coordinate("1.1.1/1.1.1/1.1.1");
   let mut rr = to_coordinate("1.1.1/1.1.1/1.1.1");
+  let mut location = to_coordinate("1.1.1/1.1.1/1.1.1");
 
-  let lp = left.as_bytes();
-  let rp = right.as_bytes();
-  let mut rpi = 0;
-  let rpi_limit = rp.len();
+  let mut lscroll: String;
+  let mut rscroll: String;
+  let mut lremain: String;
+  let mut rremain: String;
 
-  let mut output_left: Vec<u8> = vec![];
-  let mut output_right: Vec<u8> = vec![];
-  let mut output_dous: Vec<u8> = vec![];
-  
-  for next in lp {
-    let byte = *next;
-    let mut compare: u8 = 0;
+  let mut output: String = Default::default();
+  let mut done = false;
 
-    if rpi < rpi_limit {
-      compare = rp[rpi];
-
-      if compare == SCROLL_BREAK as u8     { rr.scroll_break();     continue; }
-      if compare == SECTION_BREAK as u8    { rr.section_break();    continue; }
-      if compare == CHAPTER_BREAK as u8    { rr.chapter_break();    continue; }
-      if compare == BOOK_BREAK as u8       { rr.book_break();       continue; }
-      if compare == VOLUME_BREAK as u8     { rr.volume_break();     continue; }
-      if compare == COLLECTION_BREAK as u8 { rr.collection_break(); continue; }
-      if compare == SERIES_BREAK as u8     { rr.series_break();     continue; }
-      if compare == SHELF_BREAK as u8      { rr.shelf_break();      continue; }
-      if compare == LIBRARY_BREAK as u8    { rr.library_break();    continue; }
-    }
-
-    let test = byte as char;
-    if test == SCROLL_BREAK || test == SECTION_BREAK || test == CHAPTER_BREAK ||
-       test == BOOK_BREAK   || test == VOLUME_BREAK || test == COLLECTION_BREAK ||
-       test == SERIES_BREAK || test == SHELF_BREAK || test == LIBRARY_BREAK {
-      output_dous.push(byte);
-    }
-
-    if byte == SCROLL_BREAK as u8     { ll.scroll_break();     continue; }
-    if byte == SECTION_BREAK as u8    { ll.section_break();    continue; }
-    if byte == CHAPTER_BREAK as u8    { ll.chapter_break();    continue; }
-    if byte == BOOK_BREAK as u8       { ll.book_break();       continue; }
-    if byte == VOLUME_BREAK as u8     { ll.volume_break();     continue; }
-    if byte == COLLECTION_BREAK as u8 { ll.collection_break(); continue; }
-    if byte == SERIES_BREAK as u8     { ll.series_break();     continue; }
-    if byte == SHELF_BREAK as u8      { ll.shelf_break();      continue; }
-    if byte == LIBRARY_BREAK as u8    { ll.library_break();    continue; }
-
-    if ll <= rr {
-      for delim in &output_dous {
-        output_left.push(*delim);
+  while !done
+  {
+    let left_paste = ll <= rr;
+    let bll = ll;
+    let brr = rr;
+    (ll, lscroll, lremain) = next_scroll(left, ll);
+    (rr, rscroll, rremain) = next_scroll(right, rr);
+    
+    if left_paste {
+      if location < ll
+      {
+        println!("Need to fixup left");
       }
-      output_dous.clear();
-      output_left.push(byte);
-      if rpi < rpi_limit {
-        output_left.push(compare);
-        rpi += 1;
+      output.push_str(lscroll.as_str());
+      if location < rr
+      {
+        println!("need to fixup right");
       }
+      output.push_str(rscroll.as_str());
     } else {
-      if rpi < rpi_limit {
-        output_left.push(compare);
-        rpi += 1;
+      output.push_str(rscroll.as_str());
+      if location < ll
+      {
+        println!("Need to fixup left");
       }
-      for delim in &output_dous {
-        output_right.push(*delim);
+      output.push_str(lscroll.as_str());
+      if location < rr
+      {
+        println!("need to fixup right");
       }
-      output_dous.clear();
-      output_right.push(byte);
     }
+
+    println!("Fetched {} from {} with {}.", lscroll, left, ll.to_string());
+    println!("Fetched {} from {} with {}.", rscroll, right, rr.to_string());
+
+    done = true;
+    //done = lremain.len() == 0 && rremain.len() == 0;
   }
 
-  while rpi < rpi_limit {
-    let byte = rp[rpi];
-    output_right.push(byte);
-    rpi += 1;
-  }
-
-  return String::from_utf8([&output_left[..], &output_right[..]].concat()).expect("invalid utf8");
+  return output; // return String::from_utf8([&output_left[..], &output_right[..]].concat()).expect("invalid utf8");
 }
 
 /// ----------------------------------------------------------------------------------------------------------
