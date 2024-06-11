@@ -560,14 +560,24 @@ mod tests {
     #[test]
     fn test_merge() {
         let doc_1a = "3A\x17B2";
-        let doc_2a = "4C\x17D1";
-        let update_a = phext::merge(doc_1a, doc_2a);
-        assert_eq!(update_a, "3A4C\x17B2D1");
+        let doc_1b = "4C\x17D1";
+        let update_1 = phext::merge(doc_1a, doc_1b);
+        assert_eq!(update_1, "3A4C\x17B2D1");
 
         let doc_2a = "Hello \x17I've come to talk";
         let doc_2b = "Darkness, my old friend.\x17 with you again.";
-        let update_b = phext::merge(doc_2a, doc_2b);
-        assert_eq!(update_b, "Hello Darkness, my old friend.\x17I've come to talk with you again.");
+        let update_2 = phext::merge(doc_2a, doc_2b);
+        assert_eq!(update_2, "Hello Darkness, my old friend.\x17I've come to talk with you again.");
+
+        let doc_3a = "One\x17Two\x18Three\x19Four";
+        let doc_3b = "1\x172\x183\x194";
+        let update_3 = phext::merge(doc_3a, doc_3b);
+        assert_eq!(update_3, "One1\x17Two2\x18Three3\x19Four4");
+
+        let doc_4a = "\x1A\x1C\x1D\x1E\x1F\x01stuff here";
+        let doc_4b = "\x1A\x1C\x1D\x1Eprecursor here\x1F\x01and more";
+        let update_4 = phext::merge(doc_4a, doc_4b);
+        assert_eq!(update_4, "\x1A\x1C\x1D\x1Eprecursor here\x1F\x01stuff hereand more");
     }
 
     #[test]

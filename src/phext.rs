@@ -795,8 +795,8 @@ pub fn merge(left: &str, right: &str) -> String {
 
   let mut lscroll: String;
   let mut rscroll: String;
-  let mut lremain: String;
-  let mut rremain: String;
+  let mut lremain: String = left.to_string();
+  let mut rremain: String = right.to_string();
 
   let mut output: String = Default::default();
   let mut done = false;
@@ -806,38 +806,66 @@ pub fn merge(left: &str, right: &str) -> String {
     let left_paste = ll <= rr;
     let bll = ll;
     let brr = rr;
-    (ll, lscroll, lremain) = next_scroll(left, ll);
-    (rr, rscroll, rremain) = next_scroll(right, rr);
+    (ll, lscroll, lremain) = next_scroll(lremain.as_str(), ll);
+    (rr, rscroll, rremain) = next_scroll(rremain.as_str(), rr);
     
     if left_paste {
-      if location < ll
-      {
-        println!("Need to fixup left");
-      }
       output.push_str(lscroll.as_str());
-      if location < rr
-      {
-        println!("need to fixup right");
-      }
       output.push_str(rscroll.as_str());
+      while location < ll
+      {
+        if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
+        if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
+        if location.z.series < ll.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
+        if location.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
+        if location.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
+        if location.y.book < ll.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
+        if location.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
+        if location.x.section < ll.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
+        if location.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
+      }      
+      while location < rr
+      {
+        if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
+        if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
+        if location.z.series < rr.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
+        if location.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
+        if location.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
+        if location.y.book < rr.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
+        if location.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
+        if location.x.section < rr.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
+        if location.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
+      }
     } else {
       output.push_str(rscroll.as_str());
-      if location < ll
-      {
-        println!("Need to fixup left");
-      }
       output.push_str(lscroll.as_str());
-      if location < rr
+      while location < rr
       {
-        println!("need to fixup right");
+        if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
+        if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
+        if location.z.series < rr.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
+        if location.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
+        if location.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
+        if location.y.book < rr.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
+        if location.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
+        if location.x.section < rr.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
+        if location.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
+      }      
+      while location < ll
+      {
+        if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
+        if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
+        if location.z.series < ll.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
+        if location.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
+        if location.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
+        if location.y.book < ll.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
+        if location.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
+        if location.x.section < ll.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
+        if location.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
       }
     }
 
-    println!("Fetched {} from {} with {}.", lscroll, left, ll.to_string());
-    println!("Fetched {} from {} with {}.", rscroll, right, rr.to_string());
-
-    done = true;
-    //done = lremain.len() == 0 && rremain.len() == 0;
+    done = lremain.len() == 0 && rremain.len() == 0;
   }
 
   return output; // return String::from_utf8([&output_left[..], &output_right[..]].concat()).expect("invalid utf8");
