@@ -804,16 +804,37 @@ pub fn merge(left: &str, right: &str) -> String {
   while !done
   {
     let left_paste = ll <= rr;
-    let bll = ll;
-    let brr = rr;
+    let mut bll = ll;
+    let mut brr = rr;
     (ll, lscroll, lremain) = next_scroll(lremain.as_str(), ll);
     (rr, rscroll, rremain) = next_scroll(rremain.as_str(), rr);
     
     if left_paste {
+      while bll < ll {
+        if bll.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    bll.library_break();    continue; }
+        if bll.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      bll.shelf_break();      continue; }
+        if bll.z.series < ll.z.series         { output.push(SERIES_BREAK);     bll.series_break();     continue; }
+        if bll.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); bll.collection_break(); continue; }
+        if bll.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     bll.volume_break();     continue; }
+        if bll.y.book < ll.y.book             { output.push(BOOK_BREAK);       bll.book_break();       continue; }
+        if bll.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    bll.chapter_break();    continue; }
+        if bll.x.section < ll.x.section       { output.push(SECTION_BREAK);    bll.section_break();    continue; }
+        if bll.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     bll.scroll_break();     continue; }
+      }
       output.push_str(lscroll.as_str());
+      while brr < rr {
+        if brr.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    brr.library_break();    continue; }
+        if brr.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      brr.shelf_break();      continue; }
+        if brr.z.series < rr.z.series         { output.push(SERIES_BREAK);     brr.series_break();     continue; }
+        if brr.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); brr.collection_break(); continue; }
+        if brr.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     brr.volume_break();     continue; }
+        if brr.y.book < rr.y.book             { output.push(BOOK_BREAK);       brr.book_break();       continue; }
+        if brr.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    brr.chapter_break();    continue; }
+        if brr.x.section < rr.x.section       { output.push(SECTION_BREAK);    brr.section_break();    continue; }
+        if brr.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     brr.scroll_break();     continue; }
+      }
       output.push_str(rscroll.as_str());
-      while location < ll
-      {
+      while location < ll {
         if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
         if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
         if location.z.series < ll.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
@@ -823,9 +844,8 @@ pub fn merge(left: &str, right: &str) -> String {
         if location.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
         if location.x.section < ll.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
         if location.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
-      }      
-      while location < rr
-      {
+      }
+      while location < rr {
         if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
         if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
         if location.z.series < rr.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
@@ -837,10 +857,31 @@ pub fn merge(left: &str, right: &str) -> String {
         if location.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
       }
     } else {
+      while brr < rr {
+        if brr.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    brr.library_break();    continue; }
+        if brr.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      brr.shelf_break();      continue; }
+        if brr.z.series < rr.z.series         { output.push(SERIES_BREAK);     brr.series_break();     continue; }
+        if brr.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); brr.collection_break(); continue; }
+        if brr.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     brr.volume_break();     continue; }
+        if brr.y.book < rr.y.book             { output.push(BOOK_BREAK);       brr.book_break();       continue; }
+        if brr.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    brr.chapter_break();    continue; }
+        if brr.x.section < rr.x.section       { output.push(SECTION_BREAK);    brr.section_break();    continue; }
+        if brr.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     brr.scroll_break();     continue; }
+      }
       output.push_str(rscroll.as_str());
+      while bll < ll {
+        if bll.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    bll.library_break();    continue; }
+        if bll.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      bll.shelf_break();      continue; }
+        if bll.z.series < ll.z.series         { output.push(SERIES_BREAK);     bll.series_break();     continue; }
+        if bll.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); bll.collection_break(); continue; }
+        if bll.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     bll.volume_break();     continue; }
+        if bll.y.book < ll.y.book             { output.push(BOOK_BREAK);       bll.book_break();       continue; }
+        if bll.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    bll.chapter_break();    continue; }
+        if bll.x.section < ll.x.section       { output.push(SECTION_BREAK);    bll.section_break();    continue; }
+        if bll.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     bll.scroll_break();     continue; }
+      }
       output.push_str(lscroll.as_str());
-      while location < rr
-      {
+      while location < rr {
         if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
         if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
         if location.z.series < rr.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
@@ -851,8 +892,7 @@ pub fn merge(left: &str, right: &str) -> String {
         if location.x.section < rr.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
         if location.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
       }      
-      while location < ll
-      {
+      while location < ll {
         if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
         if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
         if location.z.series < ll.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
@@ -862,7 +902,7 @@ pub fn merge(left: &str, right: &str) -> String {
         if location.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
         if location.x.section < ll.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
         if location.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
-      }
+      }      
     }
 
     done = lremain.len() == 0 && rremain.len() == 0;
