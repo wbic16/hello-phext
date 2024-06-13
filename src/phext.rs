@@ -810,6 +810,7 @@ pub fn merge(left: &str, right: &str) -> String {
     (rr, rscroll, rremain) = next_scroll(rremain.as_str(), rr);
     
     if left_paste {
+      println!("Left pasting at {} vs {}", bll, ll);
       while bll < ll {
         if bll.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    bll.library_break();    continue; }
         if bll.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      bll.shelf_break();      continue; }

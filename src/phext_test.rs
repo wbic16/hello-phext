@@ -578,6 +578,40 @@ mod tests {
         let doc_4b = "\x1A\x1C\x1D\x1Eprecursor here\x1F\x01and more";
         let update_4 = phext::merge(doc_4a, doc_4b);
         assert_eq!(update_4, "\x1A\x1C\x1D\x1Eprecursor here\x1F\x01stuff hereand more");
+
+        
+    }
+
+    #[test]
+    fn test_intersection() {
+
+    }
+
+    #[test]
+    fn test_subtract() {
+        
+    }
+
+    #[test]
+    fn test_normalize() {
+        
+    }
+
+    #[test]
+    fn test_expand() {
+        let doc1 = "nothing but line breaks\x0Ato test expansion to scrolls\x0Aline 3";
+        let update1 = phext::expand(doc1);
+        assert_eq!(update1, "nothing but line breaks\x17to test expansion to scrolls\x17line 3");
+    }
+
+    #[test]
+    fn test_contract() {
+        
+    }
+
+    #[test]
+    fn test_swap() {
+        
     }
 
     #[test]
