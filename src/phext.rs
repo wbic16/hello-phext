@@ -549,18 +549,10 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
     }
 
     // ensure we're actually pointing to text and not delimiters of unusual size
-    while subspace[start] == SCROLL_BREAK as u8 ||
-          subspace[start] == SECTION_BREAK as u8 ||
-          subspace[start] == CHAPTER_BREAK as u8 ||
-          subspace[start] == BOOK_BREAK as u8 ||
-          subspace[start] == VOLUME_BREAK as u8 ||
-          subspace[start] == COLLECTION_BREAK as u8 ||
-          subspace[start] == SERIES_BREAK as u8 ||
-          subspace[start] == SHELF_BREAK as u8 ||
-          subspace[start] == LIBRARY_BREAK as u8 {
-            start -=1;
-            if start == 0 { break; }
-          }
+    while is_phext_break(subspace[start]) {
+      start -=1;
+      if start == 0 { break; }
+    }
   }
 
   if stage == 1 {
@@ -966,8 +958,31 @@ pub fn subtract(left: &str, right: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+fn is_phext_break(byte: u8) -> bool {
+  return byte == SCROLL_BREAK as u8 ||
+         byte == SECTION_BREAK as u8 ||
+         byte == CHAPTER_BREAK as u8 ||
+         byte == BOOK_BREAK as u8 ||
+         byte == VOLUME_BREAK as u8 ||
+         byte == COLLECTION_BREAK as u8 ||
+         byte == SERIES_BREAK as u8 ||
+         byte == SHELF_BREAK as u8 ||
+         byte == LIBRARY_BREAK as u8;
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 pub fn normalize(phext: &str) -> String {
-  return phext.to_string();
+  let buffer = phext.as_bytes();
+  let max = buffer.len();
+  let mut p = max - 1;
+  loop {
+    if is_phext_break(buffer[p]) == false { break; }
+    p -= 1;
+    if p == 0 { break; }
+  }
+
+  p += 1;
+  return phext[..p].to_string();
 }
 
 /// ----------------------------------------------------------------------------------------------------------

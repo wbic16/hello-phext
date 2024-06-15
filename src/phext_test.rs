@@ -589,12 +589,17 @@ mod tests {
 
     #[test]
     fn test_subtract() {
-        
+        let doc1 = "Here's scroll one.\x17Scroll two.";
+        let doc2 = "Just content at the first scroll";
+        let update1 = phext::subtract(doc1, doc2);
+        assert_eq!(update1, "Scroll two.");
     }
 
     #[test]
     fn test_normalize() {
-        
+        let doc1 = "\x17Scroll two\x18\x18\x18\x18";
+        let update1 = phext::normalize(doc1);
+        assert_eq!(update1, "\x17Scroll two");
     }
 
     #[test]
