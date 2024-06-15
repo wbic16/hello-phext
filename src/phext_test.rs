@@ -584,14 +584,17 @@ mod tests {
 
     #[test]
     fn test_intersection() {
-
+       let doc1a = "AA\x01BB\x01CC";
+       let doc1b = "__\x01__\x01__";
+       let update1 = phext::intersection(doc1a, doc1b);
+       assert_eq!(update1, "AA")
     }
 
     #[test]
     fn test_subtract() {
-        let doc1 = "Here's scroll one.\x17Scroll two.";
-        let doc2 = "Just content at the first scroll";
-        let update1 = phext::subtract(doc1, doc2);
+        let doc1a = "Here's scroll one.\x17Scroll two.";
+        let doc1b = "Just content at the first scroll";
+        let update1 = phext::subtract(doc1a, doc1b);
         assert_eq!(update1, "Scroll two.");
     }
 
@@ -607,11 +610,43 @@ mod tests {
         let doc1 = "nothing but line breaks\x0Ato test expansion to scrolls\x0Aline 3";
         let update1 = phext::expand(doc1);
         assert_eq!(update1, "nothing but line breaks\x17to test expansion to scrolls\x17line 3");
+
+        let update2 = phext::expand(update1.as_str());
+        assert_eq!(update2, "nothing but line breaks\x18to test expansion to scrolls\x18line 3");
+
+        let update3 = phext::expand(update2.as_str());
+        assert_eq!(update3, "nothing but line breaks\x19to test expansion to scrolls\x19line 3");
+
+        let update4 = phext::expand(update3.as_str());
+        assert_eq!(update4, "nothing but line breaks\x1Ato test expansion to scrolls\x1Aline 3");
+
+        let update5 = phext::expand(update4.as_str());
+        assert_eq!(update5, "nothing but line breaks\x1Cto test expansion to scrolls\x1Cline 3");
+
+        let update6 = phext::expand(update5.as_str());
+        assert_eq!(update6, "nothing but line breaks\x1Dto test expansion to scrolls\x1Dline 3");
+
+        let update7 = phext::expand(update6.as_str());
+        assert_eq!(update7, "nothing but line breaks\x1Eto test expansion to scrolls\x1Eline 3");
+
+        let update8 = phext::expand(update7.as_str());
+        assert_eq!(update8, "nothing but line breaks\x1Fto test expansion to scrolls\x1Fline 3");
+
+        let update9 = phext::expand(update8.as_str());
+        assert_eq!(update9, "nothing but line breaks\x01to test expansion to scrolls\x01line 3");
+
+        let update10 = phext::expand(update9.as_str());
+        assert_eq!(update10, "nothing but line breaks\x01to test expansion to scrolls\x01line 3");
     }
 
     #[test]
     fn test_contract() {
-        
+        let doc1 = "A more complex example than expand\x01----\x1F++++\x1E____\x1Doooo\x1C====\x1Azzzz\x19gggg\x18....\x17qqqq";
+        let update1 = phext::contract(doc1);
+        assert_eq!(update1, "A more complex example than expand\x1F----\x1E++++\x1D____\x1Coooo\x1A====\x19zzzz\x18gggg\x17....\x0Aqqqq");
+
+        let update2 = phext::contract(update1.as_str());
+        assert_eq!(update2, "A more complex example than expand\x1E----\x1D++++\x1C____\x1Aoooo\x19====\x18zzzz\x17gggg\x0A....\x0Aqqqq");
     }
 
     #[test]

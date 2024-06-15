@@ -934,12 +934,77 @@ pub fn fetch(phext: &str, target: Coordinate) -> String {
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn expand(phext: &str) -> String {
-   return phext.to_string();
+  let mut copy = phext.to_string().clone();
+  unsafe {
+  let buffer = copy.as_bytes_mut();
+  let max = buffer.len();
+  let mut p: usize = 0;
+  loop {
+    if p == max { break; }
+    if buffer[p] == LINE_BREAK as u8 {
+      buffer[p] = SCROLL_BREAK as u8;
+    } else if buffer[p] == SCROLL_BREAK as u8 {
+      buffer[p] = SECTION_BREAK as u8;
+    } else if buffer[p] == SECTION_BREAK as u8 {
+      buffer[p] = CHAPTER_BREAK as u8;
+    } else if buffer[p] == CHAPTER_BREAK as u8 {
+      buffer[p] = BOOK_BREAK as u8;
+    } else if buffer[p] == BOOK_BREAK as u8 {
+      buffer[p] = VOLUME_BREAK as u8;
+    } else if buffer[p] == VOLUME_BREAK as u8{
+      buffer[p] = COLLECTION_BREAK as u8;
+    } else if buffer[p] == COLLECTION_BREAK as u8 {
+      buffer[p] = SERIES_BREAK as u8;
+    } else if buffer[p] == SERIES_BREAK as u8 {
+      buffer[p] = SHELF_BREAK as u8;
+    } else if buffer[p] == SHELF_BREAK as u8 {
+      buffer[p] = LIBRARY_BREAK as u8;
+    }
+    p += 1;
+  }
+
+  let temp: Vec<u8> = buffer.iter().cloned().collect();
+  let result: String = String::from_utf8(temp).expect("invalid utf8");
+  return result;
+  }
 }
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn contract(phext: &str) -> String {
-   return phext.to_string();
+  let mut copy = phext.to_string().clone();
+  unsafe {
+  let buffer = copy.as_bytes_mut();
+  let max = buffer.len();
+  let mut p: usize = 0;
+  loop {
+    if p == max { break; }
+    
+    if buffer[p] == LIBRARY_BREAK as u8 {
+      buffer[p] = SHELF_BREAK as u8;
+    } else if buffer[p] == SHELF_BREAK as u8 {
+      buffer[p] = SERIES_BREAK as u8;
+    } else if buffer[p] == SERIES_BREAK as u8 {
+      buffer[p] = COLLECTION_BREAK as u8;
+    } else if buffer[p] == COLLECTION_BREAK as u8{
+      buffer[p] = VOLUME_BREAK as u8;
+    } else if buffer[p] == VOLUME_BREAK as u8 {
+      buffer[p] = BOOK_BREAK as u8;
+    } else if buffer[p] == BOOK_BREAK as u8 {
+      buffer[p] = CHAPTER_BREAK as u8;
+    } else if buffer[p] == CHAPTER_BREAK as u8 {
+      buffer[p] = SECTION_BREAK as u8;
+    } else if buffer[p] == SECTION_BREAK as u8 {
+      buffer[p] = SCROLL_BREAK as u8;
+    } else if buffer[p] == SCROLL_BREAK as u8 {
+      buffer[p] = LINE_BREAK as u8;
+    }   
+    p += 1;
+  }
+
+  let temp: Vec<u8> = buffer.iter().cloned().collect();
+  let result: String = String::from_utf8(temp).expect("invalid utf8");
+  return result;
+  }
 }
 
 /// ----------------------------------------------------------------------------------------------------------
