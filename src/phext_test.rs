@@ -651,7 +651,11 @@ mod tests {
 
     #[test]
     fn test_swap() {
-        
+        let doc1a = "text in scroll #1\x17scroll #2";
+        let doc1b = "first\x17second";
+        let coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
+        let update = phext::swap(coord, doc1a, doc1b);
+
     }
 
     #[test]

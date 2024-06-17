@@ -50,11 +50,11 @@ Not yet implemented
 * coordinate_based_remove: Verifies that random scroll removal by phext coordinate works
 * range_based_replace: Verifies that a range of phext coordinates can be used to replace text
 * next_scroll: verifies that we can tokenize subspace by scroll
+* expand: verifies that delimiters can be grown larger by 1 dimension
+* contract: verifies that delimiters can be shrunk by 1 dimension
 * WIP: merge: verifies that two phext documents can be zipper-merged
 * PENDING: intersection: verifies that content from shared coordinates can be merged between two docs
 * PENDING: subtract: verifies that we can prune all of the coordinates from a second phext document
 * PENDING: normalize: verifies that empty scrolls are pruned from the given phext document
-* PENDING: expand: verifies that delimiters can be grown larger by 1 dimension
-* PENDING: contract: verifies that delimiters can be shrunk by 1 dimension
 * PENDING: swap: verifies that the content at the given coordinates can be swapped between two phext archives
 * test_api_write

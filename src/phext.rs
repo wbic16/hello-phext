@@ -1008,8 +1008,16 @@ pub fn contract(phext: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-pub fn swap(phext: &str) -> String {
-  return phext.to_string();
+pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
+  let mut ll = coord;
+  let mut rr = coord;
+  let mut lscroll: String;
+  let mut rscroll: String;
+  let mut lremain: String;
+  let mut rremain: String;
+  (ll, lscroll, lremain) = next_scroll(left, ll);
+  (rr, rscroll, rremain) = next_scroll(right, rr);
+  return "todo".to_string();
 }
 
 /// ----------------------------------------------------------------------------------------------------------
