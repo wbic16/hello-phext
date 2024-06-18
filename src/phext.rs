@@ -233,6 +233,13 @@ impl std::fmt::Display for Coordinate {
   }
 }
 
+#[derive(Default, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(impl_new::New)]
+pub struct PositionedScroll {
+  pub coord: Coordinate,
+  pub scroll: String
+}
+
 #[derive(Default, Debug, PartialEq, PartialOrd, Copy, Clone)]
 #[derive(impl_new::New)]
 pub struct Range {
@@ -735,7 +742,7 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
 ///
 /// retrieves the next scroll from the given string, assuming an arbitrary starting point
 /// ----------------------------------------------------------------------------------------------------------
-pub fn next_scroll(phext: &str, start: Coordinate) -> (Coordinate, String, String) {
+pub fn next_scroll(phext: &str, start: Coordinate) -> (PositionedScroll, String) {
   let mut location = start;
   let p = phext.as_bytes();
   let mut output: Vec<u8> = vec![];
@@ -772,7 +779,8 @@ pub fn next_scroll(phext: &str, start: Coordinate) -> (Coordinate, String, Strin
     pi += 1;
   }
 
-  return (location, String::from_utf8(output).expect("valid UTF-8"), String::from_utf8(remaining).expect("valid UTF-8"));
+  let out_scroll: PositionedScroll = PositionedScroll{coord: location, scroll: String::from_utf8(output).expect("valid UTF-8")};
+  return (out_scroll, String::from_utf8(remaining).expect("valid UTF-8"));
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -785,21 +793,23 @@ pub fn merge(left: &str, right: &str) -> String {
   let mut rr = to_coordinate("1.1.1/1.1.1/1.1.1");
   let mut location = to_coordinate("1.1.1/1.1.1/1.1.1");
 
-  let mut lscroll: String;
-  let mut rscroll: String;
+  let mut lpart: PositionedScroll;
+  let mut rpart: PositionedScroll;
   let mut lremain: String = left.to_string();
   let mut rremain: String = right.to_string();
 
   let mut output: String = Default::default();
   let mut done = false;
 
+  // TODO: refactor this with PositionedScroll token streams
+
   while !done
   {
     let left_paste = ll <= rr;
     let mut bll = ll;
     let mut brr = rr;
-    (ll, lscroll, lremain) = next_scroll(lremain.as_str(), ll);
-    (rr, rscroll, rremain) = next_scroll(rremain.as_str(), rr);
+    (lpart, lremain) = next_scroll(lremain.as_str(), ll);
+    (rpart, rremain) = next_scroll(rremain.as_str(), rr);
     
     if left_paste {
       println!("Left pasting at {} vs {}", bll, ll);
@@ -814,7 +824,7 @@ pub fn merge(left: &str, right: &str) -> String {
         if bll.x.section < ll.x.section       { output.push(SECTION_BREAK);    bll.section_break();    continue; }
         if bll.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     bll.scroll_break();     continue; }
       }
-      output.push_str(lscroll.as_str());
+      output.push_str(lpart.scroll.as_str());
       while brr < rr {
         if brr.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    brr.library_break();    continue; }
         if brr.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      brr.shelf_break();      continue; }
@@ -826,7 +836,7 @@ pub fn merge(left: &str, right: &str) -> String {
         if brr.x.section < rr.x.section       { output.push(SECTION_BREAK);    brr.section_break();    continue; }
         if brr.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     brr.scroll_break();     continue; }
       }
-      output.push_str(rscroll.as_str());
+      output.push_str(rpart.scroll.as_str());
       while location < ll {
         if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
         if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
@@ -861,7 +871,7 @@ pub fn merge(left: &str, right: &str) -> String {
         if brr.x.section < rr.x.section       { output.push(SECTION_BREAK);    brr.section_break();    continue; }
         if brr.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     brr.scroll_break();     continue; }
       }
-      output.push_str(rscroll.as_str());
+      output.push_str(rpart.scroll.as_str());
       while bll < ll {
         if bll.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    bll.library_break();    continue; }
         if bll.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      bll.shelf_break();      continue; }
@@ -873,7 +883,7 @@ pub fn merge(left: &str, right: &str) -> String {
         if bll.x.section < ll.x.section       { output.push(SECTION_BREAK);    bll.section_break();    continue; }
         if bll.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     bll.scroll_break();     continue; }
       }
-      output.push_str(lscroll.as_str());
+      output.push_str(lpart.scroll.as_str());
       while location < rr {
         if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
         if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
@@ -1011,12 +1021,24 @@ pub fn contract(phext: &str) -> String {
 pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
   let mut ll = coord;
   let mut rr = coord;
-  let mut lscroll: String;
-  let mut rscroll: String;
-  let mut lremain: String;
-  let mut rremain: String;
-  (ll, lscroll, lremain) = next_scroll(left, ll);
-  (rr, rscroll, rremain) = next_scroll(right, rr);
+  let mut lpart: PositionedScroll;
+  let mut rpart: PositionedScroll;
+  let mut lremain: String = left.to_string();
+  let mut rremain: String = right.to_string();
+  loop {
+    if ll < coord {
+      (lpart, lremain) = next_scroll(lremain.as_str(), ll);
+      ll = lpart.coord;
+    }
+    if rr < coord {
+      (rpart, rremain) = next_scroll(rremain.as_str(), rr);
+      rr = rpart.coord;
+    }
+    // TODO: build up a tokenizer to produce streams of PositionedScroll entries
+    // once we have that, advance through the token streams until we hit `coord`
+    // if both streams have entries at that coordinate, swap those entries
+    break;
+  }
   return "todo".to_string();
 }
 

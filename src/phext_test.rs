@@ -551,9 +551,9 @@ mod tests {
     #[test]
     fn test_next_scroll() {
         let doc1 = "3A\x17B2\x18C1";
-        let (update1coord, update1, remaining) = phext::next_scroll(doc1, phext::to_coordinate("1.1.1/1.1.1/1.1.1"));
-        assert_eq!(update1coord.to_string(), "1.1.1/1.1.1/1.1.2");
-        assert_eq!(update1, "3A");
+        let (update1, remaining) = phext::next_scroll(doc1, phext::to_coordinate("1.1.1/1.1.1/1.1.1"));
+        assert_eq!(update1.coord.to_string(), "1.1.1/1.1.1/1.1.2");
+        assert_eq!(update1.scroll, "3A");
         assert_eq!(remaining, "B2\x18C1");
     }
 
@@ -655,7 +655,7 @@ mod tests {
         let doc1b = "first\x17second";
         let coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
         let update = phext::swap(coord, doc1a, doc1b);
-
+        assert_eq!(update, "first\x17scroll #2");
     }
 
     #[test]
