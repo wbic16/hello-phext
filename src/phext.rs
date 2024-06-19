@@ -239,6 +239,11 @@ pub struct PositionedScroll {
   pub coord: Coordinate,
   pub scroll: String
 }
+impl std::fmt::Display for PositionedScroll {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    return write!(f, "{}: {}", self.coord.to_string(), self.scroll[..4].to_string());
+  }
+}
 
 #[derive(Default, Debug, PartialEq, PartialOrd, Copy, Clone)]
 #[derive(impl_new::New)]
@@ -781,6 +786,26 @@ pub fn next_scroll(phext: &str, start: Coordinate) -> (PositionedScroll, String)
 
   let out_scroll: PositionedScroll = PositionedScroll{coord: location, scroll: String::from_utf8(output).expect("valid UTF-8")};
   return (out_scroll, String::from_utf8(remaining).expect("valid UTF-8"));
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn phokenize
+///
+/// Transforms a packed phext buffer into a phext token (phoken) stream
+/// ----------------------------------------------------------------------------------------------------------
+pub fn phokenize(phext: &str) -> Vec<PositionedScroll> {
+  let mut result: Vec<PositionedScroll> = Vec::new();
+  let mut coord = default_coordinate();
+  let mut temp: String = phext.to_string();
+  loop {
+    let item: PositionedScroll;
+    (item, temp) = next_scroll(temp.as_str(), coord);
+    coord = item.coord;
+    result.push(item);
+    if temp.len() == 0 { break; }
+  }
+
+  return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------

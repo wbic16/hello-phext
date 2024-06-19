@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::phext::{self, LIBRARY_BREAK, SHELF_BREAK, SERIES_BREAK, COLLECTION_BREAK, VOLUME_BREAK, BOOK_BREAK, CHAPTER_BREAK, SECTION_BREAK, SCROLL_BREAK};
+    use crate::phext::{self, PositionedScroll, BOOK_BREAK, CHAPTER_BREAK, COLLECTION_BREAK, LIBRARY_BREAK, SCROLL_BREAK, SECTION_BREAK, SERIES_BREAK, SHELF_BREAK, VOLUME_BREAK};
     use std::collections::HashMap;
 
     #[test]
@@ -555,6 +555,18 @@ mod tests {
         assert_eq!(update1.coord.to_string(), "1.1.1/1.1.1/1.1.2");
         assert_eq!(update1.scroll, "3A");
         assert_eq!(remaining, "B2\x18C1");
+    }
+
+    #[test]
+    fn test_phokenize() {
+        let doc1 = "one\x17two\x17three\x17four";
+        let mut expected: Vec<phext::PositionedScroll> = Vec::new();
+        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), scroll: "one".to_string()});
+        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.2"), scroll: "two".to_string()});
+        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.3"), scroll: "three".to_string()});
+        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.4"), scroll: "four".to_string()});
+        let update = phext::phokenize(doc1);
+        assert_eq!(update, expected);
     }
 
     #[test]

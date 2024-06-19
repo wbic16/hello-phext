@@ -50,6 +50,7 @@ Not yet implemented
 * coordinate_based_remove: Verifies that random scroll removal by phext coordinate works
 * range_based_replace: Verifies that a range of phext coordinates can be used to replace text
 * next_scroll: verifies that we can tokenize subspace by scroll
+* phokenize: verifies that we can build subspace phokens (phext tokens)
 * expand: verifies that delimiters can be grown larger by 1 dimension
 * contract: verifies that delimiters can be shrunk by 1 dimension
 * WIP: merge: verifies that two phext documents can be zipper-merged
