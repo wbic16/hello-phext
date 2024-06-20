@@ -747,13 +747,15 @@ pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
 ///
 /// retrieves the next scroll from the given string, assuming an arbitrary starting point
 /// ----------------------------------------------------------------------------------------------------------
-pub fn next_scroll(phext: &str, start: Coordinate) -> (PositionedScroll, String) {
+pub fn next_scroll(phext: &str, start: Coordinate) -> (PositionedScroll, Coordinate, String) {
   let mut location = start;
   let p = phext.as_bytes();
   let mut output: Vec<u8> = vec![];
   let mut remaining: Vec<u8> = vec![];
   let mut pi: usize = 0;
-  while pi < p.len()
+  let mut begin: Coordinate = start;
+  let pmax = p.len();
+  while pi < pmax
   {
     let test = p[pi] as char;
     let mut dimension_break: bool = false;
@@ -772,7 +774,8 @@ pub fn next_scroll(phext: &str, start: Coordinate) -> (PositionedScroll, String)
         pi += 1;
         break;
       }
-    } else {
+    } else {      
+      begin = location;
       output.push(p[pi]);
     }
     pi += 1;
@@ -784,8 +787,8 @@ pub fn next_scroll(phext: &str, start: Coordinate) -> (PositionedScroll, String)
     pi += 1;
   }
 
-  let out_scroll: PositionedScroll = PositionedScroll{coord: location, scroll: String::from_utf8(output).expect("valid UTF-8")};
-  return (out_scroll, String::from_utf8(remaining).expect("valid UTF-8"));
+  let out_scroll: PositionedScroll = PositionedScroll{coord: begin, scroll: String::from_utf8(output).expect("valid UTF-8")};
+  return (out_scroll, location, String::from_utf8(remaining).expect("valid UTF-8"));
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -799,8 +802,7 @@ pub fn phokenize(phext: &str) -> Vec<PositionedScroll> {
   let mut temp: String = phext.to_string();
   loop {
     let item: PositionedScroll;
-    (item, temp) = next_scroll(temp.as_str(), coord);
-    coord = item.coord;
+    (item, coord, temp) = next_scroll(temp.as_str(), coord);
     result.push(item);
     if temp.len() == 0 { break; }
   }
@@ -833,8 +835,8 @@ pub fn merge(left: &str, right: &str) -> String {
     let left_paste = ll <= rr;
     let mut bll = ll;
     let mut brr = rr;
-    (lpart, lremain) = next_scroll(lremain.as_str(), ll);
-    (rpart, rremain) = next_scroll(rremain.as_str(), rr);
+    (lpart, ll, lremain) = next_scroll(lremain.as_str(), ll);
+    (rpart, rr, rremain) = next_scroll(rremain.as_str(), rr);
     
     if left_paste {
       println!("Left pasting at {} vs {}", bll, ll);
@@ -1052,12 +1054,10 @@ pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
   let mut rremain: String = right.to_string();
   loop {
     if ll < coord {
-      (lpart, lremain) = next_scroll(lremain.as_str(), ll);
-      ll = lpart.coord;
+      (lpart, ll, lremain) = next_scroll(lremain.as_str(), ll);
     }
     if rr < coord {
-      (rpart, rremain) = next_scroll(rremain.as_str(), rr);
-      rr = rpart.coord;
+      (rpart, rr, rremain) = next_scroll(rremain.as_str(), rr);
     }
     // TODO: build up a tokenizer to produce streams of PositionedScroll entries
     // once we have that, advance through the token streams until we hit `coord`

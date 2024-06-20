@@ -551,22 +551,53 @@ mod tests {
     #[test]
     fn test_next_scroll() {
         let doc1 = "3A\x17B2\x18C1";
-        let (update1, remaining) = phext::next_scroll(doc1, phext::to_coordinate("1.1.1/1.1.1/1.1.1"));
-        assert_eq!(update1.coord.to_string(), "1.1.1/1.1.1/1.1.2");
+        let (update1, next_start, remaining) = phext::next_scroll(doc1, phext::to_coordinate("1.1.1/1.1.1/1.1.1"));
+        assert_eq!(update1.coord.to_string(), "1.1.1/1.1.1/1.1.1");        
         assert_eq!(update1.scroll, "3A");
+        assert_eq!(next_start.to_string(), "1.1.1/1.1.1/1.1.2");
         assert_eq!(remaining, "B2\x18C1");
     }
 
     #[test]
     fn test_phokenize() {
         let doc1 = "one\x17two\x17three\x17four";
-        let mut expected: Vec<phext::PositionedScroll> = Vec::new();
-        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), scroll: "one".to_string()});
-        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.2"), scroll: "two".to_string()});
-        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.3"), scroll: "three".to_string()});
-        expected.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.4"), scroll: "four".to_string()});
-        let update = phext::phokenize(doc1);
-        assert_eq!(update, expected);
+        let mut expected1: Vec<phext::PositionedScroll> = Vec::new();
+        expected1.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), scroll: "one".to_string()});
+        expected1.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.2"), scroll: "two".to_string()});
+        expected1.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.3"), scroll: "three".to_string()});
+        expected1.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.4"), scroll: "four".to_string()});
+        let update1: Vec<PositionedScroll> = phext::phokenize(doc1);
+        assert_eq!(update1, expected1);
+
+        let doc2 = "one\x01two\x1Fthree\x1Efour\x1Dfive\x1Csix\x1Aseven\x19eight\x18nine\x17ten";
+        let mut expected2: Vec<phext::PositionedScroll> = Vec::new();
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), scroll: "one".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.1.1/1.1.1/1.1.1"), scroll: "two".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.1/1.1.1/1.1.1"), scroll: "three".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/1.1.1/1.1.1"), scroll: "four".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/2.1.1/1.1.1"), scroll: "five".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/2.2.1/1.1.1"), scroll: "six".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/2.2.2/1.1.1"), scroll: "seven".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/2.2.2/2.1.1"), scroll: "eight".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/2.2.2/2.2.1"), scroll: "nine".to_string()});
+        expected2.push(PositionedScroll{ coord: phext::to_coordinate("2.2.2/2.2.2/2.2.2"), scroll: "ten".to_string()});
+        let update2: Vec<PositionedScroll> = phext::phokenize(doc2);
+        assert_eq!(update2, expected2);
+
+        let doc3 = "one\x17two\x18three\x19four\x1afive\x1csix\x1dseven\x1eeight\x1fnine\x01ten";
+        let mut expected3: Vec<phext::PositionedScroll> = Vec::new();
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), scroll: "one".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.1.2"), scroll: "two".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/1.2.1"), scroll: "three".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.1/2.1.1"), scroll: "four".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.1.2/1.1.1"), scroll: "five".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/1.2.1/1.1.1"), scroll: "six".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.1/2.1.1/1.1.1"), scroll: "seven".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.1.2/1.1.1/1.1.1"), scroll: "eight".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("1.2.1/1.1.1/1.1.1"), scroll: "nine".to_string()});
+        expected3.push(PositionedScroll{ coord: phext::to_coordinate("2.1.1/1.1.1/1.1.1"), scroll: "ten".to_string()});
+        let update3: Vec<PositionedScroll> = phext::phokenize(doc3);
+        assert_eq!(update3, expected3);
     }
 
     #[test]
