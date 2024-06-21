@@ -1045,26 +1045,43 @@ pub fn contract(phext: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
-  let mut ll = coord;
-  let mut rr = coord;
-  let mut lpart: PositionedScroll;
-  let mut rpart: PositionedScroll;
-  let mut lremain: String = left.to_string();
-  let mut rremain: String = right.to_string();
-  loop {
-    if ll < coord {
-      (lpart, ll, lremain) = next_scroll(lremain.as_str(), ll);
+fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
+  let mut result: String = Default::default();
+  let mut coord = default_coordinate();
+  for ps in tokens {
+    while coord < ps.coord {
+      if coord.z.library < ps.coord.z.library       { result.push(LIBRARY_BREAK);    coord.library_break();    continue; }
+      if coord.z.shelf < ps.coord.z.shelf           { result.push(SHELF_BREAK);      coord.shelf_break();      continue; }
+      if coord.z.series < ps.coord.z.series         { result.push(SERIES_BREAK);     coord.series_break();     continue; }
+      if coord.y.collection < ps.coord.y.collection { result.push(COLLECTION_BREAK); coord.collection_break(); continue; }
+      if coord.y.volume < ps.coord.y.volume         { result.push(VOLUME_BREAK);     coord.volume_break();     continue; }
+      if coord.y.book < ps.coord.y.book             { result.push(BOOK_BREAK);       coord.book_break();       continue; }
+      if coord.x.chapter < ps.coord.x.chapter       { result.push(CHAPTER_BREAK);    coord.chapter_break();    continue; }
+      if coord.x.section < ps.coord.x.section       { result.push(SECTION_BREAK);    coord.section_break();    continue; }
+      if coord.x.scroll < ps.coord.x.scroll         { result.push(SCROLL_BREAK);     coord.scroll_break();     continue; }
     }
-    if rr < coord {
-      (rpart, rr, rremain) = next_scroll(rremain.as_str(), rr);
-    }
-    // TODO: build up a tokenizer to produce streams of PositionedScroll entries
-    // once we have that, advance through the token streams until we hit `coord`
-    // if both streams have entries at that coordinate, swap those entries
-    break;
+    result.push_str(&ps.scroll);
   }
-  return "todo".to_string();
+  return result;
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
+  let mut pl = phokenize(left);
+  let pr = phokenize(right);
+  for ps in &mut pl {
+    if ps.coord == coord {
+      for ith in &pr {
+        if ith.coord == coord {
+          // let old = ith.scroll;
+          // ith.scroll = ps.scroll;
+          ps.scroll = ith.scroll.clone();
+        }
+      }
+    }
+  }
+
+  return dephokenize(&mut pl);
 }
 
 /// ----------------------------------------------------------------------------------------------------------

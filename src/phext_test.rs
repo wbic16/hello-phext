@@ -696,9 +696,15 @@ mod tests {
     fn test_swap() {
         let doc1a = "text in scroll #1\x17scroll #2";
         let doc1b = "first\x17second";
-        let coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
-        let update = phext::swap(coord, doc1a, doc1b);
-        assert_eq!(update, "first\x17scroll #2");
+        let coord1 = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
+        let update1 = phext::swap(coord1, doc1a, doc1b);
+        assert_eq!(update1, "first\x17scroll #2");
+
+        let doc2a = "before\x18section two\x18section three\x18section four";
+        let doc2b = "lalala\x18replaced!!!\x18ignored\x19ignored\x17ignored";
+        let coord2 = phext::to_coordinate("1.1.1/1.1.1/1.2.1");
+        let update2 = phext::swap(coord2, doc2a, doc2b);
+        assert_eq!(update2, "before\x18replaced!!!\x18section three\x18section four");
     }
 
     #[test]
