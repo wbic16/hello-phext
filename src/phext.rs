@@ -1066,6 +1066,11 @@ fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+fn append_positioned_scroll() {
+  // TODO: merge functionality from dephokenize and leverage for zipper merges
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
   let mut pl = phokenize(left);
   let pr = phokenize(right);
@@ -1086,7 +1091,13 @@ pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn intersection(left: &str, right: &str) -> String {
-  return "".to_string();
+  let mut pl = phokenize(left);
+  let mut pr = phokenize(right);
+  
+  // todo: zipper merge, not append
+  let mut result = dephokenize(&mut pl);
+  result.push_str(&dephokenize(&mut pr));
+  return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------

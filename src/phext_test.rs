@@ -630,7 +630,7 @@ mod tests {
        let doc1a = "AA\x01BB\x01CC";
        let doc1b = "__\x01__\x01__";
        let update1 = phext::intersection(doc1a, doc1b);
-       assert_eq!(update1, "AA")
+       assert_eq!(update1, "AA__\x01BB__\x01CC__");
     }
 
     #[test]
