@@ -1,6 +1,6 @@
 # hello-phext
 
-This repository demonstrates how to work with phext from a rust context. Phext is 11 dimensional plain hypertext.
+This repository demonstrates how to work with phext from a rust context. Phext is 11 dimensional plain hypertext. Refer to unit tests for example phext documents.
 
 ## Build
 
