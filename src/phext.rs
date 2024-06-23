@@ -1049,25 +1049,28 @@ fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
   let mut result: String = Default::default();
   let mut coord = default_coordinate();
   for ps in tokens {
-    while coord < ps.coord {
-      if coord.z.library < ps.coord.z.library       { result.push(LIBRARY_BREAK);    coord.library_break();    continue; }
-      if coord.z.shelf < ps.coord.z.shelf           { result.push(SHELF_BREAK);      coord.shelf_break();      continue; }
-      if coord.z.series < ps.coord.z.series         { result.push(SERIES_BREAK);     coord.series_break();     continue; }
-      if coord.y.collection < ps.coord.y.collection { result.push(COLLECTION_BREAK); coord.collection_break(); continue; }
-      if coord.y.volume < ps.coord.y.volume         { result.push(VOLUME_BREAK);     coord.volume_break();     continue; }
-      if coord.y.book < ps.coord.y.book             { result.push(BOOK_BREAK);       coord.book_break();       continue; }
-      if coord.x.chapter < ps.coord.x.chapter       { result.push(CHAPTER_BREAK);    coord.chapter_break();    continue; }
-      if coord.x.section < ps.coord.x.section       { result.push(SECTION_BREAK);    coord.section_break();    continue; }
-      if coord.x.scroll < ps.coord.x.scroll         { result.push(SCROLL_BREAK);     coord.scroll_break();     continue; }
-    }
-    result.push_str(&ps.scroll);
+    result.push_str(&append_scroll(ps.clone(), coord)); 
   }
   return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-fn append_positioned_scroll() {
-  // TODO: merge functionality from dephokenize and leverage for zipper merges
+fn append_scroll(token: PositionedScroll, mut coord: Coordinate) -> String {
+  let mut output: String = Default::default();
+  println!("append_scroll: {} vs {}", token.coord, coord);
+  while coord < token.coord {
+    if coord.z.library < token.coord.z.library       { output.push(LIBRARY_BREAK);    coord.library_break();    continue; }
+    if coord.z.shelf < token.coord.z.shelf           { output.push(SHELF_BREAK);      coord.shelf_break();      continue; }
+    if coord.z.series < token.coord.z.series         { output.push(SERIES_BREAK);     coord.series_break();     continue; }
+    if coord.y.collection < token.coord.y.collection { output.push(COLLECTION_BREAK); coord.collection_break(); continue; }
+    if coord.y.volume < token.coord.y.volume         { output.push(VOLUME_BREAK);     coord.volume_break();     continue; }
+    if coord.y.book < token.coord.y.book             { output.push(BOOK_BREAK);       coord.book_break();       continue; }
+    if coord.x.chapter < token.coord.x.chapter       { output.push(CHAPTER_BREAK);    coord.chapter_break();    continue; }
+    if coord.x.section < token.coord.x.section       { output.push(SECTION_BREAK);    coord.section_break();    continue; }
+    if coord.x.scroll < token.coord.x.scroll         { output.push(SCROLL_BREAK);     coord.scroll_break();     continue; }
+  }
+  output.push_str(&token.scroll);
+  return output;
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -1093,16 +1096,51 @@ pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
 pub fn intersection(left: &str, right: &str) -> String {
   let mut pl = phokenize(left);
   let mut pr = phokenize(right);
-  
-  // todo: zipper merge, not append
-  let mut result = dephokenize(&mut pl);
-  result.push_str(&dephokenize(&mut pr));
+  let mut result: String = Default::default();
+
+  let coord = default_coordinate();
+  let mut pli = 0;
+  let mut pri = 0;
+  loop {
+    let mut left = pl[pli].clone();
+    let mut right = pr[pri].clone();
+
+    println!("looping... {} vs {}", left.coord, right.coord);
+
+    while left.coord <= coord {
+      result.push_str(&append_scroll(left.clone(), coord));
+      println!("Appended {} at {}", left.scroll, left.coord);
+      if pli < (pl.len() - 1) {
+        pli += 1;
+        left = pl[pli].clone();
+      } else { break; }
+    }
+
+    while right.coord <= coord {
+      result.push_str(&append_scroll(right.clone(), coord));
+      println!("Appended {} at {}", right.scroll, right.coord);
+      if pri < (pr.len() - 1) {
+        pri += 1;
+        right = pr[pri].clone();
+      } else { break; }
+    }
+
+    if (pli == (pl.len() - 1)) && (pri == (pr.len() - 1)) {
+      break;
+    } else {
+      println!("pli: {}, pri: {}", pli, pri);
+    }
+  }
+
   return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn subtract(left: &str, right: &str) -> String {
-  return "".to_string();
+  let mut stuff: String = Default::default();
+  stuff.push_str(left);
+  stuff.push_str(right);
+  return stuff;
 }
 
 /// ----------------------------------------------------------------------------------------------------------
