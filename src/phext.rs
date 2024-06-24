@@ -671,7 +671,7 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
   let start: usize = parts_start.0;
   let mut end: usize = parts_end.1;
   println!("Subspace start: {}, end: {}", start, end);
-  let mut fixup: Vec<u8> = vec![];
+  let fixup: Vec<u8> = vec![];
 
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let max = bytes.len();
@@ -1047,9 +1047,9 @@ pub fn contract(phext: &str) -> String {
 /// ----------------------------------------------------------------------------------------------------------
 fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
   let mut result: String = Default::default();
-  let mut coord = default_coordinate();
+  let coord = default_coordinate();
   for ps in tokens {
-    result.push_str(&append_scroll(ps.clone(), coord)); 
+    result.push_str(&append_scroll(ps.clone(), coord));
   }
   return result;
 }
@@ -1094,38 +1094,58 @@ pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn intersection(left: &str, right: &str) -> String {
-  let mut pl = phokenize(left);
-  let mut pr = phokenize(right);
+  let pl = phokenize(left);
+  let pr = phokenize(right);
+  let maxpl = pl.len() - 1;
+  let maxpr = pr.len() - 1;
   let mut result: String = Default::default();
 
   let coord = default_coordinate();
   let mut pli = 0;
   let mut pri = 0;
+
   loop {
     let mut left = pl[pli].clone();
     let mut right = pr[pri].clone();
 
-    println!("looping... {} vs {}", left.coord, right.coord);
+    println!("looping... {}/{} vs {}/{}", pli, pl.len(), pri, pr.len());
 
+    let mut progress = false;
     while left.coord <= coord {
       result.push_str(&append_scroll(left.clone(), coord));
       println!("Appended {} at {}", left.scroll, left.coord);
-      if pli < (pl.len() - 1) {
+      progress = true;
+      if pli < maxpl {
         pli += 1;
         left = pl[pli].clone();
       } else { break; }
-    }
+    }    
 
     while right.coord <= coord {
       result.push_str(&append_scroll(right.clone(), coord));
       println!("Appended {} at {}", right.scroll, right.coord);
-      if pri < (pr.len() - 1) {
+      progress = true;
+      if pri < maxpr {
         pri += 1;
         right = pr[pri].clone();
       } else { break; }
     }
 
-    if (pli == (pl.len() - 1)) && (pri == (pr.len() - 1)) {
+    if progress == false {
+      if pli < maxpl {
+        result.push_str(&append_scroll(left.clone(), coord));
+        println!("default appended {} at {}", left.scroll, left.coord);
+        pli += 1;
+      } else {
+        if pri < maxpr {
+          result.push_str(&append_scroll(right.clone(), coord));
+          pri += 1;
+          println!("default appended {} at {}", right.scroll, right.coord);
+        }
+      }
+    }
+
+    if (pli == maxpl) && (pri == maxpr) {
       break;
     } else {
       println!("pli: {}, pri: {}", pli, pri);
