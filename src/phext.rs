@@ -816,129 +816,49 @@ pub fn phokenize(phext: &str) -> Vec<PositionedScroll> {
 /// combines `left` and `right` into a new phext document, with content merged on a per-scroll basis
 /// ----------------------------------------------------------------------------------------------------------
 pub fn merge(left: &str, right: &str) -> String {
-  let mut ll = to_coordinate("1.1.1/1.1.1/1.1.1");
-  let mut rr = to_coordinate("1.1.1/1.1.1/1.1.1");
-  let mut location = to_coordinate("1.1.1/1.1.1/1.1.1");
+  let tl = phokenize(left);
+  let tr = phokenize(right);
+  let mut tli = 0;
+  let mut tri = 0;
+  let maxtl = tl.len();
+  let maxtr = tr.len();
+  let mut result: String = Default::default();
+  let mut coord = default_coordinate();
 
-  let mut lpart: PositionedScroll;
-  let mut rpart: PositionedScroll;
-  let mut lremain: String = left.to_string();
-  let mut rremain: String = right.to_string();
+  loop {
+    let have_left = tli < maxtl;
+    let have_right = tri < maxtr;
 
-  let mut output: String = Default::default();
-  let mut done = false;
+    if have_left && have_right {
 
-  // TODO: refactor this with PositionedScroll token streams
+      if tl[tli].coord <= tr[tri].coord {
+        result.push_str(&append_scroll(tl[tli].clone(), coord));
+        coord = tl[tli].coord;
+        tli += 1;        
+      } else {
+        result.push_str(&append_scroll(tr[tri].clone(), coord));
+        coord = tr[tri].coord;
+        tri += 1;
+      }
 
-  while !done
-  {
-    let left_paste = ll <= rr;
-    let mut bll = ll;
-    let mut brr = rr;
-    (lpart, ll, lremain) = next_scroll(lremain.as_str(), ll);
-    (rpart, rr, rremain) = next_scroll(rremain.as_str(), rr);
-    
-    if left_paste {
-      println!("Left pasting at {} vs {}", bll, ll);
-      while bll < ll {
-        if bll.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    bll.library_break();    continue; }
-        if bll.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      bll.shelf_break();      continue; }
-        if bll.z.series < ll.z.series         { output.push(SERIES_BREAK);     bll.series_break();     continue; }
-        if bll.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); bll.collection_break(); continue; }
-        if bll.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     bll.volume_break();     continue; }
-        if bll.y.book < ll.y.book             { output.push(BOOK_BREAK);       bll.book_break();       continue; }
-        if bll.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    bll.chapter_break();    continue; }
-        if bll.x.section < ll.x.section       { output.push(SECTION_BREAK);    bll.section_break();    continue; }
-        if bll.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     bll.scroll_break();     continue; }
-      }
-      output.push_str(lpart.scroll.as_str());
-      while brr < rr {
-        if brr.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    brr.library_break();    continue; }
-        if brr.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      brr.shelf_break();      continue; }
-        if brr.z.series < rr.z.series         { output.push(SERIES_BREAK);     brr.series_break();     continue; }
-        if brr.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); brr.collection_break(); continue; }
-        if brr.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     brr.volume_break();     continue; }
-        if brr.y.book < rr.y.book             { output.push(BOOK_BREAK);       brr.book_break();       continue; }
-        if brr.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    brr.chapter_break();    continue; }
-        if brr.x.section < rr.x.section       { output.push(SECTION_BREAK);    brr.section_break();    continue; }
-        if brr.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     brr.scroll_break();     continue; }
-      }
-      output.push_str(rpart.scroll.as_str());
-      while location < ll {
-        if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
-        if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
-        if location.z.series < ll.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
-        if location.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
-        if location.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
-        if location.y.book < ll.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
-        if location.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
-        if location.x.section < ll.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
-        if location.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
-      }
-      while location < rr {
-        if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
-        if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
-        if location.z.series < rr.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
-        if location.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
-        if location.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
-        if location.y.book < rr.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
-        if location.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
-        if location.x.section < rr.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
-        if location.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
-      }
+    } else if have_left {
+
+      result.push_str(&append_scroll(tl[tli].clone(), coord));
+      coord = tl[tli].coord;
+      tli += 1;
+
+    } else if have_right {
+
+      result.push_str(&append_scroll(tr[tri].clone(), coord));
+      coord = tr[tri].coord;
+      tri += 1;
+
     } else {
-      while brr < rr {
-        if brr.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    brr.library_break();    continue; }
-        if brr.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      brr.shelf_break();      continue; }
-        if brr.z.series < rr.z.series         { output.push(SERIES_BREAK);     brr.series_break();     continue; }
-        if brr.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); brr.collection_break(); continue; }
-        if brr.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     brr.volume_break();     continue; }
-        if brr.y.book < rr.y.book             { output.push(BOOK_BREAK);       brr.book_break();       continue; }
-        if brr.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    brr.chapter_break();    continue; }
-        if brr.x.section < rr.x.section       { output.push(SECTION_BREAK);    brr.section_break();    continue; }
-        if brr.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     brr.scroll_break();     continue; }
-      }
-      output.push_str(rpart.scroll.as_str());
-      while bll < ll {
-        if bll.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    bll.library_break();    continue; }
-        if bll.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      bll.shelf_break();      continue; }
-        if bll.z.series < ll.z.series         { output.push(SERIES_BREAK);     bll.series_break();     continue; }
-        if bll.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); bll.collection_break(); continue; }
-        if bll.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     bll.volume_break();     continue; }
-        if bll.y.book < ll.y.book             { output.push(BOOK_BREAK);       bll.book_break();       continue; }
-        if bll.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    bll.chapter_break();    continue; }
-        if bll.x.section < ll.x.section       { output.push(SECTION_BREAK);    bll.section_break();    continue; }
-        if bll.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     bll.scroll_break();     continue; }
-      }
-      output.push_str(lpart.scroll.as_str());
-      while location < rr {
-        if location.z.library < rr.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
-        if location.z.shelf < rr.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
-        if location.z.series < rr.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
-        if location.y.collection < rr.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
-        if location.y.volume < rr.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
-        if location.y.book < rr.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
-        if location.x.chapter < rr.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
-        if location.x.section < rr.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
-        if location.x.scroll < rr.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
-      }      
-      while location < ll {
-        if location.z.library < ll.z.library       { output.push(LIBRARY_BREAK);    location.library_break();    continue; }
-        if location.z.shelf < ll.z.shelf           { output.push(SHELF_BREAK);      location.shelf_break();      continue; }
-        if location.z.series < ll.z.series         { output.push(SERIES_BREAK);     location.series_break();     continue; }
-        if location.y.collection < ll.y.collection { output.push(COLLECTION_BREAK); location.collection_break(); continue; }
-        if location.y.volume < ll.y.volume         { output.push(VOLUME_BREAK);     location.volume_break();     continue; }
-        if location.y.book < ll.y.book             { output.push(BOOK_BREAK);       location.book_break();       continue; }
-        if location.x.chapter < ll.x.chapter       { output.push(CHAPTER_BREAK);    location.chapter_break();    continue; }
-        if location.x.section < ll.x.section       { output.push(SECTION_BREAK);    location.section_break();    continue; }
-        if location.x.scroll < ll.x.scroll         { output.push(SCROLL_BREAK);     location.scroll_break();     continue; }
-      }      
+      break;
     }
-
-    done = lremain.len() == 0 && rremain.len() == 0;
   }
 
-  return output; // return String::from_utf8([&output_left[..], &output_right[..]].concat()).expect("invalid utf8");
+  return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -1440,6 +1360,8 @@ impl Coordinate {
 }
 
 use rocket::request::FromParam;
+
+use crate::default;
 
 impl<'r> FromParam<'r> for Coordinate {
   type Error = &'r str;
