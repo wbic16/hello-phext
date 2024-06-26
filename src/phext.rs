@@ -1078,10 +1078,34 @@ pub fn intersection(left: &str, right: &str) -> String {
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn subtract(left: &str, right: &str) -> String {
-  let mut stuff: String = Default::default();
-  stuff.push_str(left);
-  stuff.push_str(right);
-  return stuff;
+  let pl = phokenize(left);
+  let pr = phokenize(right);
+  let mut result: String = Default::default();
+  let mut pri = 0;
+  let max = pr.len();
+  let mut coord = default_coordinate();
+  for token in pl {
+    let mut do_append = false;
+    if pri == max {
+      do_append = true;
+    }
+
+    if pri < max {
+      let compare = pr[pri].clone();
+      if token.coord < compare.coord {
+        do_append = true;
+      } else if token.coord == compare.coord {
+        pri += 1;
+      }
+    }
+
+    if do_append {
+      result.push_str(&append_scroll(token.clone(), coord));
+      coord = token.coord;
+    }
+  }
+
+  return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------

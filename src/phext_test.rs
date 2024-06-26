@@ -638,7 +638,7 @@ mod tests {
         let doc1a = "Here's scroll one.\x17Scroll two.";
         let doc1b = "Just content at the first scroll";
         let update1 = phext::subtract(doc1a, doc1b);
-        assert_eq!(update1, "Scroll two.");
+        assert_eq!(update1, "\x17Scroll two.");
     }
 
     #[test]
