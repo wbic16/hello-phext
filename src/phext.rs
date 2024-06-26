@@ -967,9 +967,11 @@ pub fn contract(phext: &str) -> String {
 /// ----------------------------------------------------------------------------------------------------------
 fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
   let mut result: String = Default::default();
-  let coord = default_coordinate();
+  let mut coord = default_coordinate();
   for ps in tokens {
+    println!("merging {} at {} vs {}", ps.scroll, ps.coord, coord);
     result.push_str(&append_scroll(ps.clone(), coord));
+    coord = ps.coord;
   }
   return result;
 }
@@ -1001,8 +1003,7 @@ pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
     if ps.coord == coord {
       for ith in &pr {
         if ith.coord == coord {
-          // let old = ith.scroll;
-          // ith.scroll = ps.scroll;
+          println!("swapping left='{}' for right='{}'", ps.scroll, ith.scroll);
           ps.scroll = ith.scroll.clone();
         }
       }
