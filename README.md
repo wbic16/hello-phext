@@ -53,9 +53,7 @@ Not yet implemented
 * phokenize: verifies that we can build subspace phokens (phext tokens)
 * expand: verifies that delimiters can be grown larger by 1 dimension
 * contract: verifies that delimiters can be shrunk by 1 dimension
-* WIP: merge: verifies that two phext documents can be zipper-merged
-* PENDING: intersection: verifies that content from shared coordinates can be merged between two docs
-* PENDING: subtract: verifies that we can prune all of the coordinates from a second phext document
-* PENDING: normalize: verifies that empty scrolls are pruned from the given phext document
-* PENDING: swap: verifies that the content at the given coordinates can be swapped between two phext archives
-* test_api_write
+* merge: verifies that two phext documents can be zipper-merged (intersection)
+* subtract: verifies that we can prune all of the coordinates from a second phext document
+* normalize: verifies that empty scrolls are pruned from the given phext document
+* swap: verifies that the content at the given coordinates can be swapped between two phext archives
