@@ -1313,8 +1313,6 @@ impl Coordinate {
 
 use rocket::request::FromParam;
 
-use crate::default;
-
 impl<'r> FromParam<'r> for Coordinate {
   type Error = &'r str;
 
