@@ -637,14 +637,16 @@ mod tests {
         let doc_6b = "\x1D\x1D Collection at 1.1.1/3.1.1/1.1.1\x1C Volume at 1.1.1/3.2.1/1.1.1";
         let update_6 = phext::merge(doc_6a, doc_6b);
         assert_eq!(update_6, "\x1D Collection at 1.1.1/2.1.1/1.1.1\x1C Volume at 1.1.1/2.2.1/1.1.1\x1D Collection at 1.1.1/3.1.1/1.1.1\x1C Volume at 1.1.1/3.2.1/1.1.1");
-    }
 
-    #[test]
-    fn test_intersection() {
-       let doc1a = "AA\x01BB\x01CC";
-       let doc1b = "__\x01__\x01__";
-       let update1 = phext::intersection(doc1a, doc1b);
-       assert_eq!(update1, "AA__\x01BB__\x01CC__");
+        let doc_7a = "\x1ABook #2 Part 1\x1ABook #3 Part 1";
+        let doc_7b = "\x1A + Part II\x1A + Part Deux";
+        let update_7 = phext::merge(doc_7a, doc_7b);
+        assert_eq!(update_7, "\x1ABook #2 Part 1 + Part II\x1ABook #3 Part 1 + Part Deux");
+    
+        let doc8a = "AA\x01BB\x01CC";
+        let doc8b = "__\x01__\x01__";
+        let update8 = phext::merge(doc8a, doc8b);
+        assert_eq!(update8, "AA__\x01BB__\x01CC__");
     }
 
     #[test]
