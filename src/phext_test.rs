@@ -598,6 +598,12 @@ mod tests {
         expected3.push(PositionedScroll{ coord: phext::to_coordinate("2.1.1/1.1.1/1.1.1"), scroll: "ten".to_string()});
         let update3: Vec<PositionedScroll> = phext::phokenize(doc3);
         assert_eq!(update3, expected3);
+
+        let doc4 = "\x1A\x1C\x1D\x1E\x1F\x01stuff here";
+        let mut expected4: Vec<phext::PositionedScroll> = Vec::new();
+        expected4.push(PositionedScroll{ coord: phext::to_coordinate("2.1.1/1.1.1/1.1.1"), scroll: "stuff here".to_string()});
+        let update4: Vec<PositionedScroll> = phext::phokenize(doc4);
+        assert_eq!(update4, expected4);
     }
 
     #[test]
@@ -620,7 +626,7 @@ mod tests {
         let doc_4a = "\x1A\x1C\x1D\x1E\x1F\x01stuff here";
         let doc_4b = "\x1A\x1C\x1D\x1Eprecursor here\x1F\x01and more";
         let update_4 = phext::merge(doc_4a, doc_4b);
-        assert_eq!(update_4, "\x1A\x1C\x1D\x1Eprecursor here\x1F\x01stuff hereand more");
+        assert_eq!(update_4, "\x1Eprecursor here\x01stuff hereand more");
 
         
     }

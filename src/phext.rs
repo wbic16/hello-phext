@@ -828,32 +828,22 @@ pub fn merge(left: &str, right: &str) -> String {
   loop {
     let have_left = tli < maxtl;
     let have_right = tri < maxtr;
+    
+    let pick_left = have_left && (have_right == false || tl[tli].coord <= tr[tri].coord);
+    let pick_right = have_right && (have_left == false || tr[tri].coord <= tl[tli].coord);
 
-    if have_left && have_right {
-
-      if tl[tli].coord <= tr[tri].coord {
-        result.push_str(&append_scroll(tl[tli].clone(), coord));
-        coord = tl[tli].coord;
-        tli += 1;        
-      } else {
-        result.push_str(&append_scroll(tr[tri].clone(), coord));
-        coord = tr[tri].coord;
-        tri += 1;
-      }
-
-    } else if have_left {
-
+    if pick_left {
       result.push_str(&append_scroll(tl[tli].clone(), coord));
       coord = tl[tli].coord;
       tli += 1;
-
-    } else if have_right {
-
+    }
+    if pick_right {
       result.push_str(&append_scroll(tr[tri].clone(), coord));
       coord = tr[tri].coord;
       tri += 1;
+    }
 
-    } else {
+    if pick_left == false && pick_right == false {
       break;
     }
   }
@@ -1021,7 +1011,7 @@ pub fn intersection(left: &str, right: &str) -> String {
   let maxpr = pr.len() - 1;
   let mut result: String = Default::default();
 
-  let coord = default_coordinate();
+  let mut coord = default_coordinate();
   let mut pli = 0;
   let mut pri = 0;
 
@@ -1034,6 +1024,7 @@ pub fn intersection(left: &str, right: &str) -> String {
     let mut progress = false;
     while left.coord <= coord {
       result.push_str(&append_scroll(left.clone(), coord));
+      coord = left.coord;
       println!("Appended {} at {}", left.scroll, left.coord);
       progress = true;
       if pli < maxpl {
@@ -1044,6 +1035,7 @@ pub fn intersection(left: &str, right: &str) -> String {
 
     while right.coord <= coord {
       result.push_str(&append_scroll(right.clone(), coord));
+      coord = right.coord;
       println!("Appended {} at {}", right.scroll, right.coord);
       progress = true;
       if pri < maxpr {
@@ -1055,11 +1047,13 @@ pub fn intersection(left: &str, right: &str) -> String {
     if progress == false {
       if pli < maxpl {
         result.push_str(&append_scroll(left.clone(), coord));
+        coord = left.coord;
         println!("default appended {} at {}", left.scroll, left.coord);
         pli += 1;
       } else {
         if pri < maxpr {
           result.push_str(&append_scroll(right.clone(), coord));
+          coord = right.coord;
           pri += 1;
           println!("default appended {} at {}", right.scroll, right.coord);
         }
