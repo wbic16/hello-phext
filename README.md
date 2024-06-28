@@ -2,6 +2,8 @@
 
 This repository demonstrates how to work with phext from a rust context. Phext is 11 dimensional plain hypertext. Refer to unit tests for example phext documents.
 
+For more information about the phext format, head over to https://phext.io.
+
 ## Build
 
 1. Clone this repo
