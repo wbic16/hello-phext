@@ -862,7 +862,7 @@ pub fn merge(left: &str, right: &str) -> String {
 /// @param coord  coordinate to select the scroll from
 /// ----------------------------------------------------------------------------------------------------------
 pub fn fetch(phext: &str, target: Coordinate) -> String {
-  let bytes = phext.as_bytes();
+  let bytes: &[u8] = phext.as_bytes();
   let parts = get_subspace_coordinates(bytes, target);
 
   let start = parts.0 as usize;
@@ -1064,7 +1064,7 @@ pub fn normalize(phext: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-pub fn locate(phext: &str, target: &str) -> String {  
+pub fn locate(phext: &str, target: &str) -> String {
   return fetch(phext, to_coordinate(target));
 }
 
