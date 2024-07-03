@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::phext::{self, PositionedScroll, BOOK_BREAK, CHAPTER_BREAK, COLLECTION_BREAK, LIBRARY_BREAK, SCROLL_BREAK, SECTION_BREAK, SERIES_BREAK, SHELF_BREAK, VOLUME_BREAK};
-    use std::collections::HashMap;
+    use std::{collections::HashMap, io::Write};
 
     #[test]
     fn test_coordinate_parsing() {
@@ -315,7 +315,7 @@ mod tests {
         assert_eq!(expected1.2.x.chapter, 1);
         assert_eq!(expected1.2.x.section, 1);
         assert_eq!(expected1.2.x.scroll, 2);
-        assert_eq!(expected1.0, 10);
+        assert_eq!(expected1.0, 11);
         assert_eq!(expected1.1, 11);
 
         let mut expected_coord = phext::default_coordinate();
@@ -766,7 +766,25 @@ mod tests {
     }
 
     #[test]
-    fn test_api_write() {
-        // todo: figure out how to invoke rocket from unit tests
+    fn test_fs_read_write() {
+        let filename = "unit-test.phext";
+        let file = std::fs::File::create(&filename);
+        let required = "Unable to locate ".to_owned() + &filename;
+        let initial = "a simple phext doc with three scrolls\x17we just want to verify\x17that all of our breaks are making it through rust's fs layer.\x18section 2\x19chapter 2\x1Abook 2\x1Cvolume 2\x1Dcollection 2\x1Eseries 2\x1Fshelf 2\x01library 2";
+        let _result = file.expect(&required).write_all(initial.as_bytes());
+        let prior = std::fs::read_to_string(filename).expect("Unable to open phext");
+
+        assert_eq!(prior, initial);
+        let coordinate = "2.1.1/1.1.1/1.1.1";
+        let message = phext::replace(prior.as_str(), phext::to_coordinate(coordinate), "still lib 2");
+        assert_eq!(message, "a simple phext doc with three scrolls\x17we just want to verify\x17that all of our breaks are making it through rust's fs layer.\x18section 2\x19chapter 2\x1Abook 2\x1Cvolume 2\x1Dcollection 2\x1Eseries 2\x1Fshelf 2\x01still lib 2");
+    }
+
+    #[test]
+    fn test_replace_create() {
+        let initial = "A\x17B\x17C\x18D\x19E\x1AF\x1CG\x1DH\x1EI\x1FJ\x01K";
+        let coordinate = "3.1.1/1.1.1/1.1.1";
+        let message = phext::replace(initial, phext::to_coordinate(coordinate), "L");
+        assert_eq!(message, "A\x17B\x17C\x18D\x19E\x1AF\x1CG\x1DH\x1EI\x1FJ\x01K\x01L");
     }
 }

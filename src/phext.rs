@@ -548,7 +548,11 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       if nearest.y.book > start       { start = nearest.y.book;       }
       if nearest.x.chapter > start    { start = nearest.x.chapter;    }
       if nearest.x.section > start    { start = nearest.x.section;    }
-      if nearest.x.scroll > start     { start = nearest.x.scroll;     } 
+      if nearest.x.scroll > start     { start = nearest.x.scroll;     }
+      while start < subspace.len() && !is_phext_break(subspace[start])
+      {
+        start += 1;
+      }
     } else {
       if nearest.z.shelf > 0 && start > nearest.z.shelf           { start = nearest.z.shelf;      }
       if nearest.z.series > 0 && start > nearest.z.series         { start = nearest.z.series;     }
@@ -558,12 +562,13 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       if nearest.x.chapter > 0 && start > nearest.x.chapter       { start = nearest.x.chapter;    }
       if nearest.x.section > 0 && start > nearest.x.section       { start = nearest.x.section;    }
       if nearest.x.scroll > 0 && start > nearest.x.scroll         { start = nearest.x.scroll;     }
-    }
 
-    // ensure we're actually pointing to text and not delimiters of unusual size
-    while is_phext_break(subspace[start]) {
-      start -=1;
-      if start == 0 { break; }
+      // ensure we're actually pointing to text and not delimiters of unusual size
+      while is_phext_break(subspace[start]) {
+        start -=1;
+        if start == 0 { break; }
+      }
+      end = start;
     }
   }
 
@@ -582,15 +587,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
 
   if end == 0 || end < start {    
     end = start;
-    while subspace[end] != SCROLL_BREAK as u8 &&
-          subspace[end] != SECTION_BREAK as u8 &&
-          subspace[end] != CHAPTER_BREAK as u8 &&
-          subspace[end] != BOOK_BREAK as u8 &&
-          subspace[end] != VOLUME_BREAK as u8 &&
-          subspace[end] != COLLECTION_BREAK as u8 &&
-          subspace[end] != SERIES_BREAK as u8 &&
-          subspace[end] != SHELF_BREAK as u8 &&
-          subspace[end] != LIBRARY_BREAK as u8 {
+    while end < subspace.len() &&
+          !is_phext_break(subspace[end]) {
             end +=1;
             if end == subspace.len() { break; }
           }

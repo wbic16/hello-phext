@@ -2,7 +2,6 @@
 mod phext;
 mod phext_test;
 use std::{fs::{self, File}, io::{Read, Write}};
-use phext::Coordinate;
 use rocket::Request;
 use rocket::http::Status;
 use rocket::http::ContentType;
