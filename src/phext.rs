@@ -539,7 +539,7 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
   if stage == 0 {
     // This is a little complicated: if we're appending beyond known subspace, then we want the furthest
     // subspace coordinate. But if we're injecting into known subspace, then we want the closest coordinate.
-    start = nearest.z.library;    
+    start = nearest.z.library;
     if walker < target {
       if nearest.z.shelf > start      { start = nearest.z.shelf;      }
       if nearest.z.series > start     { start = nearest.z.series;     }
@@ -553,6 +553,8 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       {
         start += 1;
       }
+      start += 1;
+      end = start;
     } else {
       if nearest.z.shelf > 0 && start > nearest.z.shelf           { start = nearest.z.shelf;      }
       if nearest.z.series > 0 && start > nearest.z.series         { start = nearest.z.series;     }
@@ -564,10 +566,11 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
       if nearest.x.scroll > 0 && start > nearest.x.scroll         { start = nearest.x.scroll;     }
 
       // ensure we're actually pointing to text and not delimiters of unusual size
-      while is_phext_break(subspace[start]) {
+      while start > 0 && start < subspace.len() && is_phext_break(subspace[start]) {
         start -=1;
         if start == 0 { break; }
       }
+      start += 1;
       end = start;
     }
   }
@@ -596,12 +599,34 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
 
   //println!("Selected index={}, end={}, target={}, walker={}, best={}", start, end, target.to_string(), walker.to_string(), best.to_string());
 
+  let max = subspace.len();
+  if start > max { start = max; }
+  if end > max { end = max; }
+
   return (start, end, best);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn remove(phext: &str, location: Coordinate) -> String {
   return replace(phext, location, "");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+pub fn navmap(urlbase: &str, phext: &str) -> String {
+  let phokens = phokenize(phext);
+  let mut result = String::new();
+  let max = phokens.len();
+  if max > 0 {
+    result += "<ul>\n";
+  }
+  for phoken in phokens {
+    result += &format!("<li><a href=\"{}{}\">{}</a></li>\n", urlbase, phoken.coord.to_urlencoded(), phoken.coord.to_string()).to_string();
+  }
+  if max > 0 {
+    result += "</ul>\n";
+  }
+
+  return result;
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -1191,6 +1216,16 @@ impl Coordinate {
       return "".to_owned();
     }
     return format!("{}.{}.{}/{}.{}.{}/{}.{}.{}",
+      self.z.library, self.z.shelf, self.z.series,
+      self.y.collection, self.y.volume, self.y.book,
+      self.x.chapter, self.x.section, self.x.scroll);
+  }
+
+  pub fn to_urlencoded(&self) -> String {
+    if !self.validate_coordinate() {
+      return "".to_owned();
+    }
+    return format!("{}.{}.{};{}.{}.{};{}.{}.{}",
       self.z.library, self.z.shelf, self.z.series,
       self.y.collection, self.y.volume, self.y.book,
       self.x.chapter, self.x.section, self.x.scroll);

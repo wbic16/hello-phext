@@ -332,7 +332,7 @@ mod tests {
         assert_eq!(update2, "aaa\x01bbb\x17ccc\x17ddd\x17eee");
 
         // append 'fff' after 'eee'
-        let coord3 = phext::to_coordinate("2.1.1/1.1./1.2.1");
+        let coord3 = phext::to_coordinate("2.1.1/1.1.1/1.2.1");
         let update3 = phext::insert(update2.as_str(), coord3, "fff");
         assert_eq!(update3, "aaa\x01bbb\x17ccc\x17ddd\x17eee\x18fff");
 
