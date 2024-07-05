@@ -2,3 +2,4 @@ target/*
 Cargo.lock
 *.exe
 *.pdb
+*.phext
