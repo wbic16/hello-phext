@@ -13,16 +13,105 @@ struct Subspace {
     scroll: String,
 }
 
+fn css_rules() -> String {
+  return "
+body {
+  background-color: #232323;
+  color: #efefff;
+  font-family: sans-serif;
+  margin: 0 auto;
+  width: 90%;
+  padding: 10px;
+  border: 4px solid grey;
+}
+
+textarea {
+  background-color: #47579a;
+  color: #fefefe;
+  font-weight: bold;
+  border: 1px solid white;
+  border-radius: 3px;
+  font-size: 1.4em;
+  margin: 10px;
+}
+input {
+  margin: 10px;
+  width: 100px;
+  padding: 8px;
+  border-radius: 3px;
+  border: 2px solid white;
+  background-color: #47579a;
+  color: #fefefe;
+  font-weight: bold;
+}
+input:hover {
+  background-color: #9496a7;
+  cursor: pointer;
+}
+
+a, a:visited {
+  color: #d0d0ff;
+  text-decoration: none;
+}
+a:hover, a:visited:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.navmap {
+  width: 250px;
+  float: left;
+}
+.navmap ul li {
+}
+".to_string();
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+fn css_styling() -> String {
+  return "<style type=\"text/css\" media=\"all\">".to_owned() + &css_rules() + "</style>";
+}
+
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/api/<world>/<coordinate>")]
 fn index(world: &str, coordinate: &str) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
   let message = "Unable to find ".to_owned() + world;
   let buffer:String = fs::read_to_string(filename).expect(&message);
+  let size = buffer.len();
   let scroll = phext::locate(&buffer, coordinate);
   let navmap = phext::navmap(&format!("/api/{}/", world), buffer.as_str());
 
-  let response = "<html><head><title>Phext API Testing</title></head><body>".to_owned() + &scroll + "<br /><form method='POST'><input type='submit' value='Save' /><input type='hidden' name='world' value='" + world + "' /><br /><textarea rows='20' cols='110' name='scroll'>" + &scroll + "</textarea></form><hr />" + &navmap + "</body></html>";
+  let response = "
+<html>
+  <head>
+    <title>Phext API Testing</title>".to_owned() +
+    css_styling().as_str() + "
+  <script type=\"text/javascript\">
+  function dgid(id) {
+    return document.getElementById(id);
+  }
+  function load_event() {
+    var se = dgid('scroll_editor');
+    if (se) {
+      se.focus();
+    }
+  }
+  </script>
+  </head>
+  <body onLoad=\"load_event();\">
+    <div class='navmap'>Phext Viewer<br />" + &world + " (" + &size.to_string() + " bytes):<br />
+    Scrolls: " + &navmap + "</div>
+    <div class='content'>
+    <form method='POST'>
+      <input type='submit' value='Save' />
+      <input type='hidden' name='world' value='" + world + "' />
+      <br />
+      <textarea id='scroll_editor' rows='50' cols='160' name='scroll'>" + &scroll + "</textarea>
+    </form>
+    </div>
+  </body>
+</html>";
 
   return (ContentType::HTML, response);
 }
@@ -40,7 +129,12 @@ fn set(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, S
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   let navmap = phext::navmap(&format!("/api/{}/", world), message.as_str());
-  return (ContentType::HTML, "<html><head><title>Phext API Testing</title></head><body>Wrote ".to_owned() + &filename + " at " + coordinate + ": " + scroll.scroll.as_str() + "<hr /><p>" + &navmap + "</p></body></html>");
+  return (ContentType::HTML, "<html><head><title>Phext API Testing</title>".to_owned() +
+     css_styling().as_str() + "</head><body>
+     <p>Available Coordinates:" + &navmap + "
+     </p><hr />Wrote " + &filename + " at " + coordinate + ": " + scroll.scroll.as_str() + "
+</body></html>"
+   );
 }
 
 /// ----------------------------------------------------------------------------------------------------------
