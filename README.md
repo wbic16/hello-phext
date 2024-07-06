@@ -28,8 +28,10 @@ Run `cargo run pack test.phext`
 ### Extract all nodes from a phext document into your local directory
 Not yet implemented
 
-### Unit Tests
+### Phext Basics
 
+* test_more_cowbell: Ensures that you've got more cowbell!
+* line_break: Proves that we're using ASCII line breaks
 * coordinate_parsing: Verifies that string -> coordinate -> string produces the same result
 * scrolls: Verifies that SCROLL_BREAK reliably splits 3 scrolls
 * sections: Verifies that SECTION_BREAK reliably splits 3 sections
@@ -42,17 +44,18 @@ Not yet implemented
 * libraries: Verifies that LIBRARY_BREAK reliably splits 3 libraries
 * coordinates_invalid: tests for invalid coordinate detection
 * coordinates_valid: ensures that a realistic coordinate is valid
-* test_url_encoding: tests for alternate url format with semicolons
 * realistic_parse: Verifies that a coordinate with many delimiters parses correctly
 * dead_reckoning: Verifies that we can accurately calculate coordinates on existing phext documents
-* line_break: Proves that we're using ASCII line breaks
-* test_more_cowbell: Ensures that you've got more cowbell!
+
+### API Tests
+
+* next_scroll: verifies that we can tokenize subspace by scroll
+* phokenize: verifies that we can build subspace phokens (phext tokens)
+* test_url_encoding: tests for alternate url format with semicolons
 * coordinate_based_insert: Verifies that random insertion by phext coordinate works
 * coordinate_based_replace: Verifies that random replacement by phext coordinate works
 * coordinate_based_remove: Verifies that random scroll removal by phext coordinate works
 * range_based_replace: Verifies that a range of phext coordinates can be used to replace text
-* next_scroll: verifies that we can tokenize subspace by scroll
-* phokenize: verifies that we can build subspace phokens (phext tokens)
 * expand: verifies that delimiters can be grown larger by 1 dimension
 * contract: verifies that delimiters can be shrunk by 1 dimension
 * merge: verifies that two phext documents can be zipper-merged (intersection)
