@@ -612,6 +612,31 @@ pub fn remove(phext: &str, location: Coordinate) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+pub fn create_summary(phext: &str) -> String {
+  let buffer = phext.as_bytes();
+  let mut limit = 32;
+  if buffer.len() < 32 { limit = buffer.len(); }
+  let mut i = 0;
+  let mut summary: Vec<u8> = Default::default();
+  while i < limit {
+    let ith = buffer[i];    
+    if is_phext_break(ith) {
+      break;
+    }
+    summary.push(ith);
+    i += 1;
+  }
+  if summary.len() < buffer.len() {
+    summary.push('.' as u8);
+    summary.push('.' as u8);
+    summary.push('.' as u8);
+  }
+
+  let result: String = String::from_utf8(summary).expect("invalid utf8");
+  return result;
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 pub fn navmap(urlbase: &str, phext: &str) -> String {
   let phokens = phokenize(phext);
   let mut result = String::new();
@@ -620,7 +645,7 @@ pub fn navmap(urlbase: &str, phext: &str) -> String {
     result += "<ul>\n";
   }
   for phoken in phokens {
-    result += &format!("<li><a href=\"{}{}\">{}</a></li>\n", urlbase, phoken.coord.to_urlencoded(), phoken.coord.to_string()).to_string();
+    result += &format!("<li><a href=\"{}{}\">{} {}</a></li>\n", urlbase, phoken.coord.to_urlencoded(), phoken.coord.to_string(), create_summary(&phoken.scroll)).to_string();
   }
   if max > 0 {
     result += "</ul>\n";
@@ -1060,7 +1085,8 @@ pub fn subtract(left: &str, right: &str) -> String {
 
 /// ----------------------------------------------------------------------------------------------------------
 fn is_phext_break(byte: u8) -> bool {
-  return byte == SCROLL_BREAK as u8 ||
+  return byte == LINE_BREAK as u8 ||
+         byte == SCROLL_BREAK as u8 ||
          byte == SECTION_BREAK as u8 ||
          byte == CHAPTER_BREAK as u8 ||
          byte == BOOK_BREAK as u8 ||

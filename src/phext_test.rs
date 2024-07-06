@@ -819,4 +819,15 @@ mod tests {
         let message = phext::replace(initial, phext::to_coordinate(coordinate), "L");
         assert_eq!(message, "A\x17B\x17C\x18D\x19E\x1AF\x1CG\x1DH\x1EI\x1FJ\x01K\x01L");
     }
+
+    #[test]
+    fn test_summary() {
+        let doc1 = "A short phext\nSecond line\x17second scroll.............................";
+        let update1 = phext::create_summary(doc1);
+        assert_eq!(update1, "A short phext...");
+
+        let doc2 = "very terse";
+        let update2 = phext::create_summary(doc2);
+        assert_eq!(update2, "very terse");
+    }
 }

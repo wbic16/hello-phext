@@ -2,7 +2,7 @@
 mod phext;
 mod phext_test;
 use std::{fs::{self, File}, io::{Read, Write}};
-use rocket::Request;
+use rocket::{http::hyper::body::HttpBody, Request};
 use rocket::http::Status;
 use rocket::http::ContentType;
 use rocket::form::Form;
@@ -49,6 +49,14 @@ input:hover {
   cursor: pointer;
 }
 
+input.text {
+  border: 1px solid grey;
+  width: 150px;
+}
+input.text:hover {
+  cursor: auto;
+}
+
 a, a:visited {
   color: #d0d0ff;
   text-decoration: none;
@@ -59,8 +67,9 @@ a:hover, a:visited:hover {
 }
 
 .navmap {
-  width: 250px;
+  width: 450px;
   float: left;
+  font-family: consolas, monospace;
 }
 .navmap ul li {
 }
@@ -104,6 +113,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
     Scrolls: " + &navmap + "</div>
     <div class='content'>
     <form method='POST'>
+      Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coordinate.replace(';', "/") + "' />
       <input type='submit' value='Save' />
       <input type='hidden' name='world' value='" + world + "' />
       <br />
@@ -128,13 +138,7 @@ fn set(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, S
   let message = phext::replace(prior.as_str(), phext::to_coordinate(coordinate), scroll.scroll.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
-  let navmap = phext::navmap(&format!("/api/{}/", world), message.as_str());
-  return (ContentType::HTML, "<html><head><title>Phext API Testing</title>".to_owned() +
-     css_styling().as_str() + "</head><body>
-     <p>Available Coordinates:" + &navmap + "
-     </p><hr />Wrote " + &filename + " at " + coordinate + ": " + scroll.scroll.as_str() + "
-</body></html>"
-   );
+  return index(world, coordinate);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
