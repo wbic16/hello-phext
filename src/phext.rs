@@ -299,6 +299,16 @@ impl std::convert::TryFrom<&str> for Coordinate {
     }
 }
 
+pub fn check_for_cowbell(phext: &str) -> bool {
+  for byte in phext.as_bytes() {
+    if *byte == MORE_COWBELL as u8 {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /// ----------------------------------------------------------------------------------------------------------
 /// @fn get_subspace_coordinates
 ///

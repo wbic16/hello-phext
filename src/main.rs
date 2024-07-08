@@ -1,8 +1,8 @@
 #[macro_use] extern crate rocket;
 mod phext;
 mod phext_test;
-use std::{fs::{self, File}, io::{Read, Write}};
-use rocket::{http::hyper::body::HttpBody, Request};
+use std::{fs::{self, File}, io::Write};
+use rocket::Request;
 use rocket::http::Status;
 use rocket::http::ContentType;
 use rocket::form::Form;
