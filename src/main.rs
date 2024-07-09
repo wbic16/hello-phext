@@ -1,3 +1,13 @@
+/// ----------------------------------------------------------------------------------------------------------
+/// Phext API Hosting
+///
+/// This module provides two routes to make hosting your phext documents easy.
+/// 1. GET /api/{phext}/{coordinate}
+/// 2. POST /api/{phext}/{coordinate} data={scroll}
+///
+/// These routes hook into `phext.rs` and allow you to quickly edit phext scrolls without transferring the
+/// entire phext document. Additional routes will be added over time. See `phext_test.rs` for all features.
+/// ----------------------------------------------------------------------------------------------------------
 #[macro_use] extern crate rocket;
 mod phext;
 mod phext_test;
@@ -8,11 +18,20 @@ use rocket::http::ContentType;
 use rocket::form::Form;
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @struct Subspace
+///
+/// Interface class for passing phext data from Rocket into our API endpoints
+/// ----------------------------------------------------------------------------------------------------------
 #[derive(Default, Debug, PartialEq, Eq, FromForm, Responder)]
 struct Subspace {
     scroll: String,
 }
 
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn css_rules
+///
+/// Generates CSS styles for injection within a CSS block of text
+/// ----------------------------------------------------------------------------------------------------------
 fn css_rules() -> String {
   return "
 body {
@@ -77,20 +96,58 @@ a:hover, a:visited:hover {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn css_styling
+///
+/// Generates an inline HTML/CSS styling block with our preferred styles set.
+/// ----------------------------------------------------------------------------------------------------------
 fn css_styling() -> String {
   return "<style type=\"text/css\" media=\"all\">".to_owned() + &css_rules() + "</style>";
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-#[get("/api/<world>/<coordinate>")]
+/// @fn ignore_warnings
+///
+/// temporary placeholder for phext methods that only have test coverage so far
+/// refer to `cargo test` output for more detail
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/<world>/catchall")]
+fn ignore_warnings(world: &str) -> (ContentType, String) {
+  let filename: String = world.to_owned() + ".phext";
+  let message = "Unable to find ".to_owned() + world;
+  let buffer:String = fs::read_to_string(filename).expect(&message);
+  let left = buffer.as_str();
+  let right = buffer.as_str();
+  phext::subtract(left, right);
+  let coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
+  phext::swap(coord, left, right);
+  phext::merge(left, right);
+  phext::insert(left, coord, "test");
+  let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), end: phext::to_coordinate("1.1.1/1.1.1/1.1.2")};
+  phext::range_replace(left, range, "test");
+  phext::remove(right, coord);
+  phext::check_for_cowbell(left);
+
+  return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn index
+///
+/// Provides our primary API endpoint for querying phext documents
+///
+/// @param world       the phext document to load (with the '.phext' extension)
+/// @param coordinate  the coordinate to render within `world`
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/index/<world>/<coordinate>")]
 fn index(world: &str, coordinate: &str) -> (ContentType, String) {
-  let filename = world.to_owned() + ".phext";
+  let filename: String = world.to_owned() + ".phext";
   let message = "Unable to find ".to_owned() + world;
   let buffer:String = fs::read_to_string(filename).expect(&message);
   let size = buffer.len();
   let scroll = phext::locate(&buffer, coordinate);
-  let navmap = phext::navmap(&format!("/api/{}/", world), buffer.as_str());
+  let navmap = phext::navmap(&format!("/api/v1/index/{}/", world), buffer.as_str());
 
+  let coord = coordinate.replace(';', "/");
   let response = "
 <html>
   <head>
@@ -112,10 +169,10 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
     <div class='navmap'>Phext Viewer<br />" + &world + " (" + &size.to_string() + " bytes):<br />
     Scrolls: " + &navmap + "</div>
     <div class='content'>
-    <form method='POST'>
-      Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coordinate.replace(';', "/") + "' />
+    <form method='POST' action='/api/v1/update/" + &world + "/" + coordinate + "'>
+      Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coord + "' />
       <input type='submit' value='Save' />
-      <input type='hidden' name='world' value='" + world + "' />
+      <input type='hidden' name='world' value='" + &world + "' />
       <br />
       <textarea id='scroll_editor' rows='50' cols='160' name='scroll'>" + &scroll + "</textarea>
     </form>
@@ -127,8 +184,16 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-#[post("/api/<world>/<coordinate>", data="<scroll>")]
-fn set(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+/// @fn update
+///
+/// Provides a POST API endpoint for accepting phext content oriented at a specific coordinate
+///
+/// @param world       the phext document to update (not including the .phext extension)
+/// @param coordinate  the phext coordinates within `world` to edit
+/// @param scroll      content to replace at the given coordinates
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/update/<world>/<coordinate>", data="<scroll>")]
+fn update(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
   
   let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
@@ -142,11 +207,78 @@ fn set(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, S
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn normalize
+///
+/// Provides phext normalization - trimming unused pockets of subspace from an input phext.
+/// WARNING: Overwrites the entire contents of `world`!
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/normalize/<world>", data="<scroll>")]
+fn normalize(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+
+  let message = phext::normalize(scroll.scroll.as_str());
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn contract
+///
+/// Provides phext contraction - transforms all dimension breaks down by 1
+/// WARNING: Overwrites the entire contents of `world`!
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/contract/<world>", data="<scroll>")]
+fn contract(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+
+  let message = phext::contract(scroll.scroll.as_str());
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn expand
+///
+/// Provides phext expansion - transforms all dimension breaks up by 1
+/// WARNING: Overwrites the entire contents of `world`!
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/expand/<world>", data="<scroll>")]
+fn expand(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+
+  let message = phext::expand(scroll.scroll.as_str());
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn not_found
+///
+/// Provides a specific error message for unrecognized URLs, instructing the user to reach out to us on twitter.
+/// ----------------------------------------------------------------------------------------------------------
 #[catch(404)]
 fn not_found(req: &Request) -> String {
   return format!("Unable to locate '{}'. Reach out to @wbic16 on twitter.", req.uri());
 }
 
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn default
+///
+/// Handles generic errors - informs the user that an unexpected error has occurred
 /// ----------------------------------------------------------------------------------------------------------
 #[catch(default)]
 fn default(status: Status, req: &Request) -> String {
@@ -154,9 +286,13 @@ fn default(status: Status, req: &Request) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn rocket
+///
+/// Builds a rocket instance, registers default and 404 pages, and mounts our GET/POST endpoints
+/// ----------------------------------------------------------------------------------------------------------
 #[launch]
 fn rocket() -> _ {
     rocket::build()
         .register("/", catchers![not_found, default])
-        .mount("/", routes![index, set])
+        .mount("/", routes![index, update, normalize, expand, contract, ignore_warnings])
 }
