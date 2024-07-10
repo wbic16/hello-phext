@@ -92,6 +92,11 @@ a:hover, a:visited:hover {
 }
 .navmap ul li {
 }
+.actions {
+  position: absolute;
+  top: 10px;
+  right: 200px;
+}
 ".to_string();
 }
 
@@ -163,19 +168,50 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       se.focus();
     }
   }
+  function expand() {
+    var se = dgid('scroll_editor');
+    if (se) {
+      var es = dgid('expand_subspace');
+      if (es) {
+        es.value = se.value;
+      }
+    }
+  }
+  function contract() {
+    var se = dgid('scroll_editor');
+    if (se) {
+      var cs = dgid('contract_subspace');
+      if (cs) {
+        cs.value = se.value;
+      }
+    }
+  }
   </script>
   </head>
   <body onLoad=\"load_event();\">
     <div class='navmap'>Phext Viewer<br />" + &world + " (" + &size.to_string() + " bytes):<br />
     Scrolls: " + &navmap + "</div>
     <div class='content'>
-    <form method='POST' action='/api/v1/update/" + &world + "/" + coordinate + "'>
-      Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coord + "' />
-      <input type='submit' value='Save' />
-      <input type='hidden' name='world' value='" + &world + "' />
-      <br />
-      <textarea id='scroll_editor' rows='50' cols='160' name='scroll'>" + &scroll + "</textarea>
-    </form>
+      <form method='POST' action='/api/v1/update/" + &world + "/" + coordinate + "'>
+        Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coord + "' />
+        <input type='submit' value='Save' />
+        <input type='hidden' name='world' value='" + &world + "' />
+        <br />
+        <textarea id='scroll_editor' rows='50' cols='160' name='scroll'>" + &scroll + "</textarea>
+      </form>
+
+      <div class='actions'>
+        <form method='POST' action='/api/v1/expand/" + &world + "'>
+          <input type='hidden' name='scroll' id='expand_subspace' value='' />
+          <input type='submit' value='Expand' onclick='expand();' />
+        </form>
+
+        <form method='POST' action='/api/v1/contract/" + &world + "'>
+          <input type='hidden' name='scroll' id='contract_subspace' value='' />
+          <input type='submit' value='Contract' onclick='contract();' />
+        </form>
+      </div>
+
     </div>
   </body>
 </html>";
