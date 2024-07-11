@@ -15,18 +15,10 @@ For more information about the phext format, head over to https://phext.io.
 1. Complete the build steps above
 2. Run `cargo test`
 
-## Examples
+## Run
 
-After completing the build and test commands, you should be able to try out the example, pack, and unpack commands.
-
-### Demonstrate how to inspect a phext
-Run `cargo run help`
-
-### Compile all local text files into a phext
-Run `cargo run pack test.phext`
-
-### Extract all nodes from a phext document into your local directory
-Not yet implemented
+1. After building and testing the project, start the rocket server.
+2. Run `cargo run`
 
 ### Phext Basics
 
