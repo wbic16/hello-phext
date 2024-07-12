@@ -2,8 +2,8 @@
 /// Phext API Hosting
 ///
 /// This module provides two routes to make hosting your phext documents easy.
-/// 1. GET /api/{phext}/{coordinate}
-/// 2. POST /api/{phext}/{coordinate} data={scroll}
+/// 1. GET /api/v1/index/{phext}/{coordinate}
+/// 2. POST /api/v1/update/{phext}/{coordinate} data={scroll}
 ///
 /// These routes hook into `phext.rs` and allow you to quickly edit phext scrolls without transferring the
 /// entire phext document. Additional routes will be added over time. See `phext_test.rs` for all features.

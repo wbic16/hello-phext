@@ -4,6 +4,23 @@ This repository demonstrates how to work with phext from a rust context. Phext i
 
 For more information about the phext format, head over to https://phext.io.
 
+## Phext Coordinate Formats
+
+* Canonical Format: Orders coordinates to avoid the need for labels
+  * example: z3.z2.z1/y3.y2.y1/x3.x2.x1
+  * z3 - Library (LB)
+  * z2 - Shelf (SF)
+  * z1 - Series (SR)
+  * y3 - Collection (CN)
+  * y2 - Volume (VM)
+  * y1 - Book (BK)
+  * x3 - Chapter (CH)
+  * x2 - Section (SN)
+  * x1 - Scroll (SC)
+* URL Format: the same as the canonical format, but with semi-colons instead of slashes
+  * this allows us to use coordinates in routes
+  * example: z3.z2.z1;y3.y2.y1;x3.x2.x1
+
 ## Build
 
 1. Clone this repo
@@ -19,6 +36,23 @@ For more information about the phext format, head over to https://phext.io.
 
 1. After building and testing the project, start the rocket server.
 2. Run `cargo run`
+
+### API Routes
+
+* Basic View: `/api/v1/index/{world}/{coordinate}`
+  * world: the filename of the .phext archive to load
+  * coordinate: the phext coordinate in URL form (z3.z2.z1;y3.y2.y1;x3.x2.x1)
+* Raw Scroll: `/api/v1/raw/{world}/{coordinate}`
+  * fetches the scroll from "world.phext" at the given coordinate
+* Update Scroll: `/api/v1/update/{world}/{coordinate}`
+  * Runs `phext::replace` for the given coordinate within "world.phext"
+* Normalize Phext: `/api/v1/normalize/{world}`
+  * Accepts the posted scroll content as "world.phext" *and* normalizes the output
+* Contract Phext: `/api/v1/contract/{world}`
+  * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters down by 1 dimension
+* Expand Phext: `/api/v1/expand/{world}`
+  * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters up by 1 dimension
+* /api/{world}/catchall - a dummy route for collecting methods not used elsewhere (yet)
 
 ### Phext Basics
 
