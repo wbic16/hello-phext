@@ -220,6 +220,21 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn raw
+///
+/// retrieves just the raw content for a given phext coordinate - suitable for RPC
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/raw/<world>/<coordinate>")]
+fn raw(world: &str, coordinate: &str) -> (ContentType, String) {
+  let filename: String = world.to_owned() + ".phext";
+  let message = "Unable to find ".to_owned() + world;
+  let buffer:String = fs::read_to_string(filename).expect(&message);
+  let scroll = phext::locate(&buffer, coordinate);
+
+  return (ContentType::Text, scroll);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn update
 ///
 /// Provides a POST API endpoint for accepting phext content oriented at a specific coordinate
@@ -330,5 +345,5 @@ fn default(status: Status, req: &Request) -> String {
 fn rocket() -> _ {
     rocket::build()
         .register("/", catchers![not_found, default])
-        .mount("/", routes![index, update, normalize, expand, contract, ignore_warnings])
+        .mount("/", routes![raw, index, update, normalize, expand, contract, ignore_warnings])
 }
