@@ -19,7 +19,7 @@ use rocket::form::Form;
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(Default, Debug, PartialEq, Eq, FromForm, Responder)]
 struct Subspace {
-    scroll: String,
+    content: String,
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -215,12 +215,12 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn select
+/// @fn select_scroll
 ///
-/// retrieves just the raw scroll for a given phext coordinate - suitable for RPC
+/// retrieves just the raw scroll for a given phext coordinate
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/api/v1/select/<world>/<coordinate>")]
-fn select(world: &str, coordinate: &str) -> (ContentType, String) {
+fn select_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
   let filename: String = world.to_owned() + ".phext";
   let message = "Unable to find ".to_owned() + world;
   let buffer:String = fs::read_to_string(filename).expect(&message);
@@ -230,53 +230,112 @@ fn select(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn insert
+/// @fn select_phext
+///
+/// retrieves the entire phext (copy/paste at scale!)
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/select/<world>")]
+fn select_phext(world: &str) -> (ContentType, String) {
+  let filename: String = world.to_owned() + ".phext";
+  let message = "Unable to find ".to_owned() + world;
+  let buffer:String = fs::read_to_string(filename).expect(&message);
+
+  return (ContentType::Text, buffer);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn insert_scroll
 ///
 /// inserts a new scroll (or appends to the existing scroll) at the given coordinate
 /// ----------------------------------------------------------------------------------------------------------
 #[post("/api/v1/insert/<world>/<coordinate>", data="<scroll>")]
-fn insert(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+fn insert_scroll(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
   
   let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
-  let message = phext::insert(prior.as_str(), phext::to_coordinate(coordinate), scroll.scroll.as_str());
+  let message = phext::insert(prior.as_str(), phext::to_coordinate(coordinate), scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return (ContentType::Text, "OK".to_string());
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn update
+/// @fn insert_phext
+///
+/// inserts a new scroll (or appends to the existing scroll) at the given coordinate
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/insert/<world>", data="<phext>")]
+fn insert_phext(world: &str, phext: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+  
+  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;  
+  let message = prior + &phext.content;
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return (ContentType::Text, "OK".to_string());
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn update_scroll
 /// 
 /// replaces the contents of the specified scroll
 /// ----------------------------------------------------------------------------------------------------------
 #[post("/api/v1/update/<world>/<coordinate>", data="<scroll>")]
-fn update(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+fn update_scroll(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
   
   let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
-  let message = phext::replace(prior.as_str(), phext::to_coordinate(coordinate), scroll.scroll.as_str());
+  let message = phext::replace(prior.as_str(), phext::to_coordinate(coordinate), scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return (ContentType::Text, "OK".to_string());
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn delete
+/// @fn update_phext
+/// 
+/// replaces the contents of the specified scroll
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/update/<world>", data="<phext>")]
+fn update_phext(world: &str, phext: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+  let _result = file.expect(&required).write_all(phext.content.as_bytes());
+
+  return (ContentType::Text, "OK".to_string());
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn delete_scroll
 /// 
 /// zeroes the length of the given scroll
 /// ----------------------------------------------------------------------------------------------------------
 #[post("/api/v1/delete/<world>/<coordinate>")]
-fn delete(world: &str, coordinate: &str) -> (ContentType, String) {
-  let empty:Subspace = Subspace{ scroll: "".to_string() };
+fn delete_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
+  let empty:Subspace = Subspace{ content: "".to_string() };
   let nothing: Form<Subspace> = Form::from(empty);
-  return update(world, coordinate, nothing);
+  return update_scroll(world, coordinate, nothing);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn delete_phext
+/// 
+/// zeroes the length of the given scroll
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/delete/<world>")]
+fn delete_phext(world: &str) -> (ContentType, String) {
+  let empty:Subspace = Subspace{ content: "".to_string() };
+  let nothing: Form<Subspace> = Form::from(empty);
+  return update_phext(world, nothing);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -290,7 +349,7 @@ fn delete(world: &str, coordinate: &str) -> (ContentType, String) {
 /// ----------------------------------------------------------------------------------------------------------
 #[post("/api/v1/save/<world>/<coordinate>", data="<scroll>")]
 fn save(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
-  let _result = update(world, coordinate, scroll);
+  let _result = update_scroll(world, coordinate, scroll);
 
   return index(world, coordinate);
 }
@@ -308,7 +367,7 @@ fn normalize(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
-  let message = phext::normalize(scroll.scroll.as_str());
+  let message = phext::normalize(scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return index(world, "1.1.1/1.1.1/1.1.1");
@@ -328,7 +387,7 @@ fn contract(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
-  let message = phext::contract(scroll.scroll.as_str());
+  let message = phext::contract(scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return index(world, "1.1.1/1.1.1/1.1.1");
@@ -348,7 +407,7 @@ fn expand(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
-  let message = phext::expand(scroll.scroll.as_str());
+  let message = phext::expand(scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return index(world, "1.1.1/1.1.1/1.1.1");
@@ -383,5 +442,9 @@ fn default(status: Status, req: &Request) -> String {
 fn rocket() -> _ {
     rocket::build()
         .register("/", catchers![not_found, default])
-        .mount("/", routes![select, insert, update, delete, index, save, normalize, expand, contract, ignore_warnings])
+        .mount("/", routes![select_scroll, select_phext,
+                            insert_scroll, insert_phext,
+                            update_scroll, update_phext,
+                            delete_scroll, delete_phext,
+                            index, save, normalize, expand, contract, ignore_warnings])
 }

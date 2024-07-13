@@ -53,14 +53,20 @@ For more information about the phext format, head over to https://phext.io.
 
 ### Low-Level (SQL-ish) Routes
 
+Note: You can omit the coordinate part of the route to work in subspace directly!
+
 * Select Scroll: `/api/v1/select/{world}/{coordinate}`
   * fetches the scroll from "world.phext" at the given coordinate
+  * fetches the phext named "world.phext" if no coordinate is given
 * Insert Scroll: `/api/v1/insert/{world}/{coordinate}`
   * Appends text at the given coordinates (expanding that scroll)
+  * Appends raw content to the end of "world.phext" if no coordinate is given
 * Update Scroll: `/api/v1/update/{world}/{coordinate}`
   * Replaces the content at the given coordinates (used by Save)
+  * Replaces the phext named "world.phext" if no coordinate is given
 * Delete Scroll: `/api/v1/delete/{world}/{coordinate}`
   * zeroizes the scroll at the given coordinates
+  * zeroizes the entire contents of "world.phext" if no coordinate is given
 
 * /api/{world}/catchall - a dummy route for collecting methods not used elsewhere (yet)
 
