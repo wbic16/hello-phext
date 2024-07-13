@@ -1,12 +1,7 @@
 /// ----------------------------------------------------------------------------------------------------------
 /// Phext API Hosting
 ///
-/// This module provides two routes to make hosting your phext documents easy.
-/// 1. GET /api/v1/index/{phext}/{coordinate}
-/// 2. POST /api/v1/update/{phext}/{coordinate} data={scroll}
-///
-/// These routes hook into `phext.rs` and allow you to quickly edit phext scrolls without transferring the
-/// entire phext document. Additional routes will be added over time. See `phext_test.rs` for all features.
+/// The hello-phext repository provides API access to Phext. Refer to README.md for a list of routes.
 /// ----------------------------------------------------------------------------------------------------------
 #[macro_use] extern crate rocket;
 mod phext;
@@ -192,7 +187,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
     <div class='navmap'>Phext Viewer<br />" + &world + " (" + &size.to_string() + " bytes):<br />
     Scrolls: " + &navmap + "</div>
     <div class='content'>
-      <form method='POST' action='/api/v1/update/" + &world + "/" + coordinate + "'>
+      <form method='POST' action='/api/v1/save/" + &world + "/" + coordinate + "'>
         Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coord + "' />
         <input type='submit' value='Save' />
         <input type='hidden' name='world' value='" + &world + "' />
@@ -220,12 +215,12 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn raw
+/// @fn select
 ///
-/// retrieves just the raw content for a given phext coordinate - suitable for RPC
+/// retrieves just the raw scroll for a given phext coordinate - suitable for RPC
 /// ----------------------------------------------------------------------------------------------------------
-#[get("/api/v1/raw/<world>/<coordinate>")]
-fn raw(world: &str, coordinate: &str) -> (ContentType, String) {
+#[get("/api/v1/select/<world>/<coordinate>")]
+fn select(world: &str, coordinate: &str) -> (ContentType, String) {
   let filename: String = world.to_owned() + ".phext";
   let message = "Unable to find ".to_owned() + world;
   let buffer:String = fs::read_to_string(filename).expect(&message);
@@ -235,13 +230,28 @@ fn raw(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn insert
+///
+/// inserts a new scroll (or appends to the existing scroll) at the given coordinate
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/insert/<world>/<coordinate>", data="<scroll>")]
+fn insert(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+  
+  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+
+  let message = phext::insert(prior.as_str(), phext::to_coordinate(coordinate), scroll.scroll.as_str());
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return (ContentType::Text, "OK".to_string());
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn update
-///
-/// Provides a POST API endpoint for accepting phext content oriented at a specific coordinate
-///
-/// @param world       the phext document to update (not including the .phext extension)
-/// @param coordinate  the phext coordinates within `world` to edit
-/// @param scroll      content to replace at the given coordinates
+/// 
+/// replaces the contents of the specified scroll
 /// ----------------------------------------------------------------------------------------------------------
 #[post("/api/v1/update/<world>/<coordinate>", data="<scroll>")]
 fn update(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
@@ -253,6 +263,34 @@ fn update(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType
 
   let message = phext::replace(prior.as_str(), phext::to_coordinate(coordinate), scroll.scroll.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return (ContentType::Text, "OK".to_string());
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn delete
+/// 
+/// zeroes the length of the given scroll
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/delete/<world>/<coordinate>")]
+fn delete(world: &str, coordinate: &str) -> (ContentType, String) {
+  let empty:Subspace = Subspace{ scroll: "".to_string() };
+  let nothing: Form<Subspace> = Form::from(empty);
+  return update(world, coordinate, nothing);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn save
+///
+/// Provides a POST API endpoint for accepting a phext scroll oriented at a specific coordinate
+///
+/// @param world       the phext document to save (not including the .phext extension)
+/// @param coordinate  the phext coordinates within `world` to edit
+/// @param scroll      content to replace at the given coordinates
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/save/<world>/<coordinate>", data="<scroll>")]
+fn save(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+  let _result = update(world, coordinate, scroll);
 
   return index(world, coordinate);
 }
@@ -345,5 +383,5 @@ fn default(status: Status, req: &Request) -> String {
 fn rocket() -> _ {
     rocket::build()
         .register("/", catchers![not_found, default])
-        .mount("/", routes![raw, index, update, normalize, expand, contract, ignore_warnings])
+        .mount("/", routes![select, insert, update, delete, index, save, normalize, expand, contract, ignore_warnings])
 }

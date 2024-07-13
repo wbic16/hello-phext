@@ -37,14 +37,12 @@ For more information about the phext format, head over to https://phext.io.
 1. After building and testing the project, start the rocket server.
 2. Run `cargo run`
 
-### API Routes
+### API Routes (User Level)
 
 * Basic View: `/api/v1/index/{world}/{coordinate}`
   * world: the filename of the .phext archive to load
   * coordinate: the phext coordinate in URL form (z3.z2.z1;y3.y2.y1;x3.x2.x1)
-* Raw Scroll: `/api/v1/raw/{world}/{coordinate}`
-  * fetches the scroll from "world.phext" at the given coordinate
-* Update Scroll: `/api/v1/update/{world}/{coordinate}`
+* Save Scroll: `/api/v1/save/{world}/{coordinate}`
   * Runs `phext::replace` for the given coordinate within "world.phext"
 * Normalize Phext: `/api/v1/normalize/{world}`
   * Accepts the posted scroll content as "world.phext" *and* normalizes the output
@@ -52,6 +50,18 @@ For more information about the phext format, head over to https://phext.io.
   * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters down by 1 dimension
 * Expand Phext: `/api/v1/expand/{world}`
   * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters up by 1 dimension
+
+### Low-Level (SQL-ish) Routes
+
+* Select Scroll: `/api/v1/select/{world}/{coordinate}`
+  * fetches the scroll from "world.phext" at the given coordinate
+* Insert Scroll: `/api/v1/insert/{world}/{coordinate}`
+  * Appends text at the given coordinates (expanding that scroll)
+* Update Scroll: `/api/v1/update/{world}/{coordinate}`
+  * Replaces the content at the given coordinates (used by Save)
+* Delete Scroll: `/api/v1/delete/{world}/{coordinate}`
+  * zeroizes the scroll at the given coordinates
+
 * /api/{world}/catchall - a dummy route for collecting methods not used elsewhere (yet)
 
 ### Phext Basics
