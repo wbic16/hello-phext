@@ -163,7 +163,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       se.focus();
     }
   }
-  function expand() {
+  function expand_scroll() {
     var se = dgid('scroll_editor');
     if (se) {
       var es = dgid('expand_subspace');
@@ -172,13 +172,41 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       }
     }
   }
-  function contract() {
+  function contract_phext() {
     var se = dgid('scroll_editor');
     if (se) {
       var cs = dgid('contract_subspace');
       if (cs) {
         cs.value = se.value;
       }
+    }
+  }
+  function insert_phext() {
+    var se = dgid('scroll_editor');
+    var iss = dgid('insert_scroll_subspace');
+    if (iss) {
+      iss.value = se.value;
+    }
+  }
+  function update_phext() {
+    var se = dgid('scroll_editor');
+    var uss = dgid('update_scroll_subspace');
+    if (uss) {
+      uss.value = se.value;
+    }
+  }
+  function insert_phext() {
+    var se = dgid('scroll_editor');
+    var ips = dgid('insert_phext_subspace');
+    if (ips) {
+      ips.value = se.value;
+    }
+  }
+  function update_phext() {
+    var se = dgid('scroll_editor');
+    var ups = dgid('update_phext_subspace');
+    if (ups) {
+      ups.value = se.value;
     }
   }
   </script>
@@ -198,12 +226,40 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       <div class='actions'>
         <form method='POST' action='/api/v1/expand/" + &world + "'>
           <input type='hidden' name='scroll' id='expand_subspace' value='' />
-          <input type='submit' value='Expand' onclick='expand();' />
+          <input type='submit' value='Expand' onclick='expand_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/contract/" + &world + "'>
           <input type='hidden' name='scroll' id='contract_subspace' value='' />
-          <input type='submit' value='Contract' onclick='contract();' />
+          <input type='submit' value='Contract' onclick='contract_phext();' />
+        </form>
+
+        <form method='POST' action='/api/v1/insert/" + &world + "/" + &coordinate + "'>
+          <input type='hidden' name='scroll' id='insert_scroll_subspace' value='' />
+          <input type='submit' value='Insert Scroll' onclick='insert_scroll();' />
+        </form>
+
+        <form method='POST' action='/api/v1/update/" + &world + "/" + &coordinate + "'>
+          <input type='hidden' name='scroll' id='update_scroll_subspace' value='' />
+          <input type='submit' value='Update Scroll' onclick='update_scroll();' />
+        </form>
+
+        <form method='POST' action='/api/v1/delete/" + &world + "/" + &coordinate + "'>
+          <input type='submit' value='Delete Scroll' />
+        </form>
+
+        <form method='POST' action='/api/v1/insert/" + &world + "'>
+          <input type='hidden' name='scroll' id='insert_phext_subspace' value='' />
+          <input type='submit' value='Insert Phext' onclick='insert_phext();' />
+        </form>
+
+        <form method='POST' action='/api/v1/update/" + &world + "'>
+          <input type='hidden' name='scroll' id='update_phext_subspace' value='' />
+          <input type='submit' value='Update Phext' onclick='update_phext();' />
+        </form>
+
+        <form method='POST' action='/api/v1/delete/" + &world + "'>
+          <input type='submit' value='Delete Phext' />
         </form>
       </div>
 
