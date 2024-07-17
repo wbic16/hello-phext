@@ -220,45 +220,53 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
         <input type='submit' value='Save' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
-        <textarea id='scroll_editor' rows='50' cols='160' name='scroll'>" + &scroll + "</textarea>
+        <textarea id='scroll_editor' rows='50' cols='160' name='content'>" + &scroll + "</textarea>
       </form>
 
       <div class='actions'>
         <form method='POST' action='/api/v1/expand/" + &world + "'>
-          <input type='hidden' name='scroll' id='expand_subspace' value='' />
+          <input type='hidden' name='content' id='expand_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Expand' onclick='expand_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/contract/" + &world + "'>
-          <input type='hidden' name='scroll' id='contract_subspace' value='' />
+          <input type='hidden' name='content' id='contract_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Contract' onclick='contract_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/insert/" + &world + "/" + &coordinate + "'>
-          <input type='hidden' name='scroll' id='insert_scroll_subspace' value='' />
+          <input type='hidden' name='content' id='insert_scroll_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Insert Scroll' onclick='insert_scroll();' />
         </form>
 
         <form method='POST' action='/api/v1/update/" + &world + "/" + &coordinate + "'>
-          <input type='hidden' name='scroll' id='update_scroll_subspace' value='' />
+          <input type='hidden' name='content' id='update_scroll_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Update Scroll' onclick='update_scroll();' />
         </form>
 
         <form method='POST' action='/api/v1/delete/" + &world + "/" + &coordinate + "'>
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Delete Scroll' />
         </form>
 
         <form method='POST' action='/api/v1/insert/" + &world + "'>
-          <input type='hidden' name='scroll' id='insert_phext_subspace' value='' />
+          <input type='hidden' name='content' id='insert_phext_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Insert Phext' onclick='insert_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/update/" + &world + "'>
-          <input type='hidden' name='scroll' id='update_phext_subspace' value='' />
+          <input type='hidden' name='content' id='update_phext_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Update Phext' onclick='update_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/delete/" + &world + "'>
+          <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Delete Phext' />
         </form>
       </div>
