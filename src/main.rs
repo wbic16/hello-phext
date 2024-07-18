@@ -209,6 +209,14 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       ups.value = se.value;
     }
   }
+  function open() {
+    var pc = dgid('phext_coordinate');
+    if (pc) {
+      var coordinate = pc.value.replace('/', ';');
+      alert('opening " + &world + " x ' + coordinate);
+      //window.open(\"/api/v1/index/" + &world + "/\" + coordinate);
+    }
+  }
   </script>
   </head>
   <body onLoad=\"load_event();\">
@@ -216,8 +224,9 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
     Scrolls: " + &navmap + "</div>
     <div class='content'>
       <form method='POST' action='/api/v1/save/" + &world + "/" + coordinate + "'>
-        Phext Coordinate: <input class='text' type='text' name='coordinate' value='" + &coord + "' />
+        Phext Coordinate: <input class='text' type='text' name='coordinate' id='phext_coordinate' value='" + &coord + "' />
         <input type='submit' value='Save' />
+        <input type='button' value='Open' onclick='open();' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
         <textarea id='scroll_editor' rows='50' cols='160' name='content'>" + &scroll + "</textarea>
@@ -276,6 +285,12 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
 </html>";
 
   return (ContentType::HTML, response);
+}
+
+#[get("/favicon.ico")]
+fn favorite_icon() -> (ContentType, Vec<u8>) {
+  let favicon = include_bytes!("favicon.ico");
+  return (ContentType::Icon, favicon.to_vec());
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -510,5 +525,7 @@ fn rocket() -> _ {
                             insert_scroll, insert_phext,
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
-                            index, save, normalize, expand, contract, ignore_warnings])
+                            index, save, normalize, expand, contract,
+                            favorite_icon,
+                            ignore_warnings])
 }
