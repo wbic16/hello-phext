@@ -478,6 +478,11 @@ mod tests {
         let update9 = phext::replace(update8.as_str(), coord9, "/win");
         assert_eq!(update9, "aaa\x17222\x183-\x19delta\x1Aa bridge just close enough\x1Cnifty\x1DG8\x1EHello World\x1F_o_\x01/win");
 
+        // the api editor has trouble with this input...
+        let coord_r0a = phext::to_coordinate("2.1.1/1.1.1/1.1.5");
+        let update_r0a = phext::replace("hello world\x17scroll two", coord_r0a, "2.1.1-1.1.1-1.1.5");
+        assert_eq!(update_r0a, "hello world\x17scroll two\x01\x17\x17\x17\x172.1.1-1.1.1-1.1.5");
+
         // regression from api testing
         // unit tests don't hit the failure I'm seeing through rocket...hmm - seems to be related to using library breaks
         let coord_r1a = phext::to_coordinate("1.1.1/1.1.1/1.1.1");

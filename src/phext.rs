@@ -675,12 +675,6 @@ pub fn replace(phext: &str, location: Coordinate, scroll: &str) -> String {
 
   println!("scanned {} bytes for start={}, end={}, coord={} vs req={}", phext.len(), start, end, subspace_coordinate, location);
 
-  if start == end {
-    // edge case: this scroll hasn't been opened yet...so
-    // we need to open this scroll at this point in subspace
-    fixup.push(SCROLL_BREAK as u8);
-  }
-
   while subspace_coordinate.z.library < location.z.library {
     fixup.push(LIBRARY_BREAK as u8);
     subspace_coordinate.library_break();
