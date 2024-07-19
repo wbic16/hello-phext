@@ -667,13 +667,23 @@ pub fn navmap(urlbase: &str, phext: &str) -> String {
 /// ----------------------------------------------------------------------------------------------------------
 pub fn replace(phext: &str, location: Coordinate, scroll: &str) -> String {
   let bytes = phext.as_bytes();
+  let bytes_size = bytes.len();
   let parts = get_subspace_coordinates(bytes, location);
-  let start: usize = parts.0;
+  let mut start: usize = parts.0;
   let mut end: usize = parts.1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
 
-  println!("scanned {} bytes for start={}, end={}, coord={} vs req={}", phext.len(), start, end, subspace_coordinate, location);
+  //println!("scanned {} bytes for start={}, end={}, coord={} vs location={}", phext.len(), start, end, subspace_coordinate, location);
+  
+  if bytes_size > 0 {
+    // edge case: when a scroll hasn't been opened yet, we need to advance from the left edge to the right edge
+    let compare = bytes_size - 1;
+    if start == end && start < compare {
+      start += 1;
+      end += 1;
+    }
+  }
 
   while subspace_coordinate.z.library < location.z.library {
     fixup.push(LIBRARY_BREAK as u8);

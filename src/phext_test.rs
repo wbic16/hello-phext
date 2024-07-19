@@ -514,6 +514,13 @@ mod tests {
         "\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18\x18" +
         "\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17\x17" +
         "eee");
+
+        // finally found the bugger!
+        let coord_regression_2 = phext::to_coordinate("1.1.1/1.1.2/1.1.2");
+        let regression_2_baseline = "1.1.11.1.21.1.31.1.41.2.11.2.21.2.31.2.4".to_string() +
+            "2.1.13.1.14.1.12/1.1.12/1.1.32.1/1.1.12.1.1/1.1.12/1.1.1/1.1.12.1/1.1.1/1.1.12.1.1/1.1.1/1.1.1";
+        let update_regression_2 = phext::replace(regression_2_baseline.as_str(), coord_regression_2, "new content");
+        assert_eq!(update_regression_2, "1.1.1\x171.1.2\x171.1.3\x171.1.4\x181.2.1\x171.2.2\x171.2.3\x171.2.4\x192.1.1\x193.1.1\x194.1.1\x1a2/1.1.1\x17new content\x172/1.1.3\x1c2.1/1.1.1\x1d2.1.1/1.1.1\x1e2/1.1.1/1.1.1\x1f2.1/1.1.1/1.1.1\x012.1.1/1.1.1/1.1.1");
     }
 
     #[test]
