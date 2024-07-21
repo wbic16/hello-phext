@@ -1,6 +1,10 @@
 # hello-phext
 
-This Rust project demonstrates how to work with Phext (11-dimensional plain hypertext). For more information about the phext format, head over to https://phext.io. 
+This Rust project demonstrates how to work with Phext (11-dimensional plain hypertext). For more information about the phext format, head over to https://phext.io.
+
+## Hello, Phext
+
+This project is an amalgamation of a Rust-powered Phext backend (phext.rs) and a Rocket-based API (main.rs). The functionality defined in the Phext backend provides all of the database/logic needed for hosting phext documents. The Rocket-based API is simply a wrapper around that functionality.
 
 ## Phext Motivation
 
@@ -76,8 +80,8 @@ Note: You can omit the coordinate part of the route to work in subspace directly
   * Replaces the entire contents of the given phext doc
 * Delete Phext: `/api/v1/delete/{world}`
   * zeroizes the entire contents of "world.phext"
-
-* /api/{world}/catchall - a dummy route for collecting methods not used elsewhere (yet)
+* Dummy Route: `/api/{world}/catchall`
+  * a dummy route for collecting methods not used elsewhere (yet)
 
 ### Phext Basics
 
