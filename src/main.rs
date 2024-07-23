@@ -105,6 +105,23 @@ fn css_styling() -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn more_cowbell
+///
+/// ensures that the cowbell character is supported
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/cowbell")]
+fn more_cowbell() -> (ContentType, String)
+{
+  let response = "<html><head><title>More Cowbell</title></head><body>Cowbell: \x07 (Hex = 0x07)</body></html>";
+  let passed = phext::check_for_cowbell(response);
+  if passed {
+    return (ContentType::HTML, response.to_string());
+  }
+
+  return (ContentType::HTML, "No cowbell!?".to_string());
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn ignore_warnings
 ///
 /// temporary placeholder for phext methods that only have test coverage so far
@@ -125,7 +142,6 @@ fn ignore_warnings(world: &str) -> (ContentType, String) {
   let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), end: phext::to_coordinate("1.1.1/1.1.1/1.1.2")};
   phext::range_replace(left, range, "test");
   phext::remove(right, coord);
-  phext::check_for_cowbell(left);
 
   return index(world, "1.1.1/1.1.1/1.1.1");
 }
@@ -527,5 +543,6 @@ fn rocket() -> _ {
                             delete_scroll, delete_phext,
                             index, save, normalize, expand, contract,
                             favorite_icon,
+                            more_cowbell,
                             ignore_warnings])
 }

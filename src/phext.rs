@@ -912,28 +912,6 @@ pub fn default_coordinate() -> Coordinate {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-fn null_coordinate() -> Coordinate {
-  let coord = Coordinate {
-    z: ZCoordinate {
-      library: 0,
-      shelf: 0,
-      series: 0
-    },
-    y: YCoordinate {
-      collection: 0,
-      volume: 0,
-      book: 0
-    },
-    x: XCoordinate {
-      chapter: 0,
-      section: 0,
-      scroll: 0
-    }
-  };
-  return coord;
-}
-
-/// ----------------------------------------------------------------------------------------------------------
 /// @fn to_coordinate
 ///
 /// translates a phext string to a strongly-typed address
