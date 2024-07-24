@@ -140,9 +140,18 @@ fn ignore_warnings(world: &str) -> (ContentType, String) {
   phext::merge(left, right);
   let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), end: phext::to_coordinate("1.1.1/1.1.1/1.1.2")};
   phext::range_replace(left, range, "test");
-  phext::remove(right, coord);
 
   return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn save (index)
+/// 
+/// This GET masquerades as a call to index, because users are likely to edit a save url to open a new scroll
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/save/<world>/<coordinate>")]
+fn save_index(world: &str, coordinate: &str) -> (ContentType, String) {
+  return index(world, coordinate);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -415,9 +424,17 @@ fn update_phext(world: &str, phext: Form<Subspace>) -> (ContentType, String) {
 /// ----------------------------------------------------------------------------------------------------------
 #[post("/api/v1/delete/<world>/<coordinate>")]
 fn delete_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
-  let empty:Subspace = Subspace{ content: "".to_string() };
-  let nothing: Form<Subspace> = Form::from(empty);
-  return update_scroll(world, coordinate, nothing);
+  let filename = world.to_owned() + ".phext";
+  
+  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+
+  let coord = phext::to_coordinate(coordinate);
+  let message = phext::remove(prior.as_str(), coord);
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return (ContentType::Text, "OK".to_string());
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -541,6 +558,7 @@ fn rocket() -> _ {
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
                             index, save, normalize, expand, contract,
+                            save_index,
                             favorite_icon,
                             more_cowbell,
                             ignore_warnings])
