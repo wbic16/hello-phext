@@ -533,47 +533,47 @@ mod tests {
         // replace 'bbb' with ''
         let coord2 = phext::to_coordinate("1.1.1/1.1.1/1.1.2");
         let update2 = phext::remove(update1.as_str(), coord2);
-        assert_eq!(update2, "\x17\x18ccc\x19ddd\x1Aeee\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
+        assert_eq!(update2, "\x18ccc\x19ddd\x1Aeee\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
 
         // replace 'ccc' with ''
         let coord3 = phext::to_coordinate("1.1.1/1.1.1/1.2.1");
         let update3 = phext::remove(update2.as_str(), coord3);
-        assert_eq!(update3, "\x17\x18\x19ddd\x1Aeee\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
+        assert_eq!(update3, "\x19ddd\x1Aeee\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
 
         // replace 'ddd' with ''
         let coord4 = phext::to_coordinate("1.1.1/1.1.1/2.1.1");
         let update4 = phext::remove(update3.as_str(), coord4);
-        assert_eq!(update4, "\x17\x18\x19\x1Aeee\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
+        assert_eq!(update4, "\x1Aeee\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
 
         // replace 'eee' with ''
         let coord5 = phext::to_coordinate("1.1.1/1.1.2/1.1.1");
         let update5 = phext::remove(update4.as_str(), coord5);
-        assert_eq!(update5, "\x17\x18\x19\x1A\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
+        assert_eq!(update5, "\x1Cfff\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
 
         // replace 'fff' with ''
         let coord6 = phext::to_coordinate("1.1.1/1.2.1/1.1.1");
         let update6 = phext::remove(update5.as_str(), coord6);
-        assert_eq!(update6, "\x17\x18\x19\x1A\x1C\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
+        assert_eq!(update6, "\x1Dggg\x1Ehhh\x1Fiii\x01jjj");
 
         // replace 'ggg' with ''
         let coord7 = phext::to_coordinate("1.1.1/2.1.1/1.1.1");
         let update7 = phext::remove(update6.as_str(), coord7);
-        assert_eq!(update7, "\x17\x18\x19\x1A\x1C\x1D\x1Ehhh\x1Fiii\x01jjj");
+        assert_eq!(update7, "\x1Ehhh\x1Fiii\x01jjj");
 
         // replace 'hhh' with ''
         let coord8 = phext::to_coordinate("1.1.2/1.1.1/1.1.1");
         let update8 = phext::remove(update7.as_str(), coord8);
-        assert_eq!(update8, "\x17\x18\x19\x1A\x1C\x1D\x1E\x1Fiii\x01jjj");
+        assert_eq!(update8, "\x1Fiii\x01jjj");
 
         // replace 'iii' with ''
         let coord9 = phext::to_coordinate("1.2.1/1.1.1/1.1.1");
         let update9 = phext::remove(update8.as_str(), coord9);
-        assert_eq!(update9, "\x17\x18\x19\x1A\x1C\x1D\x1E\x1F\x01jjj");
+        assert_eq!(update9, "\x01jjj");
 
         // replace 'jjj' with ''
         let coord10 = phext::to_coordinate("2.1.1/1.1.1/1.1.1");
         let update10 = phext::remove(update9.as_str(), coord10);
-        assert_eq!(update10, "\x17\x18\x19\x1A\x1C\x1D\x1E\x1F\x01");
+        assert_eq!(update10, "");
     }
 
     #[test]

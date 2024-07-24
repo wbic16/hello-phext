@@ -369,17 +369,15 @@ pub fn get_subspace_coordinates(subspace: &[u8], target: Coordinate) -> (usize, 
   if stage == 0 {
     start = max;
     end = max;
-    stage = 2;
   }
-
-  println!("Selected start={}, end={}, stage={}, best={}", start, end, stage, best);
 
   return (start, end, best);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn remove(phext: &str, location: Coordinate) -> String {
-  return replace(phext, location, "");
+  let phase1 = replace(phext, location, "");
+  return normalize(phase1.as_str());
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -509,7 +507,7 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
 /// inserts the content specified in `scroll` at the coordinate within `phext` specified by `location`
 /// ----------------------------------------------------------------------------------------------------------
 pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
-  let bytes = phext.as_bytes();
+  let bytes: &[u8] = phext.as_bytes();
   let parts: (usize, usize, Coordinate) = get_subspace_coordinates(bytes, location);
   let end: usize = parts.1;
   let mut fixup: Vec<u8> = vec![];
@@ -779,8 +777,9 @@ fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
   let mut result: String = Default::default();
   let mut coord = default_coordinate();
   for ps in tokens {
-    println!("merging {} at {} vs {}", ps.scroll, ps.coord, coord);
-    result.push_str(&append_scroll(ps.clone(), coord));
+    if ps.scroll.len() > 0 {
+      result.push_str(&append_scroll(ps.clone(), coord));
+    }
     coord = ps.coord;
   }
   return result;
@@ -789,7 +788,6 @@ fn dephokenize(tokens: &mut Vec<PositionedScroll>) -> String {
 /// ----------------------------------------------------------------------------------------------------------
 fn append_scroll(token: PositionedScroll, mut coord: Coordinate) -> String {
   let mut output: String = Default::default();
-  println!("append_scroll: {} vs {}", token.coord, coord);
   while coord < token.coord {
     if coord.z.library < token.coord.z.library       { output.push(LIBRARY_BREAK);    coord.library_break();    continue; }
     if coord.z.shelf < token.coord.z.shelf           { output.push(SHELF_BREAK);      coord.shelf_break();      continue; }
@@ -871,17 +869,8 @@ fn is_phext_break(byte: u8) -> bool {
 
 /// ----------------------------------------------------------------------------------------------------------
 pub fn normalize(phext: &str) -> String {
-  let buffer = phext.as_bytes();
-  let max = buffer.len();
-  let mut p = max - 1;
-  loop {
-    if is_phext_break(buffer[p]) == false { break; }
-    p -= 1;
-    if p == 0 { break; }
-  }
-
-  p += 1;
-  return phext[..p].to_string();
+  let mut arr = phokenize(phext);
+  return dephokenize(&mut arr);
 }
 
 /// ----------------------------------------------------------------------------------------------------------
