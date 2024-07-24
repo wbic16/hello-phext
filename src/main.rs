@@ -47,6 +47,7 @@ textarea {
   border-radius: 3px;
   font-size: 1.4em;
   margin: 10px;
+  width: 60%;
 }
 input {
   margin: 10px;
@@ -173,22 +174,6 @@ fn fetch_phext_buffer(world: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn ignore_warnings
-///
-/// temporary placeholder for phext methods that only have test coverage so far
-/// refer to `cargo test` output for more detail
-/// ----------------------------------------------------------------------------------------------------------
-#[get("/api/<world>/catchall")]
-fn ignore_warnings(world: &str) -> (ContentType, String) {
-  let buffer = fetch_phext_buffer(world);
-  let left = buffer.as_str();
-  let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), end: phext::to_coordinate("1.1.1/1.1.1/1.1.2")};
-  phext::range_replace(left, range, "test");
-
-  return index(world, "1.1.1/1.1.1/1.1.1");
-}
-
-/// ----------------------------------------------------------------------------------------------------------
 /// @fn save (index)
 /// 
 /// This GET masquerades as a call to index, because users are likely to edit a save url to open a new scroll
@@ -299,6 +284,18 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       mf.action = mf.action.replace('__father__', father);
     }
   }
+  function replace() {
+    var rf = dgid('replace_form');
+    var rc = dgid('replace_content');
+    var se = dgid('scroll_editor');
+    if (rf.action.endsWith('__start__/__end__')) {
+      var start = dgid('start').value;
+      var end = dgid('end').value;
+      rf.action = rf.action.replace('__start__', start);
+      rf.action = rf.action.replace('__end__', end);
+      rc.value = se.value;
+    }
+  }
   </script>
   </head>
   <body onLoad=\"load_event();\">
@@ -311,21 +308,11 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
         <input type='button' value='Open' onclick='open();' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
-        <textarea id='scroll_editor' rows='50' cols='140' name='content'>" + &scroll + "</textarea>
+        <textarea id='scroll_editor' rows='50' name='content'>" + &scroll + "</textarea>
       </form>
 
       <div class='actions'>
-        <form method='POST' action='/api/v1/expand/" + &world + "'>
-          <input type='hidden' name='content' id='expand_subspace' value='' />
-          <input type='hidden' name='redirect' value='yes' />
-          <input type='submit' value='Expand' onclick='expand_phext();' />
-        </form>
-
-        <form method='POST' action='/api/v1/contract/" + &world + "'>
-          <input type='hidden' name='content' id='contract_subspace' value='' />
-          <input type='hidden' name='redirect' value='yes' />
-          <input type='submit' value='Contract' onclick='contract_phext();' />
-        </form>
+        <h2>Scroll Operations</h2>
 
         <form method='POST' action='/api/v1/insert/" + &world + "/" + &coordinate + "'>
           <input type='hidden' name='content' id='insert_scroll_subspace' value='' />
@@ -344,26 +331,41 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
           <input type='submit' value='Delete Scroll' />
         </form>
 
+        <h2>Phext Operations</h2>
+        <hr />
+
+        <form method='POST' action='/api/v1/expand/" + &world + "'>
+          <input type='hidden' name='content' id='expand_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
+          <input type='submit' value='Expand' onclick='expand_phext();' />
+        </form>
+
+        <form method='POST' action='/api/v1/contract/" + &world + "'>
+          <input type='hidden' name='content' id='contract_subspace' value='' />
+          <input type='hidden' name='redirect' value='yes' />
+          <input type='submit' value='Contract' onclick='contract_phext();' />
+        </form>
+
         <form method='POST' action='/api/v1/insert/" + &world + "'>
           <input type='hidden' name='content' id='insert_phext_subspace' value='' />
           <input type='hidden' name='redirect' value='yes' />
-          <input type='submit' value='Insert Phext' onclick='insert_phext();' />
+          <input type='submit' value='Insert' onclick='insert_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/update/" + &world + "'>
           <input type='hidden' name='content' id='update_phext_subspace' value='' />
           <input type='hidden' name='redirect' value='yes' />
-          <input type='submit' value='Update Phext' onclick='update_phext();' />
+          <input type='submit' value='Update' onclick='update_phext();' />
         </form>
 
         <form method='POST' action='/api/v1/delete/" + &world + "'>
           <input type='hidden' name='redirect' value='yes' />
-          <input type='submit' value='Delete Phext' />
+          <input type='submit' value='Delete' />
         </form>
 
         <form method='GET' id='subtract_form' action='/api/v1/subtract/" + &world + "/__other__'>
           <input type='hidden' name='redirect' value='yes' />
-          <input type='submit' value='Subtract Phext' onclick='subtract();' />
+          <input type='submit' value='Subtract' onclick='subtract();' />
         </form>
 
         <form method='GET' id='merge_form' action='/api/v1/merge/" + &world + "/__mother__/__father__'>
@@ -371,6 +373,14 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
           Father: <input type='text' id='father' /><br />
           <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Merge' onclick='merge();' />
+        </form>
+
+        <form method='POST' id='replace_form' action='/api/v1/replace/" + &world + "/__start__/__end__'>          
+          Start Coordinate: <input type='text' id='start' value='1.1.1;1.1.1;1.1.1' /><br />
+          End Coordinate: <input type='text' id='end' value='1.1.1;1.1.1;1.1.1' /><br />
+          <input type='hidden' name='content' id='replace_content' />
+          <input type='hidden' name='redirect' value='yes' />
+          <input type='submit' value='Replace' onclick='replace();' />
         </form>
       </div>
 
@@ -565,7 +575,6 @@ fn contract(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   return index(world, "1.1.1/1.1.1/1.1.1");
 }
 
-
 /// ----------------------------------------------------------------------------------------------------------
 /// @fn expand
 ///
@@ -580,6 +589,26 @@ fn expand(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let required = "Unable to locate ".to_owned() + &filename;
 
   let message = phext::expand(scroll.content.as_str());
+  let _result = file.expect(&required).write_all(message.as_bytes());
+
+  return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn range_replace
+///
+/// Inserts the content of `scroll`, overwriting all content from `start` to `end`
+/// ----------------------------------------------------------------------------------------------------------
+#[post("/api/v1/replace/<world>/<start>/<end>", data="<scroll>")]
+fn range_replace(world: &str, start: &str, end: &str, scroll: Form<Subspace>) -> (ContentType, String) {
+  let filename = world.to_owned() + ".phext";
+  let range = phext::Range { start: phext::to_coordinate(start), end: phext::to_coordinate(end) };
+  let prior = fetch_phext_buffer(world);
+
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+
+  let message = phext::range_replace(prior.as_str(), range, scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return index(world, "1.1.1/1.1.1/1.1.1");
@@ -619,8 +648,6 @@ fn rocket() -> _ {
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
                             index, save, normalize, expand, contract,
-                            save_index, subtract, merge,
-                            favorite_icon,
-                            more_cowbell,
-                            ignore_warnings])
+                            save_index, subtract, merge, range_replace,
+                            favorite_icon, more_cowbell])
 }
