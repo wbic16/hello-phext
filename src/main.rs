@@ -165,7 +165,6 @@ fn ignore_warnings(world: &str) -> (ContentType, String) {
   let left = buffer.as_str();
   let right = buffer.as_str();
   let coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
-  phext::swap(coord, left, right);
   phext::merge(left, right);
   let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), end: phext::to_coordinate("1.1.1/1.1.1/1.1.2")};
   phext::range_replace(left, range, "test");

@@ -804,24 +804,6 @@ fn append_scroll(token: PositionedScroll, mut coord: Coordinate) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
-  let mut pl = phokenize(left);
-  let pr = phokenize(right);
-  for ps in &mut pl {
-    if ps.coord == coord {
-      for ith in &pr {
-        if ith.coord == coord {
-          println!("swapping left='{}' for right='{}'", ps.scroll, ith.scroll);
-          ps.scroll = ith.scroll.clone();
-        }
-      }
-    }
-  }
-
-  return dephokenize(&mut pl);
-}
-
-/// ----------------------------------------------------------------------------------------------------------
 /// @fn subtract
 ///
 /// Subtracts the scrolls from `left` where there is also content at those coordinates in `right`

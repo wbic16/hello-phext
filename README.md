@@ -116,4 +116,3 @@ Note: You can omit the coordinate part of the route to work in subspace directly
 * merge: verifies that two phext documents can be zipper-merged (intersection)
 * subtract: verifies that we can prune all of the coordinates from a second phext document
 * normalize: verifies that empty scrolls are pruned from the given phext document
-* swap: verifies that the content at the given coordinates can be swapped between two phext archives

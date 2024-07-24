@@ -753,63 +753,6 @@ mod tests {
     }
 
     #[test]
-    fn test_swap() {
-        let doc1a = "text in scroll #1\x17scroll #2";
-        let doc1b = "first\x17second";
-        let coord1 = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
-        let update1 = phext::swap(coord1, doc1a, doc1b);
-        assert_eq!(update1, "first\x17scroll #2");
-
-        let doc2a = "before\x18section two\x18section three\x18section four";
-        let doc2b = "lalala\x18replaced!!!\x18ignored\x19ignored\x17ignored";
-        let coord2 = phext::to_coordinate("1.1.1/1.1.1/1.2.1");
-        let update2 = phext::swap(coord2, doc2a, doc2b);
-        assert_eq!(update2, "before\x18replaced!!!\x18section three\x18section four");
-
-        let doc3a = "one\x19two\x19three\x19four";
-        let doc3b = "111\x192\x193\x194";
-        let coord3 = phext::to_coordinate("1.1.1/1.1.1/3.1.1");
-        let update3 = phext::swap(coord3, doc3a, doc3b);
-        assert_eq!(update3, "one\x19two\x193\x19four");
-
-        let doc4a = "alpha\x1abeta\x1agamma\x1adelta";
-        let doc4b = "123\x1a456\x1a789\x1a842";
-        let coord4 = phext::to_coordinate("1.1.1/1.1.4/1.1.1");
-        let update4 = phext::swap(coord4, doc4a, doc4b);
-        assert_eq!(update4, "alpha\x1abeta\x1agamma\x1a842");
-
-        let doc5a = "alpha\x1cbeta\x1csuper\x1cduty\x1cextra";
-        let doc5b = "\x1c\x1c\x1c\x1c new text here ";
-        let coord5 = phext::to_coordinate("1.1.1/1.5.1/1.1.1");
-        let update5 = phext::swap(coord5, doc5a, doc5b);
-        assert_eq!(update5, "alpha\x1cbeta\x1csuper\x1cduty\x1c new text here ");
-
-        let doc6a = "stuff\x1d and things \x1d and more \x1d goes here and there";
-        let doc6b = "111 \x1d 222 \x1d 333 \x1d 444 \x1d 555";
-        let coord6 = phext::to_coordinate("1.1.1/4.1.1/1.1.1");
-        let update6 = phext::swap(coord6, doc6a, doc6b);
-        assert_eq!(update6, "stuff\x1d and things \x1d and more \x1d 444 ");
-
-        let doc7a = "aaa \x1e bbb \x1e ccc \x1e ddd \x1e eee";
-        let doc7b = "A\x1eB\x1eC\x1eD\x1eE\x1eF\x1eG";
-        let coord7 = phext::to_coordinate("1.1.3/1.1.1/1.1.1");
-        let update7 = phext::swap(coord7, doc7a, doc7b);
-        assert_eq!(update7, "aaa \x1e bbb \x1eC\x1e ddd \x1e eee");
-
-        let doc8a = "aaaaa \x1f bbbb \x1f ccc \x1f dddddd \x1f eeeeeeee \x1f ff ";
-        let doc8b = "\x1f\x1f\x1f\x1f___\x1f\x1f\x1f\x1f\x1f\x1f";
-        let coord8 = phext::to_coordinate("1.5.1/1.1.1/1.1.1");
-        let update8 = phext::swap(coord8, doc8a, doc8b);
-        assert_eq!(update8, "aaaaa \x1f bbbb \x1f ccc \x1f dddddd \x1f___\x1f ff ");
-
-        let doc9a = "lib 1 \x01 lib 2 \x01 lib 3 \x01 lib 4 \x01 lib 5";
-        let doc9b = "zzz \x01 yyy \x01 xxx \x01 www \x01 vvv \x01 uuu \x01";
-        let coord9 = phext::to_coordinate("2.1.1/1.1.1/1.1.1");
-        let update9 = phext::swap(coord9, doc9a, doc9b);
-        assert_eq!(update9, "lib 1 \x01 yyy \x01 lib 3 \x01 lib 4 \x01 lib 5");
-    }
-
-    #[test]
     fn test_fs_read_write() {
         let filename = "unit-test.phext";
         let file = std::fs::File::create(&filename);
