@@ -121,6 +121,38 @@ fn more_cowbell() -> (ContentType, String)
   return (ContentType::HTML, "No cowbell!?".to_string());
 }
 
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn subtract
+///
+/// removes scrolls that have content in both archives from the first archive
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/subtract/<world>/<other>")]
+fn subtract(world: &str, other: &str) -> (ContentType, String)
+{
+  let filename = world.to_owned() + ".phext";
+  let left = fetch_phext_buffer(world);
+  let right = fetch_phext_buffer(other);
+  let result = phext::subtract(left.as_str(), right.as_str());
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+  let _result = file.expect(&required).write_all(result.as_bytes());
+
+  return (ContentType::HTML, "OK".to_string());
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn fetch_phext_buffer
+///
+/// Retrieves the content from the .phext archive specified by `world`
+/// ----------------------------------------------------------------------------------------------------------
+fn fetch_phext_buffer(world: &str) -> String {
+  let filename: String = world.to_owned() + ".phext";
+  let message = "Unable to find ".to_owned() + world;
+  let buffer:String = fs::read_to_string(filename).expect(&message);
+  return buffer;
+}
+
 /// ----------------------------------------------------------------------------------------------------------
 /// @fn ignore_warnings
 ///
@@ -129,12 +161,9 @@ fn more_cowbell() -> (ContentType, String)
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/api/<world>/catchall")]
 fn ignore_warnings(world: &str) -> (ContentType, String) {
-  let filename: String = world.to_owned() + ".phext";
-  let message = "Unable to find ".to_owned() + world;
-  let buffer:String = fs::read_to_string(filename).expect(&message);
+  let buffer = fetch_phext_buffer(world);
   let left = buffer.as_str();
   let right = buffer.as_str();
-  phext::subtract(left, right);
   let coord = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
   phext::swap(coord, left, right);
   phext::merge(left, right);
@@ -164,9 +193,7 @@ fn save_index(world: &str, coordinate: &str) -> (ContentType, String) {
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/api/v1/index/<world>/<coordinate>")]
 fn index(world: &str, coordinate: &str) -> (ContentType, String) {
-  let filename: String = world.to_owned() + ".phext";
-  let message = "Unable to find ".to_owned() + world;
-  let buffer:String = fs::read_to_string(filename).expect(&message);
+  let buffer = fetch_phext_buffer(world);
   let size = buffer.len();
   let scroll = phext::locate(&buffer, coordinate);
   let navmap = phext::navmap(&format!("/api/v1/index/{}/", world), buffer.as_str());
@@ -241,6 +268,13 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       //window.open(\"/api/v1/index/" + &world + "/\" + coordinate);
     }
   }
+  function subtract() {
+    var sf = dgid('subtract_form');
+    if (sf.action.endsWith('__other__')) {
+      var phext = prompt(\"Which phext to mask with?\");
+      sf.action = sf.action.replace('__other__', phext);
+    }
+  }
   </script>
   </head>
   <body onLoad=\"load_event();\">
@@ -302,6 +336,11 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
           <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Delete Phext' />
         </form>
+
+        <form method='GET' id='subtract_form' action='/api/v1/subtract/" + &world + "/__other__'>
+          <input type='hidden' name='redirect' value='yes' />
+          <input type='submit' value='Subtract Phext' onclick='subtract();' />
+        </form>
       </div>
 
     </div>
@@ -324,9 +363,7 @@ fn favorite_icon() -> (ContentType, Vec<u8>) {
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/api/v1/select/<world>/<coordinate>")]
 fn select_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
-  let filename: String = world.to_owned() + ".phext";
-  let message = "Unable to find ".to_owned() + world;
-  let buffer:String = fs::read_to_string(filename).expect(&message);
+  let buffer = fetch_phext_buffer(world);
   let scroll = phext::locate(&buffer, coordinate);
 
   return (ContentType::Text, scroll);
@@ -339,10 +376,7 @@ fn select_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/api/v1/select/<world>")]
 fn select_phext(world: &str) -> (ContentType, String) {
-  let filename: String = world.to_owned() + ".phext";
-  let message = "Unable to find ".to_owned() + world;
-  let buffer:String = fs::read_to_string(filename).expect(&message);
-
+  let buffer = fetch_phext_buffer(world);
   return (ContentType::Text, buffer);
 }
 
@@ -354,8 +388,7 @@ fn select_phext(world: &str) -> (ContentType, String) {
 #[post("/api/v1/insert/<world>/<coordinate>", data="<scroll>")]
 fn insert_scroll(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
-  
-  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let prior = fetch_phext_buffer(world);
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
@@ -373,8 +406,7 @@ fn insert_scroll(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (Cont
 #[post("/api/v1/insert/<world>", data="<phext>")]
 fn insert_phext(world: &str, phext: Form<Subspace>) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
-  
-  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let prior = fetch_phext_buffer(world);
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;  
   let message = prior + &phext.content;
@@ -391,8 +423,7 @@ fn insert_phext(world: &str, phext: Form<Subspace>) -> (ContentType, String) {
 #[post("/api/v1/update/<world>/<coordinate>", data="<scroll>")]
 fn update_scroll(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
-  
-  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let prior = fetch_phext_buffer(world);
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
@@ -425,8 +456,7 @@ fn update_phext(world: &str, phext: Form<Subspace>) -> (ContentType, String) {
 #[post("/api/v1/delete/<world>/<coordinate>")]
 fn delete_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
   let filename = world.to_owned() + ".phext";
-  
-  let prior = fs::read_to_string(filename.clone()).expect("Unable to open world");
+  let prior = fetch_phext_buffer(world);
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
@@ -558,7 +588,7 @@ fn rocket() -> _ {
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
                             index, save, normalize, expand, contract,
-                            save_index,
+                            save_index, subtract,
                             favorite_icon,
                             more_cowbell,
                             ignore_warnings])

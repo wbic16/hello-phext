@@ -822,6 +822,12 @@ pub fn swap(coord: Coordinate, left: &str, right: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn subtract
+///
+/// Subtracts the scrolls from `left` where there is also content at those coordinates in `right`
+///
+/// Note: This makes it easy to generate a mask for a given phext archive.
+/// ----------------------------------------------------------------------------------------------------------
 pub fn subtract(left: &str, right: &str) -> String {
   let pl = phokenize(left);
   let pr = phokenize(right);
