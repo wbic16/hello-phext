@@ -50,7 +50,7 @@ textarea {
 }
 input {
   margin: 10px;
-  width: 100px;
+  width: 120px;
   padding: 8px;
   border-radius: 3px;
   border: 2px solid white;
@@ -142,6 +142,25 @@ fn subtract(world: &str, other: &str) -> (ContentType, String)
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn merge
+///
+/// zipper merge for two phexts into one
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/merge/<world>/<mother>/<father>")]
+fn merge(world: &str, mother: &str, father: &str) -> (ContentType, String)
+{
+  let filename = world.to_owned() + ".phext";
+  let left = fetch_phext_buffer(mother);
+  let right = fetch_phext_buffer(father);
+  let result = phext::merge(left.as_str(), right.as_str());
+  let file = File::create(&filename);
+  let required = "Unable to locate ".to_owned() + &filename;
+  let _result = file.expect(&required).write_all(result.as_bytes());
+
+  return index(world, "1.1.1/1.1.1/1.1.1");
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn fetch_phext_buffer
 ///
 /// Retrieves the content from the .phext archive specified by `world`
@@ -163,8 +182,6 @@ fn fetch_phext_buffer(world: &str) -> String {
 fn ignore_warnings(world: &str) -> (ContentType, String) {
   let buffer = fetch_phext_buffer(world);
   let left = buffer.as_str();
-  let right = buffer.as_str();
-  phext::merge(left, right);
   let range = phext::Range { start: phext::to_coordinate("1.1.1/1.1.1/1.1.1"), end: phext::to_coordinate("1.1.1/1.1.1/1.1.2")};
   phext::range_replace(left, range, "test");
 
@@ -273,6 +290,15 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       sf.action = sf.action.replace('__other__', phext);
     }
   }
+  function merge() {
+    var mf = dgid('merge_form');
+    if (mf.action.endsWith('__mother__/__father__')) {
+      var mother = dgid('mother').value;
+      var father = dgid('father').value;
+      mf.action = mf.action.replace('__mother__', mother);
+      mf.action = mf.action.replace('__father__', father);
+    }
+  }
   </script>
   </head>
   <body onLoad=\"load_event();\">
@@ -285,7 +311,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
         <input type='button' value='Open' onclick='open();' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
-        <textarea id='scroll_editor' rows='50' cols='160' name='content'>" + &scroll + "</textarea>
+        <textarea id='scroll_editor' rows='50' cols='140' name='content'>" + &scroll + "</textarea>
       </form>
 
       <div class='actions'>
@@ -338,6 +364,13 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
         <form method='GET' id='subtract_form' action='/api/v1/subtract/" + &world + "/__other__'>
           <input type='hidden' name='redirect' value='yes' />
           <input type='submit' value='Subtract Phext' onclick='subtract();' />
+        </form>
+
+        <form method='GET' id='merge_form' action='/api/v1/merge/" + &world + "/__mother__/__father__'>
+          Mother: <input type='text' id='mother' /><br />
+          Father: <input type='text' id='father' /><br />
+          <input type='hidden' name='redirect' value='yes' />
+          <input type='submit' value='Merge' onclick='merge();' />
         </form>
       </div>
 
@@ -586,7 +619,7 @@ fn rocket() -> _ {
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
                             index, save, normalize, expand, contract,
-                            save_index, subtract,
+                            save_index, subtract, merge,
                             favorite_icon,
                             more_cowbell,
                             ignore_warnings])
