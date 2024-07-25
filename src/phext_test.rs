@@ -810,14 +810,14 @@ mod tests {
             next.scroll_break();
         }
 
-        // 31 x 32 + 9 = 1001, which would be the next scroll to insert after adding scrolls 1-1000
+        // TODO: double-check this math
         let expected = phext::to_coordinate("1.1.1/1.1.1/2.31.17");
         assert_eq!(next, expected);
 
         let expected_doc1_length = 44;
         assert_eq!(doc1.len(), expected_doc1_length);
 
-        // 1000 scrolls should be separated by 999 delimiters
+        // 2000 scrolls should be separated by 1999 delimiters
         let mut phext_tokens = 0;
         let mut scroll_breaks = 0;
         let mut section_breaks = 0;
