@@ -506,14 +506,12 @@ pub fn range_replace(phext: &str, location: Range, scroll: &str) -> String {
 ///
 /// inserts the content specified in `scroll` at the coordinate within `phext` specified by `location`
 /// ----------------------------------------------------------------------------------------------------------
-pub fn insert(phext: &str, location: Coordinate, scroll: &str) -> String {
+pub fn insert(phext: String, location: Coordinate, scroll: &str) -> String {
   let bytes: &[u8] = phext.as_bytes();
   let parts: (usize, usize, Coordinate) = get_subspace_coordinates(bytes, location);
   let end: usize = parts.1;
   let mut fixup: Vec<u8> = vec![];
   let mut subspace_coordinate: Coordinate = parts.2;
-
-  println!("Inserting {} at {} with best={}", scroll, end, subspace_coordinate);
 
   while subspace_coordinate.z.library < location.z.library {
     fixup.push(LIBRARY_BREAK as u8);
@@ -842,7 +840,11 @@ pub fn subtract(left: &str, right: &str) -> String {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-fn is_phext_break(byte: u8) -> bool {
+/// @fn is_phext_break
+///
+/// returns true if `byte` corresponds to one of our phext delimiters (line breaks included)
+/// ----------------------------------------------------------------------------------------------------------
+pub fn is_phext_break(byte: u8) -> bool {
   return byte == LINE_BREAK as u8 ||
          byte == SCROLL_BREAK as u8 ||
          byte == SECTION_BREAK as u8 ||

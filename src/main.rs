@@ -433,7 +433,7 @@ fn insert_scroll(world: &str, coordinate: &str, scroll: Form<Subspace>) -> (Cont
   let file = File::create(&filename);
   let required = "Unable to locate ".to_owned() + &filename;
 
-  let message = phext::insert(prior.as_str(), phext::to_coordinate(coordinate), scroll.content.as_str());
+  let message = phext::insert(prior, phext::to_coordinate(coordinate), scroll.content.as_str());
   let _result = file.expect(&required).write_all(message.as_bytes());
 
   return (ContentType::Text, "OK".to_string());
