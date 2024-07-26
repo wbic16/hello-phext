@@ -555,7 +555,6 @@ fn normalize(world: &str, scroll: Form<Subspace>) -> (ContentType, String) {
   return index(world, "1.1.1/1.1.1/1.1.1");
 }
 
-
 /// ----------------------------------------------------------------------------------------------------------
 /// @fn contract
 ///

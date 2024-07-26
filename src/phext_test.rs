@@ -791,7 +791,7 @@ mod tests {
         let doc1 = "the quick brown fox jumped over the lazy dog";
         let mut x = 0;
         let mut next = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
-        let mut result = "".to_string();
+        let mut result = vec!["".to_string()];
         loop {
             x += 1;
             if x > 2000 {
@@ -806,7 +806,7 @@ mod tests {
             if next.x.chapter > 32 {
                 next.book_break();
             }
-            result = phext::insert(result, next, doc1);
+            result.push(phext::insert(result[x-1].clone(), next, doc1));
             next.scroll_break();
         }
 
@@ -822,7 +822,8 @@ mod tests {
         let mut scroll_breaks = 0;
         let mut section_breaks = 0;
         let mut chapter_breaks = 0;
-        for byte in result.as_bytes() {
+        let check = result.last().expect("at least one").as_bytes();
+        for byte in check {
             if phext::is_phext_break(*byte) {
                 phext_tokens += 1;
             }
@@ -844,10 +845,10 @@ mod tests {
         assert_eq!(chapter_breaks, 1);   // 2 chapters with 1 delimiter
 
         // doc1 * 1000 + delimiter count
-        let expected_length = 2000 * expected_doc1_length + expected_tokens; // 44999
-        assert_eq!(result.len(), expected_length);
+        let expected_length = 2000 * expected_doc1_length + expected_tokens;
+        assert_eq!(check.len(), expected_length);
 
-        // note: raw performance is slow due to the lack of memoization in the library
+        // note: raw performance is slow due to lack of optimization so far
         // for 2,000 scrolls on my laptop, we're averaging 2.3 ms per record
 
     }
