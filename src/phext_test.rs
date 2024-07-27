@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use std::time::SystemTime;
     use crate::phext::{self, PositionedScroll, BOOK_BREAK, CHAPTER_BREAK, COLLECTION_BREAK, LIBRARY_BREAK, SCROLL_BREAK, SECTION_BREAK, SERIES_BREAK, SHELF_BREAK, VOLUME_BREAK};
     use std::{collections::HashMap, io::Write};
 
@@ -792,6 +793,8 @@ mod tests {
         let mut x = 0;
         let mut next = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
         let mut result = vec!["".to_string()];
+
+        let start = SystemTime::now();
         loop {
             x += 1;
             if x > 2000 {
@@ -809,6 +812,13 @@ mod tests {
             result.push(phext::insert(result[x-1].clone(), next, doc1));
             next.scroll_break();
         }
+
+        let end = SystemTime::now().duration_since(start).expect("get millis error");
+
+        let success = end.as_millis() < 10000;
+        assert_eq!(success, true);
+
+        println!("Performance test took: {} ms", end.as_millis());
 
         // TODO: double-check this math
         let expected = phext::to_coordinate("1.1.1/1.1.1/2.31.17");
