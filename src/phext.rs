@@ -549,11 +549,17 @@ pub fn insert(phext: String, location: Coordinate, scroll: &str) -> String {
     fixup.push(SCROLL_BREAK as u8);
     subspace_coordinate.scroll_break();
   }
+
   let text: std::slice::Iter<u8> = scroll.as_bytes().iter();
   let left = &bytes[..end];
   let right = &bytes[end..];
-  let temp:Vec<u8> = left.iter().chain(fixup.iter()).chain(text).chain(right.iter()).cloned().collect();
+  let mut temp = Vec::with_capacity(left.len() + fixup.len() + text.len() + right.len());
+  temp.extend_from_slice(left);
+  temp.extend_from_slice(fixup.as_slice());
+  temp.extend_from_slice(text.as_slice());
+  temp.extend_from_slice(right);
   let result: String = String::from_utf8(temp).expect("invalid utf8");
+
   return result;
 }
 

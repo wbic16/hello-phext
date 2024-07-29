@@ -815,10 +815,9 @@ mod tests {
 
         let end = SystemTime::now().duration_since(start).expect("get millis error");
 
-        let success = end.as_millis() < 10000;
-        assert_eq!(success, true);
-
         println!("Performance test took: {} ms", end.as_millis());
+        let success = end.as_millis() < 5000;
+        assert_eq!(success, true);
 
         // TODO: double-check this math
         let expected = phext::to_coordinate("1.1.1/1.1.1/2.31.17");
