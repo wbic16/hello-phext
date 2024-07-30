@@ -788,7 +788,7 @@ mod tests {
     }
 
     #[test]
-    fn test_insert_performance() {
+    fn test_insert_performance_2k_scrolls() {
         let doc1 = "the quick brown fox jumped over the lazy dog";
         let mut x = 0;
         let mut next = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
@@ -859,6 +859,90 @@ mod tests {
 
         // note: raw performance is slow due to lack of optimization so far
         // for 2,000 scrolls on my laptop, we're averaging 2.3 ms per record
+
+    }
+
+    #[test]
+    fn test_insert_performance_medium_scrolls() {
+        let doc_template = "the quick brown fox jumped over the lazy dog\n";
+        let mut doc1 = "".to_string();
+        let mut x = 0;
+        while x < 1000 {
+            x += 1;
+            doc1.push_str(doc_template);
+        }
+        let doc1 = doc1.as_str();
+        let mut next = phext::to_coordinate("1.1.1/1.1.1/1.1.1");
+        let mut result = vec!["".to_string()];
+
+        let start = SystemTime::now();
+        x = 0;
+        loop {
+            x += 1;
+            if x > 25 {
+                break;
+            }            
+            if next.x.scroll > 5 {
+                next.section_break();
+            }
+            if next.x.section > 5 {
+                next.chapter_break();
+            }
+            if next.x.chapter > 5 {
+                next.book_break();
+            }
+            result.push(phext::insert(result[x-1].clone(), next, doc1));
+            next.scroll_break();
+        }
+
+        let end = SystemTime::now().duration_since(start).expect("get millis error");
+
+        println!("Performance test took: {} ms", end.as_millis());
+        let success = end.as_millis() < 1000;
+        assert_eq!(success, true);
+
+        // TODO: double-check this math
+        let expected = phext::to_coordinate("1.1.1/1.1.1/1.5.6");
+        assert_eq!(next, expected);
+
+        let expected_doc1_length = 45000; // counting line breaks
+        assert_eq!(doc1.len(), expected_doc1_length);
+
+        // 2000 scrolls should be separated by 1999 delimiters
+        let mut phext_tokens = 0;
+        let mut line_breaks = 0;
+        let mut scroll_breaks = 0;
+        let mut section_breaks = 0;
+        let mut chapter_breaks = 0;
+        let check = result.last().expect("at least one").as_bytes();
+        for byte in check {
+            if phext::is_phext_break(*byte) {
+                phext_tokens += 1;
+            }
+            if *byte == phext::LINE_BREAK as u8 {
+                line_breaks += 1;
+            }
+            if *byte == phext::SCROLL_BREAK as u8 {
+                scroll_breaks += 1;
+            }
+            if *byte == phext::SECTION_BREAK as u8 {
+                section_breaks += 1;
+            }
+            if *byte == phext::CHAPTER_BREAK as u8 {
+                chapter_breaks += 1;
+            }
+        }
+        let expected_tokens = 25024;
+        assert_eq!(phext_tokens, expected_tokens);
+
+        assert_eq!(line_breaks, 25000); //
+        assert_eq!(scroll_breaks, 20);  // 
+        assert_eq!(section_breaks, 4);  // 
+        assert_eq!(chapter_breaks, 0);  // 
+
+        // doc1 * 1000 + delimiter count
+        let expected_length = 25 * (expected_doc1_length-1000) + expected_tokens;
+        assert_eq!(check.len(), expected_length);
 
     }
 }
