@@ -124,6 +124,243 @@ fn more_cowbell() -> (ContentType, String)
 
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn liquid
+///
+/// provides the liquid data visualizer
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/liquid/<world>/<coordinate>")]
+fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
+{
+  let css = "
+  body {
+    background: #101419;
+    color: white;
+    font-family: sans-serif;
+  }
+  a, a:visited {
+    color: white;
+    font-size: 1.6em;
+  }
+  a.small, a.small:visited {
+    font-size: 1em;
+  }
+  .number {
+    font-weight: bold;
+    color: #8f8fd7;
+  }
+  .coordinates {
+    font-style: italic;
+    color: #8fef62;
+  }
+  input {
+    border: 2px solid white;
+    border-radius: 1px;
+    padding: 4px;
+    margin: 1px;
+    margin-bottom: 4px;
+  }
+  #city {
+    position: relative;
+    top: 50px;
+    left: 10%;
+    width: 90%;
+  }
+  #present {
+    position: absolute;
+    z-index: 4;
+    top: 100px;
+    left: -1000px;
+    width: 800px;
+    height: 400px;
+    font-size: 2em;
+    background: white;
+    border: 16px solid orange;
+    color: black;
+    padding: 20px;
+  }
+  .summary {
+    position: absolute;
+    top: -30px;
+  }
+  .outer {
+    background-color: #1B4079;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 1em;
+    z-index: 0;
+  }
+  .room {
+    width: 60px;
+    height: 48px;
+    color: #202030;
+    background-color: #B4C5E4;
+    border-radius: 3px;
+    z-index: 1;
+  }
+  .outer,
+  .room {
+    position: absolute;
+    border: 2px solid grey;
+    text-align: center;
+    vertical-align: center;
+    margin-bottom: 4px;
+    padding-top: 2px;
+    transition: all 0.4s;
+  }
+  .room:hover {
+    cursor: pointer;
+    background: whitesmoke;
+    color: black;
+    scale: 2;
+    width: 80px;
+    height: 40px;
+    padding-top: 10px;
+    z-index: 3;
+  }
+  .outer {
+    width: 670px;
+    height: 540px;
+  }
+  #presentCloser {
+    text-decoration: underline; cursor: pointer;
+  }
+  #presentCloser:hover {
+    background-color: grey;
+  }
+  ";
+  let js = "
+  <script type=\"text/JavaScript\">
+
+  function dgid(id) {
+    return document.getElementById(id);
+  }
+  
+  var MAJOR_WIDTH = 720;
+  var MAJOR_HEIGHT = 600;
+  
+  function hide() {
+    var present = dgid(\"present\");
+    present.style.left = \"-2500px\";
+  }
+  
+  function show(cellColumn, cellRow, column, row, chapter, section, scroll) {
+    squeeze(cellColumn, cellRow, column, row);    
+  }
+  
+  function randomInteger(limit) {
+    return Math.floor(Math.random() * (limit + 1));
+  }
+    
+  function setupCity() {
+    var city = dgid(\"city\");
+    var output = \"\";
+    var section = 1;
+    var scroll = 1;
+    var chapter = 1;
+    var total = 0;
+    var left = 0;
+    var top = 0;
+    var ileft = 0;
+    var itop = 0;
+    for (var j = 1; j <= 11; ++j) {
+      for (var i = 1; i <= 11; ++i) {
+        left = (MAJOR_WIDTH * (i-1));
+        top = (MAJOR_HEIGHT * (j-1));
+        output += \"<div id='outer_\" + i + \"_\" + j + \"' class='outer' style='top: \" + top + \"px; left: \" + left + \"px;'>\" + chapter + \".\" + section + \".\" + scroll + \"\\n\";
+        for (var y = 1; y <= 9; ++y) {
+          for (var x = 1; x <= 9; ++x) {
+            ileft = 64 * x;
+            itop = 48 * y;
+            output += \"<div id='inner_\" + i + \"_\" + j + \"_\" + x + \"_\" + y + \"' class='room' style='position: absolute; top: \" + itop + \"px; left: \" + ileft + \"px;' onclick='show(\" + i + \", \" + j + \", \" + x + \",\" + y + \",\" + chapter + \",\" + section + \",\" + scroll + \");'>\" + scroll + \"</div>\\n\";
+            scroll += 1;
+            total += 1;
+            if (scroll > 99) {
+              scroll = 1;
+              section += 1;
+            }
+            if (section > 99) {
+              scroll = 1;
+              section = 1;
+              chapter += 1;
+            }
+          }
+        }
+        output += \"</div>\\n\";
+      }
+    }
+  
+    var summary = \"<div class='summary'>Rooms on this Block (1.1.1/1.1.1/1.*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
+    city.innerHTML = summary + output;
+  }
+  
+  function getOuter(w, x) {
+    return dgid(\"outer_\" + w + \"_\" + x);
+  }
+  
+  function getInner(w, x, y, z) {
+    return dgid(\"inner_\" + w + \"_\" + x + \"_\" + y + \"_\" + z);
+  }
+  
+  function squeeze(w, x, y, z) {
+    var cell = getOuter(w, x);
+    var inner = getInner(w, x, y, z);
+    if (cell) {
+    }
+    if (inner && inner.style.scale.length == 0) {
+      inner.style.scale = \"4.0\";
+      inner.style.zIndex = \"3\";
+    } else if (inner) {
+      inner.style.scale = \"\";
+      inner.style.zIndex = \"3\";
+    }
+    for (var i = 1; i <= 9; ++i) {
+      for (var j = 1; j <= 9; ++j) {
+        var adjust = getInner(w, x, i, j);      
+        if (adjust && (adjust != inner) && adjust.style.scale.length == 0) {
+          adjust.style.scale = \"\";
+        }
+      }
+    }
+  }
+  
+  function cleanup(w, x) {
+    for (var y = 1; y <= 9; ++y) {
+      for (var z = 1; z <= 9; ++z) {
+        var cell = getInner(w, x, y, z);
+        if (cell) {
+          cell.style.scale = \"\";
+          cell.style.zIndex = \"\";
+        }      
+      }
+    }
+  
+    var cell = getOuter(w, x);
+    if (cell) {
+      cell.style.scale = \"\";
+    }
+  }
+  </script>
+  ";
+  let response = "<html>
+<head>
+<title>Liquid Metal</title>
+<style type='text/css' media='all'>".to_string() +
+css + "
+</style>" +
+js + "
+</head>
+<body onload=\"setupCity();\">
+  <a href=\"https://phext.io/white-rabbit.html?m=unlocked\">return to game</a>
+<div id=\"city\"></div>
+<div id=\"present\"></div>
+</body></html>";
+
+  return (ContentType::HTML, response);
+}
+
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn subtract
 ///
 /// removes scrolls that have content in both archives from the first archive
@@ -648,5 +885,5 @@ fn rocket() -> _ {
                             delete_scroll, delete_phext,
                             index, save, normalize, expand, contract,
                             save_index, subtract, merge, range_replace,
-                            favorite_icon, more_cowbell])
+                            favorite_icon, liquid, more_cowbell])
 }
