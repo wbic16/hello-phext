@@ -58,6 +58,8 @@ The introduction of Large Language Models (LLMs) has accelerated our transition 
   * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters down by 1 dimension
 * Expand Phext: `/api/v1/expand/{world}`
   * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters up by 1 dimension
+* Liquid Visualizer: `/api/v1/liquid/{world}/{coordinate}`
+  * Provides a tile grid of 9,801 scrolls in an 11x11 group of 9x9 scrolls
 
 ### Low-Level (SQL-ish) Routes
 
