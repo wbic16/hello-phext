@@ -301,6 +301,29 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   function getInner(w, x, y, z) {
     return dgid(\"inner_\" + w + \"_\" + x + \"_\" + y + \"_\" + z);
   }
+
+  function phextCoordinateToGridCoordinate(coord) {
+    var parts = coord.split('/');
+    var z = parts[0]; var y = parts[1]; var x = parts[2];
+    var zp = z.split('.'); var yp = y.split('.'); var xp = x.split('.');
+    var lb = zp[0]; var sf = zp[1]; var sr = zp[2];
+    var cn = yp[0]; var vm = yp[1]; var bk = yp[2];
+    var ch = xp[0]; var sn = xp[1]; var sc = xp[2];
+    var position = parseInt(99*(sn-1)) + parseInt(sc) - 1;
+    var blocks = Math.floor(position/81); var ox = Math.floor(blocks/11)+1; var ow = blocks%11+1;
+    var remainder = position%81; var oz = Math.floor(remainder/9)+1; var oy = remainder%9+1;
+    return ow + \"_\" + ox + \"_\" + oy + \"_\" + oz;
+  }
+
+  function getPhextCell(coord) {
+    var id = 'inner_' + phextCoordinateToGridCoordinate(coord);
+    var handle = dgid(id);
+    if (handle) {
+      return handle;
+    }
+
+    return false;
+  }
   
   function squeeze(w, x, y, z) {
     var cell = getOuter(w, x);
