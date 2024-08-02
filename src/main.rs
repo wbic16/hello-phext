@@ -132,6 +132,15 @@ fn more_cowbell() -> (ContentType, String)
 fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
 {
   let coordinate = coordinate.replace(";", "/");
+  let phext_coordinate = phext::to_coordinate(coordinate.as_str());
+  let library = phext_coordinate.z.library;
+  let shelf = phext_coordinate.z.shelf;
+  let series = phext_coordinate.z.series;
+  let collection = phext_coordinate.y.collection;
+  let volume = phext_coordinate.y.volume;
+  let book = phext_coordinate.y.book;
+  let chapter = phext_coordinate.x.chapter;
+  let seven_prefix = format!("{}.{}.{}/{}.{}.{}/{}", library, shelf, series, collection, volume, book, chapter);
   let css = "
   body {
     background: #101419;
@@ -253,6 +262,9 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
     return Math.floor(Math.random() * (limit + 1));
   }
     
+  var loaderDelay = 100;
+  var tx = 0;
+  var ty = 0;
   function setupCity() {
     var city = dgid(\"city\");
     var output = \"\";
@@ -291,13 +303,34 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
       }
     }
   
-    var summary = \"<div class='summary'>Rooms on this Block (1.1.1/1.1.1/1.*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
+    var summary = \"<div class='summary'>Rooms on this Block (".to_string() + seven_prefix.as_str() + ".*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
     city.innerHTML = summary + output;
 
-    var selected = getPhextCell(\"".to_string() + &coordinate + "\");
+    var selected = getPhextCell(\"" + &coordinate + "\");
     if (selected) {
       selected.style.scale = \"4\";
       selected.style.zIndex = \"3\";
+
+      var outer = getPhextOuterCell(\"" + &coordinate + "\");
+      if (outer) {
+        tx = parseInt(selected.style.left.replace('px', ''));
+        tx += parseInt(outer.style.left.replace('px', ''));
+
+        ty = parseInt(selected.style.top.replace('px', ''));
+        ty += parseInt(outer.style.top.replace('px', ''));
+
+        slowScroll();
+      }
+    }
+  }
+
+  function slowScroll() {
+    --loaderDelay;
+    if (loaderDelay >= 0)
+    {
+      var ratio = (100-loaderDelay)/100;
+      window.scrollTo(ratio*tx, ratio*ty);
+      setTimeout(slowScroll, 20);
     }
   }
   
@@ -309,7 +342,7 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
     return dgid(\"inner_\" + w + \"_\" + x + \"_\" + y + \"_\" + z);
   }
 
-  function phextCoordinateToGridCoordinate(coord) {
+  function phextCoordinateToGridCoordinate(coord, outer) {
     var parts = coord.split('/');
     var z = parts[0]; var y = parts[1]; var x = parts[2];
     var zp = z.split('.'); var yp = y.split('.'); var xp = x.split('.');
@@ -319,11 +352,24 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
     var position = parseInt(99*(sn-1)) + parseInt(sc) - 1;
     var blocks = Math.floor(position/81); var ox = Math.floor(blocks/11)+1; var ow = blocks%11+1;
     var remainder = position%81; var oz = Math.floor(remainder/9)+1; var oy = remainder%9+1;
+    if (outer) {
+      return ow + \"_\" + ox;
+    }
     return ow + \"_\" + ox + \"_\" + oy + \"_\" + oz;
   }
 
   function getPhextCell(coord) {
-    var id = 'inner_' + phextCoordinateToGridCoordinate(coord);
+    var id = 'inner_' + phextCoordinateToGridCoordinate(coord, false);
+    var handle = dgid(id);
+    if (handle) {
+      return handle;
+    }
+
+    return false;
+  }
+
+  function getPhextOuterCell(coord) {
+    var id = 'outer_' + phextCoordinateToGridCoordinate(coord, true);
     var handle = dgid(id);
     if (handle) {
       return handle;
