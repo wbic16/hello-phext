@@ -131,6 +131,7 @@ fn more_cowbell() -> (ContentType, String)
 #[get("/api/v1/liquid/<world>/<coordinate>")]
 fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
 {
+  let coordinate = coordinate.replace(";", "/");
   let css = "
   body {
     background: #101419;
@@ -292,6 +293,12 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   
     var summary = \"<div class='summary'>Rooms on this Block (1.1.1/1.1.1/1.*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
     city.innerHTML = summary + output;
+
+    var selected = getPhextCell(\"".to_string() + &coordinate + "\");
+    if (selected) {
+      selected.style.scale = \"4\";
+      selected.style.zIndex = \"3\";
+    }
   }
   
   function getOuter(w, x) {
@@ -371,7 +378,7 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
 <style type='text/css' media='all'>".to_string() +
 css + "
 </style>" +
-js + "
+&js + "
 </head>
 <body onload=\"setupCity();\">
   <a href=\"https://phext.io/white-rabbit.html?m=unlocked\">return to game</a>
