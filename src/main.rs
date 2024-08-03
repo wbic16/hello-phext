@@ -141,11 +141,22 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   let book = phext_coordinate.y.book;
   let chapter = phext_coordinate.x.chapter;
   let seven_prefix = format!("{}.{}.{}/{}.{}.{}/{}", library, shelf, series, collection, volume, book, chapter);
+  let color_ratio = 255.0/99.0;
+  let pr = ((library as f64)*color_ratio) as usize;
+  let pg = ((shelf as f64)*color_ratio) as usize;
+  let pb = ((series as f64)*color_ratio) as usize;
+  let sr = ((collection as f64)*color_ratio) as usize;
+  let sg = ((volume as f64)*color_ratio) as usize;
+  let sb = ((book as f64)*color_ratio) as usize;
+  let primary_color = format!("rgb({} {} {})", pr, pg, pb);
+  let secondary_color = format!("rgb({} {} {})", sr, sg, sb);
+
   let css = "
   body {
     background: #101419;
     color: white;
     font-family: sans-serif;
+    background-color: ".to_string() + primary_color.as_str() + "
   }
   a, a:visited {
     color: white;
@@ -171,9 +182,10 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   }
   #city {
     position: relative;
+    visibility: hidden;
     top: 50px;
     left: 10%;
-    width: 90%;
+    width: 90%;    
   }
   #present {
     position: absolute;
@@ -231,6 +243,7 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   .outer {
     width: 670px;
     height: 540px;
+    background-color: " + secondary_color.as_str() + "
   }
   #presentCloser {
     text-decoration: underline; cursor: pointer;
@@ -265,8 +278,11 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   var loaderDelay = 100;
   var tx = 0;
   var ty = 0;
+  var city = false;
+  var zoom_ratio = 1.02;
+  
   function setupCity() {
-    var city = dgid(\"city\");
+    city = dgid(\"city\");
     var output = \"\";
     var section = 1;
     var scroll = 1;
@@ -306,21 +322,24 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
     var summary = \"<div class='summary'>Rooms on this Block (".to_string() + seven_prefix.as_str() + ".*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
     city.innerHTML = summary + output;
 
-    var selected = getPhextCell(\"" + &coordinate + "\");
-    if (selected) {
-      selected.style.scale = \"4\";
-      selected.style.zIndex = \"3\";
+    loadingAnimation();
+  }
 
-      var outer = getPhextOuterCell(\"" + &coordinate + "\");
-      if (outer) {
-        tx = parseInt(selected.style.left.replace('px', ''));
-        tx += parseInt(outer.style.left.replace('px', ''));
+  function loadingAnimation() {
+    city.style.transition = 'all 0.1s';
+    city.style.scale = 0.001;
+    city.style.visibility = 'visible';
+    zoomIn();
+  }
 
-        ty = parseInt(selected.style.top.replace('px', ''));
-        ty += parseInt(outer.style.top.replace('px', ''));
+  function zoomIn(ratio) {
+    city.style.scale *= zoom_ratio;
+    if (city.style.scale < 1) {
+      setTimeout(zoomIn, 5);
+    } else {
+      city.style.scale = '';
 
-        slowScroll();
-      }
+      finalOrientation();      
     }
   }
 
@@ -331,6 +350,28 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
       var ratio = (100-loaderDelay)/100;
       window.scrollTo(ratio*tx, ratio*ty);
       setTimeout(slowScroll, 20);
+    }
+  }
+
+  function finalOrientation() {
+    var selected = getPhextCell(\"" + &coordinate + "\");
+    if (selected) {
+      selected.style.zIndex = \"3\";
+      selected.style.border = \"3px solid yellow\";
+      setTimeout(() => {
+        selected.style.scale = \"5\";        
+      }, 2000);
+
+      var outer = getPhextOuterCell(\"" + &coordinate + "\");
+      if (outer) {
+        tx = parseInt(selected.style.left.replace('px', ''));
+        tx += parseInt(outer.style.left.replace('px', '')) - window.innerWidth/3;
+
+        ty = parseInt(selected.style.top.replace('px', ''));
+        ty += parseInt(outer.style.top.replace('px', '')) - window.innerHeight/4;
+
+        slowScroll();
+      }
     }
   }
   
@@ -422,7 +463,7 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
 <head>
 <title>Liquid Metal</title>
 <style type='text/css' media='all'>".to_string() +
-css + "
+css.as_str() + "
 </style>" +
 &js + "
 </head>
