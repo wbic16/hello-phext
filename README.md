@@ -60,6 +60,8 @@ The introduction of Large Language Models (LLMs) has accelerated our transition 
   * Accepts the posted scroll content as "world.phext" *and* adjusts all phext delimiters up by 1 dimension
 * Liquid Visualizer: `/api/v1/liquid/{world}/{coordinate}`
   * Provides a tile grid of 9,801 scrolls in an 11x11 group of 9x9 scrolls
+  * The background color is rendered from the rgb value computed by R=LB/99 G=SF/99 B=SR/99
+  * The tile background color is rendered from the rgb value computed by R=CN/99 G=VM/99 B=BK/99
 
 ### Low-Level (SQL-ish) Routes
 
