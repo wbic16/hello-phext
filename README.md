@@ -65,15 +65,15 @@ The introduction of Large Language Models (LLMs) has accelerated our transition 
 
 ### Low-Level (SQL-ish) Routes
 
-Note: You can omit the coordinate part of the route to work in subspace directly!
+Note: You can omit the coordinate part of the route to work in subspace directly.
 
-* Select Scroll: `/api/v1/select/{world}/{coordinate}`
+* Select: `/api/v1/select/{world}/{coordinate}`
   * fetches the scroll from "world.phext" at the given coordinate
-* Insert Scroll: `/api/v1/insert/{world}/{coordinate}`
+* Insert: `/api/v1/insert/{world}/{coordinate}`
   * Appends text at the given coordinates (expanding that scroll)
-* Update Scroll: `/api/v1/update/{world}/{coordinate}`
+* Update: `/api/v1/update/{world}/{coordinate}`
   * Replaces the content at the given coordinates (used by Save)
-* Delete Scroll: `/api/v1/delete/{world}/{coordinate}`
+* Delete: `/api/v1/delete/{world}/{coordinate}`
   * zeroizes the scroll at the given coordinates
   * zeroizes the entire contents of "world.phext" if no coordinate is given
 * Select Phext: `/api/v1/select/{world}`
