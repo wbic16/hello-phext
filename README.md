@@ -2,9 +2,13 @@
 
 This Rust project demonstrates how to work with Phext (11-dimensional plain hypertext). For more information about the phext format, head over to https://phext.io.
 
+## Elevator Pitch
+
+If we want to solve planet-scale problems, we need planet-scale data models. Traditional text-based approaches cannot scale. Binary file formats aren't human readable. Phext bridges the gap.
+
 ## Hello, Phext
 
-This project is an amalgamation of a Rust-powered Phext backend (phext.rs) and a Rocket-based API (main.rs). The functionality defined in the Phext backend provides all of the database/logic needed for hosting phext documents. The Rocket-based API is simply a wrapper around that functionality.
+This project is an amalgamation of a Rust-powered Phext backend (phext.rs) and a Rocket-based API (main.rs). The functionality defined in the Phext backend provides all of the database/logic needed for hosting phext documents. The Rocket-based API is a wrapper around that functionality.
 
 ## Phext Motivation
 
