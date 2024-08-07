@@ -4,7 +4,7 @@ This Rust project demonstrates how to work with Phext (11-dimensional plain hype
 
 ## Elevator Pitch
 
-If we want to solve planet-scale problems, we need planet-scale data models. Traditional text-based approaches cannot scale. Binary file formats aren't human readable. Phext bridges the gap.
+Phext is hierarchical digital memory. It enables seamless knowledge transfer between humans and computers. Let's learn how to think at planet-scale. :)
 
 ## Hello, Phext
 
