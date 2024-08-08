@@ -141,6 +141,7 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   let book = phext_coordinate.y.book;
   let chapter = phext_coordinate.x.chapter;
   let seven_prefix = format!("{}.{}.{}/{}.{}.{}/{}", library, shelf, series, collection, volume, book, chapter);
+  let seven_prefix_url = format!("{}.{}.{};{}.{}.{};{}", library, shelf, series, collection, volume, book, chapter);
   let color_ratio = 255.0/99.0;
   let pr = ((library as f64)*color_ratio) as usize;
   let pg = ((shelf as f64)*color_ratio) as usize;
@@ -212,6 +213,9 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
     font-size: 1em;
     z-index: 0;
   }
+  .inner {
+    overflow: hidden;
+  }
   .room {
     width: 60px;
     height: 48px;
@@ -268,7 +272,16 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
   }
   
   function show(cellColumn, cellRow, column, row, chapter, section, scroll) {
-    squeeze(cellColumn, cellRow, column, row);    
+    squeeze(cellColumn, cellRow, column, row);
+    var inner = getInner(cellColumn, cellRow, column, row);
+    if (inner) {
+      var request = '/api/v1/select/world/".to_string() + seven_prefix_url.as_str() + "' + '.' + section + '.' + scroll;
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( \"GET\", request, false );
+      xmlHttp.send(null);
+      inner.innerHTML = xmlHttp.responseText;
+      inner.style.overflow = 'hidden';
+    }
   }
   
   function randomInteger(limit) {
@@ -319,7 +332,7 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
       }
     }
   
-    var summary = \"<div class='summary'>Rooms on this Block (".to_string() + seven_prefix.as_str() + ".*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
+    var summary = \"<div class='summary'>Rooms on this Block (" + seven_prefix.as_str() + ".*.*): \" + total + \" (\" + Math.round(100*2*total/1024)/100 + \" MB)</div><br />\\n\";
     city.innerHTML = summary + output;
 
     loadingAnimation();
