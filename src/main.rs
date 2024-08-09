@@ -275,11 +275,13 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
     squeeze(cellColumn, cellRow, column, row);
     var inner = getInner(cellColumn, cellRow, column, row);
     if (inner) {
-      var request = '/api/v1/select/world/".to_string() + seven_prefix_url.as_str() + "' + '.' + section + '.' + scroll;
+      var computed_coordinate = '".to_string() + seven_prefix_url.as_str() + "' + '.' + section + '.' + scroll;
+      var request = '/api/v1/select/" + &world + "/' + computed_coordinate;
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.open( \"GET\", request, false );
-      xmlHttp.send(null);
+      xmlHttp.send(null);      
       inner.innerHTML = xmlHttp.responseText;
+      inner.innerHTML += \"<br /><a href='/api/v1/index/" + &world + "/\" + computed_coordinate + \"'>Edit</a>\";
       inner.style.overflow = 'hidden';
     }
   }
@@ -620,6 +622,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       ips.value = se.value;
     }
   }
+
   function update_phext() {
     var se = dgid('scroll_editor');
     var ups = dgid('update_phext_subspace');
@@ -627,14 +630,23 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       ups.value = se.value;
     }
   }
-  function open() {
+
+  function open_link() {
+    open_url('index');
+  }
+
+  function open_liquid() {
+    open_url('liquid');
+  }
+
+  function open_url(action) {
     var pc = dgid('phext_coordinate');
     if (pc) {
-      var coordinate = pc.value.replace('/', ';');
-      alert('opening " + &world + " x ' + coordinate);
-      //window.open(\"/api/v1/index/" + &world + "/\" + coordinate);
+      var coordinate = pc.value.replaceAll('/', ';');
+      window.location = \"/api/v1/\" + action + \"/" + &world + "/\" + coordinate;
     }
   }
+
   function subtract() {
     var sf = dgid('subtract_form');
     if (sf.action.endsWith('__other__')) {
@@ -672,7 +684,8 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
       <form method='POST' action='/api/v1/save/" + &world + "/" + coordinate + "'>
         Phext Coordinate: <input class='text' type='text' name='coordinate' id='phext_coordinate' value='" + &coord + "' />
         <input type='submit' value='Save' />
-        <input type='button' value='Open' onclick='open();' />
+        <input type='button' value='Open' onclick='open_link();' />
+        <input type='button' value='Visualize' onclick='open_liquid();' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
         <textarea id='scroll_editor' rows='50' name='content'>" + &scroll + "</textarea>
