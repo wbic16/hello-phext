@@ -282,6 +282,8 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
       xmlHttp.send(null);      
       inner.innerHTML = xmlHttp.responseText;
       inner.innerHTML += \"<br /><a href='/api/v1/index/" + &world + "/\" + computed_coordinate + \"'>Edit</a>\";
+      inner.style.width = '240px';
+      inner.style.height = '160px';
       inner.style.overflow = 'hidden';
     }
   }
@@ -451,6 +453,8 @@ fn liquid(world: &str, coordinate: &str) -> (ContentType, String)
         var adjust = getInner(w, x, i, j);      
         if (adjust && (adjust != inner) && adjust.style.scale.length == 0) {
           adjust.style.scale = \"\";
+          adjust.style.width = \"\";
+          adjust.style.height = \"\";
         }
       }
     }
