@@ -4,37 +4,31 @@ August 10, 2024: Let's work towards ASI, one step at a time.
 
 * phextbox (phext data entry with keyboard shortcuts and warping/zooming)
 * phext shell
-* full command line history
-* parsing performance tweaks
-* performance comparison to existing technology
+* hierarchical command line history
+* copy/paste knowledge tunnels
+* performance tweaks
 * C compiler
 * linux fs driver
 * windows fs driver
 * sqlite replacement
 * twitch storms (hierarchical gaming)
-* phemail (phext email)
-* phat (phext chat)
-* copy/paste knowledge tunnel (100 MB)
+* phext mail
+* phext chat
 * phext control code escaping (more cowbell!)
-* establish phext community
-* phext OS
+* phext community
 * hooks for top25 programming languages
-* infinite tabs
+* infinite tabs!
 * wikipedia in a box
-* exocortex
+* exocortex driver for LLMs
 * solar hyperscaler
 * nova fox
 * nerd sniping at scale
 * mesh networking
-* knowledge adapter
-* ground truth
 * organic software
 * hierarchical kernels
-* 1 billion screens
-* music synthesis
 * DNA analysis
 * cova - sane javascript with decimal math
-* bickford time processor
+* phext OS
 * AGI
 * ASI================================================================
 ================================================================
