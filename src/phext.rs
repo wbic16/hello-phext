@@ -221,7 +221,6 @@ impl std::fmt::Display for XCoordinate {
 /// X - this arm contains the chapter (x3), section (x2), and scroll (x1) dimensions
 /// ----------------------------------------------------------------------------------------------------------
 #[derive(Default, Debug, PartialEq, PartialOrd, Copy, Clone)]
-#[derive(impl_new::New)]
 pub struct Coordinate {
   pub z: ZCoordinate,
   pub y: YCoordinate,
@@ -234,7 +233,6 @@ impl std::fmt::Display for Coordinate {
 }
 
 #[derive(Default, Debug, PartialEq, PartialOrd, Clone)]
-#[derive(impl_new::New)]
 pub struct PositionedScroll {
   pub coord: Coordinate,
   pub scroll: String
@@ -246,7 +244,6 @@ impl std::fmt::Display for PositionedScroll {
 }
 
 #[derive(Default, Debug, PartialEq, PartialOrd, Copy, Clone)]
-#[derive(impl_new::New)]
 pub struct Range {
   pub start: Coordinate,
   pub end: Coordinate
