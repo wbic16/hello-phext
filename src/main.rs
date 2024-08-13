@@ -4,8 +4,8 @@
 /// The hello-phext repository provides API access to Phext. Refer to README.md for a list of routes.
 /// ----------------------------------------------------------------------------------------------------------
 #[macro_use] extern crate rocket;
-mod phext;
-mod phext_test;
+extern crate libphext;
+use libphext::phext as phext;
 use std::{fs::{self, File}, io::Write};
 use rocket::Request;
 use rocket::http::Status;
@@ -568,7 +568,8 @@ fn save_index(world: &str, coordinate: &str) -> (ContentType, String) {
 fn index(world: &str, coordinate: &str) -> (ContentType, String) {
   let buffer = fetch_phext_buffer(world);
   let size = buffer.len();
-  let scroll = phext::locate(&buffer, coordinate);
+  let coord = phext::to_coordinate(coordinate);
+  let scroll = phext::fetch(&buffer, coord);
   let navmap = phext::navmap(&format!("/api/v1/index/{}/", world), buffer.as_str());
 
   let coord = coordinate.replace(';', "/");
@@ -789,7 +790,8 @@ fn favorite_icon() -> (ContentType, Vec<u8>) {
 #[get("/api/v1/select/<world>/<coordinate>")]
 fn select_scroll(world: &str, coordinate: &str) -> (ContentType, String) {
   let buffer = fetch_phext_buffer(world);
-  let scroll = phext::locate(&buffer, coordinate);
+  let coord = phext::to_coordinate(coordinate);
+  let scroll = phext::fetch(&buffer, coord);
 
   return (ContentType::Text, scroll);
 }
