@@ -557,6 +557,45 @@ fn save_index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn edit
+///
+/// Provides a node-focused editor for traversing subspace efficiently.
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/edit/<world>/<coordinate>")]
+fn edit(world: &str, coordinate: &str) -> (ContentType, String) {
+  let buffer = fetch_phext_buffer(world);
+  let coord = phext::to_coordinate(coordinate);
+  let scroll;
+  if coordinate.ends_with("-map") {
+    scroll = phext::textmap(buffer.as_str());
+  } else {
+    scroll = phext::fetch(&buffer, coord);
+  }
+  let coord_normalized = coordinate.replace(';', "/");
+
+  let response = format!("<html>
+<head>
+<title>Phext Box</title>
+{}
+<style>
+#address {{ width: 150px; }}
+#jump {{ width: 50px; }}
+</style>
+</head>
+<body>
+<input type='button' id='prev' value='Prev' onclick='prevScroll();' />
+<input type='button' id='next' value='Next' onclick='nextScroll();' />
+<label for='address'>Coordinate: <input type='text' id='address' value='{}' /></label>
+<input type='button' id='jump' value='GO' onclick='jump();' />
+<div>
+<textarea name='scroll' rows='40' cols='100'>{}</textarea>
+</div>
+</body>
+</html>", css_styling(), coord_normalized, scroll);
+  return (ContentType::HTML, response);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn index
 ///
 /// Provides our primary API endpoint for querying phext documents
@@ -644,6 +683,10 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
     open_url('liquid');
   }
 
+  function open_phext_box() {
+    open_url('edit');
+  }
+
   function open_url(action) {
     var pc = dgid('phext_coordinate');
     if (pc) {
@@ -691,6 +734,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
         <input type='submit' value='Save' />
         <input type='button' value='Open' onclick='open_link();' />
         <input type='button' value='Visualize' onclick='open_liquid();' />
+        <input type='button' value='Edit' onclick='open_phext_box();' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
         <textarea id='scroll_editor' rows='50' name='content'>" + &scroll + "</textarea>
@@ -1032,6 +1076,7 @@ fn rocket() -> _ {
                             insert_scroll, insert_phext,
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
+                            edit,
                             index, save, normalize, expand, contract,
                             save_index, subtract, merge, range_replace,
                             favorite_icon, liquid, more_cowbell])

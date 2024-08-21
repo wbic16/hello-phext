@@ -1,11 +1,8 @@
 Phext Roadmap
 -------------
-August 10, 2024: Let's work towards ASI, one step at a time.
+Last Updated: August 20, 2024
 
-* libphext evangelism?
 * phextbox (phext data entry with keyboard shortcuts and warping/zooming)
-* phext shell
-* hierarchical command line history
 * copy/paste knowledge tunnels
 * performance tweaks
 * C compiler
@@ -31,37 +28,26 @@ August 10, 2024: Let's work towards ASI, one step at a time.
 * cova - sane javascript with decimal math
 * phext OS
 * AGI
-* ASI================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================
-================================================================gKqhsXaSxqigLyzthM8X3T0aG0Q7fRbSbiCIV4sMIkeUUUerDvhxSbCqsx3TtrcX
-jNiY1GKRxbtog6bZxNWfxA4HbPamm6wSsO8cnLDWi49TnZuaVHMhNENvvOkkWXk2
-PRgnJeAoxCGe0T84nEPe1b1eZme7Mae9xw5fBV470gPwQDKr8QW63zk7wTcaRpFJ
-au9pUt9FnOK2VsFqBHRCYSf9Ve2PBMtkbTfS8qaaIgy7OHW2JW0vHKyEKbQO3Har
-lwq3UapA4zcvlifDraTio5fRkyJtMe25jaOUAyHxFjbiU4PgSTye8PqaicnBRiMl
-8aOUq1BAER2TPXecCxSYBxrwrYA4nM6B0m76UQbDvZHG8WLkY0bysoqeezBedw8x
-YsE03waf8aBnUjvuDgHTa9fijWfave0bXwtLCOsKZOopEQrYA4nM6B0m76UQbDvZ
-HG8WLkY0bysoqeezBedw8xYsE03waf8aBnUjvuDgHTa9fijWfave0bXwtLCOsKZO
-opEQ8eRsXmW0Zp8uIvHeQMFRgfef5pRP41A6ZazegLJ4YElqSBxDDceWVb7Qukap
-snAqCdhxG5iwt967pk0LdNwHsw8KMexSLGp3H02VeWNUrIsoQNnq2DKeeRlBP1Ug
-YZQNli2vDavgakXHNE7aAycUhS0R6C8C2CID4TmubcWLuMwgcj3NJ1Y5i8Cr56b2
-0JynKAk0Sqdu9nlRcu7qr8NyB8AZStLA2FyWugFOgHk2euxmGy98eRI85TAiLeLG
-RIXDnQAIGb7fCTPh1oIRJWbQBUH6DrzbeaBT7iOZu51R2k6oCbnKQlLtMYsARvxD
-72aFPeKHLieYlL83H2aDoVvarudAtTJMqpSOg9dXqwzEUNllAPo86HmqGXhKliza
-zboCKfQZXCpFbPNEyQHGeKB09a1ZjeQdKkLemcUtuibsmWHQfAIxEFZlCzNIa3th
-eHEQBwXxYBaaUIu0cJ0ulgzrN16qXosUlAGrqybqosGi2nuvHJJrs5lxp1S3JCEygKqhsXaSxqigLyzthM8X3T0aG0Q7fRbSbiCIV4sMIkeUUUerDvhxSbCqsx3TtrcX
+* ASI
+
+Implemented
+-----------
+* phext shell: v0.1.9 - https://crates.io/crates/phext-shell
+  * hierarchical command line historyScroll #2 (1.1.1/1.1.1/1.1.2)
+
+This scroll appears after the phext roadmap and before the tic-tac-toe game.Tic Tac Toe
+
+       |     |
+    x  |  x  |  o 
+       |     |
+  -----|-----|-----
+       |     |
+       |  x  |
+       |     |
+  -----|-----|-----
+       |     |
+       |  o  |  o
+       |     |gKqhsXaSxqigLyzthM8X3T0aG0Q7fRbSbiCIV4sMIkeUUUerDvhxSbCqsx3TtrcX
 jNiY1GKRxbtog6bZxNWfxA4HbPamm6wSsO8cnLDWi49TnZuaVHMhNENvvOkkWXk2
 PRgnJeAoxCGe0T84nEPe1b1eZme7Mae9xw5fBV470gPwINCOZchtRMJiaYaYy5CJ
 O6Pp5uS3vUjAghrhn5RCbtbr4OebUVwk2uJnalRt8PXHkbGHJXQtkuOsoQWdql3q
