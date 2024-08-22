@@ -2,9 +2,16 @@ Phext Roadmap
 -------------
 August 21, 2024
 
-* phext shell
-* phextbox (phext data entry with keyboard shortcuts and warping/zooming)
+* phext-shell: `cargo install phext-shell`
+  version v0.1.9
+  https://crates.io/crates/phext-shell
+
+* phextbox (full screen editor)
+  just click the 'Edit' button from hello-phext v0.3.1
+
 * hierarchical command line history
+  see the .history files in phext-shell
+
 * copy/paste knowledge tunnels
 * performance tweaks
 * C compiler
