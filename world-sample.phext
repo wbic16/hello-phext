@@ -1,8 +1,10 @@
 Phext Roadmap
 -------------
-Last Updated: August 20, 2024
+August 21, 2024
 
+* phext shell
 * phextbox (phext data entry with keyboard shortcuts and warping/zooming)
+* hierarchical command line history
 * copy/paste knowledge tunnels
 * performance tweaks
 * C compiler
@@ -28,18 +30,18 @@ Last Updated: August 20, 2024
 * cova - sane javascript with decimal math
 * phext OS
 * AGI
-* ASI
+* ASIScroll #2 (1.1.1/1.1.1/1.1.2)
 
-Implemented
------------
-* phext shell: v0.1.9 - https://crates.io/crates/phext-shell
-  * hierarchical command line historyScroll #2D (1.1.1/1.1.1/1.1.2)
+This scroll appears after the phext roadmap and before the tic-tac-toe game.commands added in v0.1.4
+------------------------
 
-This scroll appears after the phext roadmap and before the tic-tac-toe game.
-
-
-
-Weeeeeeeeee!Tic Tac Toe
+add: append content
+dsp: display scroll
+svp: save phext
+set: overwrite content
+clr: clear scroll
+ion: clear phext
+hello worldTic Tac Toe
 
        |     |
     x  |  x  |  o 

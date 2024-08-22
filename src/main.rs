@@ -557,12 +557,11 @@ fn save_index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
-/// @fn edit
-///
-/// Provides a node-focused editor for traversing subspace efficiently.
+/// @fn edit_with_rindex
+/// @todo figure out a cleaner way to parse optional args to rocket...
 /// ----------------------------------------------------------------------------------------------------------
-#[get("/api/v1/edit/<world>/<coordinate>")]
-fn edit(world: &str, coordinate: &str) -> (ContentType, String) {
+#[get("/api/v1/edit/<world>/<coordinate>/<rindex>")]
+fn edit_with_rindex(world: &str, coordinate: &str, rindex: &str) -> (ContentType, String) {
   let buffer = fetch_phext_buffer(world);
   let coord = phext::to_coordinate(coordinate);
   let scroll;
@@ -573,26 +572,127 @@ fn edit(world: &str, coordinate: &str) -> (ContentType, String) {
   }
   let coord_normalized = coordinate.replace(';', "/");
 
+  let mut rvalue = rindex.trim();
+  if rvalue.len() == 0 { rvalue = "8"; }
+  let mut lb_opt = ""; if rvalue == "0" { lb_opt = " selected"; }
+  let mut sf_opt = ""; if rvalue == "1" { sf_opt = " selected"; }
+  let mut sr_opt = ""; if rvalue == "2" { sr_opt = " selected"; }
+  let mut cn_opt = ""; if rvalue == "3" { cn_opt = " selected"; }
+  let mut vm_opt = ""; if rvalue == "4" { vm_opt = " selected"; }
+  let mut bk_opt = ""; if rvalue == "5" { bk_opt = " selected"; }
+  let mut ch_opt = ""; if rvalue == "6" { ch_opt = " selected"; }
+  let mut sn_opt = ""; if rvalue == "7" { sn_opt = " selected"; }
+  let mut sc_opt = ""; if rvalue == "8" { sc_opt = " selected"; }
+
+  let dimension_opts = format!("
+<option value='0'{}>Library</option>
+<option value='1'{}>Shelf</option>
+<option value='2'{}>Series</option>
+<option value='3'{}>Collection</option>
+<option value='4'{}>Volume</option>
+<option value='5'{}>Book</option>
+<option value='6'{}>Chapter</option>
+<option value='7'{}>Section</option>
+<option value='8'{}>Scroll</option>",
+lb_opt, sf_opt, sr_opt, cn_opt, vm_opt, bk_opt, ch_opt, sn_opt, sc_opt);
+
   let response = format!("<html>
 <head>
 <title>Phext Box</title>
 {}
 <style>
-#address {{ width: 150px; }}
-#jump {{ width: 50px; }}
+#address {{ width: 320px; height: 60px; padding: 10px; border: 2px solid grey; text-align: center; }}
+input, select {{ height: 60px; padding: 10px; font-size: 1.25em; }}
+#jump {{ width: 80px; }}
 </style>
+<script type='text/javascript'>
+function dgid(id) {{
+  return document.getElementById(id);
+}}
+var replace_index = '{}';
+function setDimension(value) {{
+  replace_index = value;
+  if (replace_index < 0) {{ replace_index = 0; }}
+  if (replace_index > 8) {{ replace_index = 8; }}
+}}
+function changeScroll(delta) {{
+  var address = dgid('address');
+  var parts = address.value.replaceAll('/', '.').split('.');
+  if (parts.length < 9) {{ return; }}
+  var last = parts[replace_index];
+  last = parseInt(last) + delta;
+  if (last < 1) {{
+    last = 1;
+  }}
+  if (last > 1000) {{
+    last = 1000;
+  }}
+  var result = '';
+  parts[replace_index] = last;
+
+  result  = parts[0] + '.' + parts[1] + '.' + parts[2] + '/';
+  result += parts[3] + '.' + parts[4] + '.' + parts[5] + '/';
+  result += parts[6] + '.' + parts[7] + '.' + parts[8];
+  
+  goto(result, replace_index);
+}}
+function prevScroll() {{
+  changeScroll(-1);
+}}
+function nextScroll() {{
+  changeScroll(1);
+}}
+function jump() {{
+  var address = dgid('address');
+  goto(address.value);
+}}
+function goto(address, rindex = '') {{
+  var urlAddress = address.replaceAll('/', ';');
+  var target = '/api/v1/edit/{}/' + urlAddress;  
+  if (rindex.length > 0) {{
+    target += '/' + rindex;
+  }}
+  window.location = target;
+}}
+function setFormSaveAction() {{
+  var saveForm = dgid('saveForm');
+  if (saveForm) {{
+    var address = dgid('address');
+    var urlAddress = address.value.replaceAll('/', ';');
+    saveForm.action = saveForm.action.replace('__coordinate__', urlAddress);
+    saveForm.submit();
+  }}
+}}
+</script>
 </head>
 <body>
-<input type='button' id='prev' value='Prev' onclick='prevScroll();' />
-<input type='button' id='next' value='Next' onclick='nextScroll();' />
-<label for='address'>Coordinate: <input type='text' id='address' value='{}' /></label>
-<input type='button' id='jump' value='GO' onclick='jump();' />
-<div>
-<textarea name='scroll' rows='40' cols='100'>{}</textarea>
+
+  <form method='POST' id='saveForm' action='/api/v1/save/{}/__coordinate__'>
+    <label for='address'>Coordinate: <input type='text' id='address' value='{}' /></label>
+    <input type='button' id='jump' value='GO' onclick='jump();' />
+    <input type='button' id='save' value='Save' onclick='setFormSaveAction();' />
+    <input type='button' id='prev' value='Prev' onclick='prevScroll();' />
+    <input type='button' id='next' value='Next' onclick='nextScroll();' />
+    <label for='dimension'>Break: <select id='dimension' onchange='setDimension(this.value);'>
+{}
+      </select></label>
+    <div>
+    <textarea name='content' rows='40' cols='160'>{}</textarea>
+  </form>
 </div>
 </body>
-</html>", css_styling(), coord_normalized, scroll);
+</html>", css_styling(), rindex, world, world, coord_normalized, dimension_opts, scroll);
   return (ContentType::HTML, response);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
+/// @fn edit
+///
+/// Provides a node-focused editor for traversing subspace efficiently.
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/edit/<world>/<coordinate>")]
+fn edit(world: &str, coordinate: &str) -> (ContentType, String) {
+  return edit_with_rindex(world, coordinate, "8");
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -1076,7 +1176,7 @@ fn rocket() -> _ {
                             insert_scroll, insert_phext,
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
-                            edit,
+                            edit, edit_with_rindex,
                             index, save, normalize, expand, contract,
                             save_index, subtract, merge, range_replace,
                             favorite_icon, liquid, more_cowbell])
