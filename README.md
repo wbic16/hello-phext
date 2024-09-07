@@ -49,6 +49,12 @@ The introduction of Large Language Models (LLMs) has accelerated our transition 
 1. After building and testing the project, start the rocket server.
 2. Run `cargo run`
 
+## Replit
+
+You can try this out or publish your own replit! See the .replit configuration file for details.
+
+https://rust.phext.io/
+
 ### API Routes (User Level)
 
 * Basic View: `/api/v1/index/{world}/{coordinate}`

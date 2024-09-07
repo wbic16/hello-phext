@@ -1,6 +1,6 @@
 [package]
 name = "hello-phext"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["Will Bickford <wbic16@gmail.com>"]
 description = "A rust-native implementation of phext with replit support"
 homepage = "https://phext.io/"

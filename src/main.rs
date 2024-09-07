@@ -713,6 +713,28 @@ fn edit(world: &str, coordinate: &str) -> (ContentType, String) {
 /// ----------------------------------------------------------------------------------------------------------
 #[get("/index.html")]
 fn homepage() -> (ContentType, String) {
+  let files: Vec<_> = fs::read_dir(".")
+    .unwrap()
+    .filter_map(|entry| {
+      let entry = entry.ok()?;
+      let path = entry.path();
+      if path.extension()? == "phext" {
+          Some(path)
+      } else {
+          None
+      }
+    })
+    .collect();
+
+  let mut phexts = String::new();
+  for file in files {
+    let phext_name = file.file_stem().expect("not a file").to_string_lossy().to_string();
+    phexts += &format!("<tr>
+    <td><a href='/api/v1/index/{}/1.1.1;1.1.1;1.1.1'>{}</a></td>
+    <td><a href='/api/v1/raw/{}'>Download</a>
+    </tr>", phext_name, phext_name, phext_name);
+  }
+
   let response = "
 <html>
   <head>
@@ -730,7 +752,14 @@ fn homepage() -> (ContentType, String) {
   </ul>
   </p>
 
-  <a href='/api/v1/index/world/1.1.1;1.1.1;1.1.1'>Start Here</a>
+  <a href='/api/v1/index/world/1.1.1;1.1.1;1.1.1'>Start Here</a><hr /><h1>Available seeds</h1><br />
+  <table>
+  <tr>
+    <th>Edit Seed</th>
+    <th>Download</th>
+  </tr>
+  " + &phexts + "
+  </table>
   </body>
   </html>
   ";
