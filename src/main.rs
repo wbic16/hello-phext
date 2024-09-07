@@ -696,6 +696,37 @@ fn edit(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn homepage
+///
+/// Provides the replit instance (rust.phext.io) homepage
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/index.html")]
+fn homepage() -> (ContentType, String) {
+  let response = "
+<html>
+  <head>
+    <title>Welcome, to the Exocortex</title>".to_owned() +
+    css_styling().as_str() + "
+  </head>
+  <body>
+  <h1>Welcome, to the Exocortex</h1>
+
+  <p>
+  <ul>
+    <li>What if ... you don't need a database?</li>
+    <li>What if ... you didn't need binary file formats?</li>
+    <li>What if ... you lived in the future?</li>
+  </ul>
+  </p>
+
+  <a href='/api/v1/index/world/1.1.1;1.1.1;1.1.1'>Start Here</a>
+  </body>
+  </html>
+  ";
+  return (ContentType::HTML, response);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn index
 ///
 /// Provides our primary API endpoint for querying phext documents
@@ -1149,8 +1180,8 @@ fn range_replace(world: &str, start: &str, end: &str, scroll: Form<Subspace>) ->
 /// Provides a specific error message for unrecognized URLs, instructing the user to reach out to us on twitter.
 /// ----------------------------------------------------------------------------------------------------------
 #[catch(404)]
-fn not_found(req: &Request) -> String {
-  return format!("Unable to locate '{}'. Reach out to @wbic16 on twitter.", req.uri());
+fn not_found(_req: &Request) -> (ContentType, String) {
+  return homepage();
 }
 
 /// ----------------------------------------------------------------------------------------------------------
@@ -1179,5 +1210,6 @@ fn rocket() -> _ {
                             edit, edit_with_rindex,
                             index, save, normalize, expand, contract,
                             save_index, subtract, merge, range_replace,
-                            favorite_icon, liquid, more_cowbell])
+                            favorite_icon, liquid, more_cowbell,
+                            homepage])
 }
