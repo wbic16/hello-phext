@@ -557,6 +557,17 @@ fn save_index(world: &str, coordinate: &str) -> (ContentType, String) {
 }
 
 /// ----------------------------------------------------------------------------------------------------------
+/// @fn raw
+///
+/// Provides a way to grab the entire phext buffer
+/// ----------------------------------------------------------------------------------------------------------
+#[get("/api/v1/raw/<world>")]
+fn raw(world: &str) -> (ContentType, String) {
+  let buffer = fetch_phext_buffer(world);
+  return (ContentType::Text, buffer);
+}
+
+/// ----------------------------------------------------------------------------------------------------------
 /// @fn edit_with_rindex
 /// @todo figure out a cleaner way to parse optional args to rocket...
 /// ----------------------------------------------------------------------------------------------------------
@@ -818,6 +829,10 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
     open_url('edit');
   }
 
+  function raw_phext() {
+    window.location = \"/api/v1/raw/" + &world + "\";
+  }
+
   function open_url(action) {
     var pc = dgid('phext_coordinate');
     if (pc) {
@@ -866,6 +881,7 @@ fn index(world: &str, coordinate: &str) -> (ContentType, String) {
         <input type='button' value='Open' onclick='open_link();' />
         <input type='button' value='Visualize' onclick='open_liquid();' />
         <input type='button' value='Edit' onclick='open_phext_box();' />
+        <input type='button' value='Raw' onclick='raw_phext();' />
         <input type='hidden' name='world' value='" + &world + "' />
         <br />
         <textarea id='scroll_editor' rows='50' name='content'>" + &scroll + "</textarea>
@@ -1207,7 +1223,7 @@ fn rocket() -> _ {
                             insert_scroll, insert_phext,
                             update_scroll, update_phext,
                             delete_scroll, delete_phext,
-                            edit, edit_with_rindex,
+                            edit, edit_with_rindex, raw,
                             index, save, normalize, expand, contract,
                             save_index, subtract, merge, range_replace,
                             favorite_icon, liquid, more_cowbell,
