@@ -6,12 +6,12 @@ channel = "stable-24_05"
 
 [deployment]
 run = ["sh", "-c", "cargo run"]
-deploymentTarget = "cloudrun"
+deploymentTarget = "gce"
+build = ["sh", "-c", "cargo build --release"]
 
 [[ports]]
 localPort = 8000
 externalPort = 80
-exposeLocalhost = true
 
 [auth]
 pageEnabled = true
