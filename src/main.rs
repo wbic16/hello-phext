@@ -740,6 +740,7 @@ fn homepage() -> (ContentType, String) {
   <head>
     <title>Welcome, to the Exocortex</title>".to_owned() +
     css_styling().as_str() + "
+    <script src=\"https://apis.google.com/js/api.js\"></script>
   </head>
   <body>
   <h1>Welcome, to the Exocortex</h1>
